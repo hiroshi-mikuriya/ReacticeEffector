@@ -23,7 +23,7 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+#include "user.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -181,6 +181,7 @@ static int8_t CDC_DeInit_FS(void)
 static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 {
   /* USER CODE BEGIN 5 */
+  static uint8_t line[8] = {0};
   switch(cmd)
   {
     case CDC_SEND_ENCAPSULATED_COMMAND:
@@ -221,11 +222,11 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
   /* 6      | bDataBits  |   1   | Number Data bits (5, 6, 7, 8 or 16).          */
   /*******************************************************************************/
     case CDC_SET_LINE_CODING:
-
+    memcpy(line, pbuf, length);
     break;
 
     case CDC_GET_LINE_CODING:
-
+    memcpy(pbuf, line, length);
     break;
 
     case CDC_SET_CONTROL_LINE_STATE:
@@ -264,6 +265,7 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
   /* USER CODE BEGIN 6 */
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+  usbRxIRQ(Buf, *Len);
   return (USBD_OK);
   /* USER CODE END 6 */
 }

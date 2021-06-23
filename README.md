@@ -3,7 +3,7 @@ ReacticeEffector
 
 ## ビルド手順
 
-`STM32CubeIDE(1.6.0)` もしくは `MacOS + CMake + ARMコンパイラ` でビルドできます。
+[STM32CubeIDE(1.6.1)](https://www.st.com/ja/development-tools/stm32cubeide.html)もしくは `MacOS + CMake + ARMコンパイラ` でビルドできます。
 
 ## MacOS + CMake + ARMコンパイラ
 
@@ -29,10 +29,24 @@ This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ```
 
+`stlink` インストール
+
+```sh
+$ brew install stlink
+$ st-flash --version
+v1.6.1
+```
+
 ビルドコマンド
 
 ```sh
 $ bash build.sh
+```
+
+書き込みコマンド
+
+```sh
+$ st-flash --format ihex write build/ReacticeEffector.hex
 ```
 
 ## ディレクトリ構成

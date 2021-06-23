@@ -30,6 +30,8 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f7xx_hal.h"
 
+#include "stm32f7xx_ll_adc.h"
+#include "stm32f7xx_ll_dma.h"
 #include "stm32f7xx_ll_rcc.h"
 #include "stm32f7xx_ll_bus.h"
 #include "stm32f7xx_ll_system.h"
@@ -37,7 +39,8 @@ extern "C" {
 #include "stm32f7xx_ll_cortex.h"
 #include "stm32f7xx_ll_utils.h"
 #include "stm32f7xx_ll_pwr.h"
-#include "stm32f7xx_ll_dma.h"
+#include "stm32f7xx_ll_spi.h"
+#include "stm32f7xx_ll_usart.h"
 #include "stm32f7xx_ll_gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -68,6 +71,18 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define GPIO_IN_INT_SW2_N_Pin LL_GPIO_PIN_5
+#define GPIO_IN_INT_SW2_N_GPIO_Port GPIOA
+#define GPIO_IN_INT_SW2_N_EXTI_IRQn EXTI9_5_IRQn
+#define GPIO_IN_INT_MPU_N_Pin LL_GPIO_PIN_6
+#define GPIO_IN_INT_MPU_N_GPIO_Port GPIOA
+#define GPIO_IN_INT_MPU_N_EXTI_IRQn EXTI9_5_IRQn
+#define GPIO_IN_INT_SW_N_Pin LL_GPIO_PIN_7
+#define GPIO_IN_INT_SW_N_GPIO_Port GPIOA
+#define GPIO_IN_INT_SW_N_EXTI_IRQn EXTI9_5_IRQn
+#define SPI4_NSS_Pin LL_GPIO_PIN_11
+#define SPI4_NSS_GPIO_Port GPIOE
+#define SPI4_NSS_EXTI_IRQn EXTI15_10_IRQn
 #define LED_ACT_Pin LL_GPIO_PIN_7
 #define LED_ACT_GPIO_Port GPIOC
 #define PCM_RST_Pin LL_GPIO_PIN_0
