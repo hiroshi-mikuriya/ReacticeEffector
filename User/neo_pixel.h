@@ -4,22 +4,51 @@
 ///
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
+#include "main.h"
 #include <cstdint>
+#include <memory>
 
 namespace sato
 {
 class NeoPixel;
-}
+struct RGB;
+} // namespace sato
+
+/// @brief 色値型
+struct sato::RGB
+{
+  uint8_t red;
+  uint8_t green;
+  uint8_t blue;
+};
 
 /// @brief Neo Pixel 制御クラス
 class sato::NeoPixel
 {
-  static constexpr uint32_t N = 24;
-  uint8_t buf_[N * 3 * 8];
+
+  SPI_TypeDef *const spi_;       ///< SPIペリフェラル
+  DMA_TypeDef *const dma_;       ///< 送信DMA
+  const uint32_t stream_;        ///< 送信DMAストリーム
+  const uint32_t ledCount_;      ///< LED数
+  std::unique_ptr<uint8_t> buf_; ///< DMA送信バッファ
 
 public:
   /// @brief コンストラクタ
-  NeoPixel() noexcept;
+  /// @param[in] spi SPIペリフェラル
+  /// @param[in] dma 送信DMA
+  /// @param[in] stream 送信DMAストリーム
+  /// @param[in] ledCount LED数
+  NeoPixel(SPI_TypeDef *spi, DMA_TypeDef *dma, uint32_t stream, uint32_t ledCount) noexcept;
   /// @brief デストラクタ
   virtual ~NeoPixel();
+  /// @brief 色値を設定する（この関数を呼んだだけでは光らない）
+  /// @param[in] rgb 色値
+  /// @param[in] n LED番号
+  void set(RGB const &rgb, uint32_t n) noexcept;
+  /// @brief 色値を全てクリアする（この関数を呼んだだけでは光らない）
+  void clear() noexcept;
+  /// @brief NeoPixelを光らせる
+  /// @retval true NeoPixelへのデータ転送成功
+  /// @retval false 前回の転送が完了していないため転送できなかった
+  bool show() const noexcept;
 };
