@@ -167,11 +167,19 @@ void DebugMon_Handler(void)
 void DMA1_Stream5_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Stream5_IRQn 0 */
-
+  if (LL_DMA_IsActiveFlag_TC5(DMA1))
+  {
+    LL_DMA_ClearFlag_TC5(DMA1);
+    neoPixelTxEndIRQ();
+  }
   /* USER CODE END DMA1_Stream5_IRQn 0 */
 
   /* USER CODE BEGIN DMA1_Stream5_IRQn 1 */
-
+  if (LL_DMA_IsActiveFlag_TE5(DMA1))
+  {
+    LL_DMA_ClearFlag_TE5(DMA1);
+    neoPixelTxErrorIRQ();
+  }
   /* USER CODE END DMA1_Stream5_IRQn 1 */
 }
 
@@ -289,6 +297,50 @@ void TIM7_IRQHandler(void)
   /* USER CODE BEGIN TIM7_IRQn 1 */
 
   /* USER CODE END TIM7_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA2 stream0 global interrupt.
+  */
+void DMA2_Stream0_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Stream0_IRQn 0 */
+  if (LL_DMA_IsActiveFlag_TC0(DMA2))
+  {
+    LL_DMA_ClearFlag_TC0(DMA2);
+    // TODO SPI4 rx end IRQ
+  }
+  /* USER CODE END DMA2_Stream0_IRQn 0 */
+
+  /* USER CODE BEGIN DMA2_Stream0_IRQn 1 */
+  if (LL_DMA_IsActiveFlag_TE0(DMA2))
+  {
+    LL_DMA_ClearFlag_TE0(DMA2);
+    // TODO SPI4 rx error IRQ
+  }
+  /* USER CODE END DMA2_Stream0_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA2 stream1 global interrupt.
+  */
+void DMA2_Stream1_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Stream1_IRQn 0 */
+  if (LL_DMA_IsActiveFlag_TC1(DMA2))
+  {
+    LL_DMA_ClearFlag_TC1(DMA2);
+    // TODO SPI4 tx end IRQ
+  }
+  /* USER CODE END DMA2_Stream1_IRQn 0 */
+
+  /* USER CODE BEGIN DMA2_Stream1_IRQn 1 */
+  if (LL_DMA_IsActiveFlag_TE1(DMA2))
+  {
+    LL_DMA_ClearFlag_TE1(DMA2);
+    // TODO SPI4 tx error IRQ
+  }
+  /* USER CODE END DMA2_Stream1_IRQn 1 */
 }
 
 /**
