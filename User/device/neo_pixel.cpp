@@ -1,4 +1,4 @@
-/// @file      neo_pixel.cpp
+/// @file      device/neo_pixel.cpp
 /// @author    SATOH GADGET
 /// @copyright Copyright© 2021 SATOH GADGET
 ///
@@ -34,15 +34,15 @@ inline uint32_t getBufferIndex(uint32_t ledNum) noexcept
 }
 } // namespace
 
-sato::NeoPixel::NeoPixel(SPI_TypeDef *spi, //
-                         DMA_TypeDef *dma, //
-                         uint32_t stream,
-                         uint32_t ledCount) noexcept //
-    : spi_(spi),                                     //
-      dma_(dma),                                     //
-      stream_(stream),                               //
-      ledCount_(ledCount),                           //
-      buf_(new uint8_t[getBufferIndex(ledCount_)])   //
+satoh::NeoPixel::NeoPixel(SPI_TypeDef *spi, //
+                          DMA_TypeDef *dma, //
+                          uint32_t stream,
+                          uint32_t ledCount) noexcept //
+    : spi_(spi),                                      //
+      dma_(dma),                                      //
+      stream_(stream),                                //
+      ledCount_(ledCount),                            //
+      buf_(new uint8_t[getBufferIndex(ledCount_)])    //
 {
   clear();
   LL_SPI_Enable(spi_);
@@ -57,7 +57,7 @@ sato::NeoPixel::NeoPixel(SPI_TypeDef *spi, //
   LL_SPI_EnableDMAReq_TX(spi_);
 }
 
-sato::NeoPixel::~NeoPixel()
+satoh::NeoPixel::~NeoPixel()
 {
   LL_SPI_DisableDMAReq_TX(spi_);
   LL_DMA_DisableIT_TC(dma_, stream_);
@@ -65,7 +65,7 @@ sato::NeoPixel::~NeoPixel()
   LL_SPI_Disable(spi_);
 }
 
-void sato::NeoPixel::set(RGB const &rgb, uint32_t n) noexcept
+void satoh::NeoPixel::set(RGB const &rgb, uint32_t n) noexcept
 {
   if (n < ledCount_)
   {
@@ -75,11 +75,11 @@ void sato::NeoPixel::set(RGB const &rgb, uint32_t n) noexcept
     ::set(rgb.blue, p + 16);
   }
 }
-void sato::NeoPixel::clear() noexcept
+void satoh::NeoPixel::clear() noexcept
 {
   memset(buf_.get(), 0, getBufferIndex(ledCount_));
 }
-bool sato::NeoPixel::show() const noexcept
+bool satoh::NeoPixel::show() const noexcept
 {
   if (LL_DMA_IsEnabledStream(dma_, stream_))
   {

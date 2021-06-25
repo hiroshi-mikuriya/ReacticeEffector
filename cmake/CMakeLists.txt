@@ -113,6 +113,8 @@ file(GLOB SRCS
 	${CORE}/Src/system_stm32f7xx.c
 	${CORE}/Startup/*.s
 	${USER}/*.cpp
+	${USER}/device/*.cpp
+	${USER}/task/*.cpp
 	${DRIVER}/Src/*.c
 	${RTOS}/*.c
 	${RTOS}/CMSIS_RTOS/*.c

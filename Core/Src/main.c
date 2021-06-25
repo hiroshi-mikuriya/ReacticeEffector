@@ -24,7 +24,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,7 +42,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-osThreadId defaultTaskHandle;
+osThreadId neoPixelTaskHandle;
+osThreadId i2cTaskHandle;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -57,7 +57,9 @@ static void MX_SPI3_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_SPI4_Init(void);
-void StartDefaultTask(void const * argument);
+static void MX_I2C1_Init(void);
+void neoPixelTaskProc(void const * argument);
+void i2cTaskProc(void const * argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -108,6 +110,7 @@ int main(void)
   MX_ADC1_Init();
   MX_USART2_UART_Init();
   MX_SPI4_Init();
+  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -129,9 +132,13 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 256);
-  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+  /* definition and creation of neoPixelTask */
+  osThreadDef(neoPixelTask, neoPixelTaskProc, osPriorityLow, 0, 128);
+  neoPixelTaskHandle = osThreadCreate(osThread(neoPixelTask), NULL);
+
+  /* definition and creation of i2cTask */
+  osThreadDef(i2cTask, i2cTaskProc, osPriorityNormal, 0, 128);
+  i2cTaskHandle = osThreadCreate(osThread(i2cTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -200,6 +207,7 @@ void SystemClock_Config(void)
   LL_RCC_SetUSBClockSource(LL_RCC_USB_CLKSOURCE_PLL);
   LL_RCC_SetUSARTClockSource(LL_RCC_USART1_CLKSOURCE_PCLK2);
   LL_RCC_SetUSARTClockSource(LL_RCC_USART2_CLKSOURCE_PCLK1);
+  LL_RCC_SetI2CClockSource(LL_RCC_I2C1_CLKSOURCE_PCLK1);
 }
 
 /**
@@ -264,6 +272,76 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
+  * @brief I2C1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C1_Init(void)
+{
+
+  /* USER CODE BEGIN I2C1_Init 0 */
+
+  /* USER CODE END I2C1_Init 0 */
+
+  LL_I2C_InitTypeDef I2C_InitStruct = {0};
+
+  LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
+  /**I2C1 GPIO Configuration
+  PB6   ------> I2C1_SCL
+  PB9   ------> I2C1_SDA
+  */
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_6;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
+  GPIO_InitStruct.Alternate = LL_GPIO_AF_4;
+  LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_9;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
+  GPIO_InitStruct.Alternate = LL_GPIO_AF_4;
+  LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /* Peripheral clock enable */
+  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C1);
+
+  /* I2C1 interrupt Init */
+  NVIC_SetPriority(I2C1_EV_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),5, 0));
+  NVIC_EnableIRQ(I2C1_EV_IRQn);
+  NVIC_SetPriority(I2C1_ER_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),5, 0));
+  NVIC_EnableIRQ(I2C1_ER_IRQn);
+
+  /* USER CODE BEGIN I2C1_Init 1 */
+
+  /* USER CODE END I2C1_Init 1 */
+  /** I2C Initialization
+  */
+  LL_I2C_EnableAutoEndMode(I2C1);
+  LL_I2C_SetOwnAddress2(I2C1, 0, LL_I2C_OWNADDRESS2_NOMASK);
+  LL_I2C_DisableOwnAddress2(I2C1);
+  LL_I2C_DisableGeneralCall(I2C1);
+  LL_I2C_EnableClockStretching(I2C1);
+  I2C_InitStruct.PeripheralMode = LL_I2C_MODE_I2C;
+  I2C_InitStruct.Timing = 0x6000030D;
+  I2C_InitStruct.AnalogFilter = LL_I2C_ANALOGFILTER_ENABLE;
+  I2C_InitStruct.DigitalFilter = 0;
+  I2C_InitStruct.OwnAddress1 = 0;
+  I2C_InitStruct.TypeAcknowledge = LL_I2C_ACK;
+  I2C_InitStruct.OwnAddrSize = LL_I2C_OWNADDRESS1_7BIT;
+  LL_I2C_Init(I2C1, &I2C_InitStruct);
+  /* USER CODE BEGIN I2C1_Init 2 */
+
+  /* USER CODE END I2C1_Init 2 */
 
 }
 
@@ -777,20 +855,34 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartDefaultTask */
+/* USER CODE BEGIN Header_neoPixelTaskProc */
 /**
-  * @brief  Function implementing the defaultTask thread.
+  * @brief  Function implementing the neoPixelTask thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void const * argument)
+/* USER CODE END Header_neoPixelTaskProc */
+void neoPixelTaskProc(void const * argument)
 {
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 5 */
-  StartDefaultTaskImpl(argument);
+  nepPixelTaskImpl(argument);
   /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_i2cTaskProc */
+/**
+* @brief Function implementing the i2cTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_i2cTaskProc */
+void i2cTaskProc(void const * argument)
+{
+  /* USER CODE BEGIN i2cTaskProc */
+  i2cTaskImpl(argument);
+  /* USER CODE END i2cTaskProc */
 }
 
  /**

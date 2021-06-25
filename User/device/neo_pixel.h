@@ -1,4 +1,4 @@
-/// @file      neo_pixel.h
+/// @file      device/neo_pixel.h
 /// @author    SATOH GADGET
 /// @copyright Copyright© 2021 SATOH GADGET
 ///
@@ -8,14 +8,14 @@
 #include <cstdint>
 #include <memory>
 
-namespace sato
+namespace satoh
 {
 class NeoPixel;
 struct RGB;
-} // namespace sato
+} // namespace satoh
 
 /// @brief 色値型
-struct sato::RGB
+struct satoh::RGB
 {
   uint8_t red;
   uint8_t green;
@@ -23,9 +23,8 @@ struct sato::RGB
 };
 
 /// @brief Neo Pixel 制御クラス
-class sato::NeoPixel
+class satoh::NeoPixel
 {
-
   SPI_TypeDef *const spi_;       ///< SPIペリフェラル
   DMA_TypeDef *const dma_;       ///< 送信DMA
   const uint32_t stream_;        ///< 送信DMAストリーム
