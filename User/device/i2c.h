@@ -24,7 +24,7 @@ public:
     OK = 0,  ///< 成功
     BUSY,    ///< ビジー
     TIMEOUT, ///< タイムアウト
-    NAK,     ///< NAK
+    NACK,    ///< NACK
   };
   /// @brief コンストラクタ
   /// @param[in] i2cx I2Cペリフェラル
@@ -32,10 +32,6 @@ public:
   explicit I2C(I2C_TypeDef *const i2cx, osThreadId threadId) noexcept;
   /// @brief デストラクタ
   virtual ~I2C();
-  /// @brief 割り込み許可
-  void enableIRQ();
-  /// @brief 割り込み禁止
-  void disableIRQ();
   /// @brief イベント割り込みが発生したら呼び出す関数
   void notifyEvIRQ();
   /// @brief エラー割り込みが発生したら呼び出す関数
@@ -44,18 +40,29 @@ public:
   /// @param[in] slaveAddr スレーブアドレス
   /// @param[in] reg レジスタ番号
   /// @param[in] v 書き込むデータ
+  /// @retval OK      成功
+  /// @retval BUSY    ビジー
+  /// @retval TIMEOUT タイムアウト
+  /// @retval NACK    NACK
   Result writeByte(uint8_t slaveAddr, uint8_t reg, uint8_t v) noexcept;
   /// @brief レジスタからデータを１バイト読み込む
   /// @param[in] slaveAddr スレーブアドレス
   /// @param[in] reg レジスタ番号
   /// @param[out] v 読み込んだ値の格納先
-  /// @return 読み込んだデータ
+  /// @retval OK      成功
+  /// @retval BUSY    ビジー
+  /// @retval TIMEOUT タイムアウト
+  /// @retval NACK    NACK
   Result readByte(uint8_t slaveAddr, uint8_t reg, uint8_t &v) noexcept;
   /// @brief レジスタからデータを複数バイト読み込む
   /// @param[in] slaveAddr スレーブアドレス
   /// @param[in] reg レジスタ番号
   /// @param[out] buf 読み込んだデータを格納するバッファ
   /// @param[in] size 読み込むバイト数
+  /// @retval OK      成功
+  /// @retval BUSY    ビジー
+  /// @retval TIMEOUT タイムアウト
+  /// @retval NACK    NACK
   Result readBytes(uint8_t slaveAddr, uint8_t reg, uint8_t *buf, uint8_t size) noexcept;
 
 private:
@@ -71,12 +78,18 @@ private:
   /// @param[in] slaveAddr スレーブアドレス
   /// @param[in] bytes 書き込みデータの先頭ポインタ
   /// @param[in] size 書き込むバイト数
+  /// @retval OK      成功
+  /// @retval BUSY    ビジー
+  /// @retval TIMEOUT タイムアウト
+  /// @retval NACK    NACK
   Result writeImpl(uint8_t slaveAddr, uint8_t const *bytes, uint8_t size) noexcept;
   /// @brief データを複数バイト読み込む
   /// @param[in] slaveAddr スレーブアドレス
   /// @param[in] buf 読み込んだデータを格納するバッファ
   /// @param[in] size 読み込むバイト数
+  /// @retval OK      成功
+  /// @retval BUSY    ビジー
+  /// @retval TIMEOUT タイムアウト
+  /// @retval NACK    NACK
   Result readImpl(uint8_t slaveAddr, uint8_t *buffer, uint8_t size) noexcept;
-  /// @brief レジスタをクリアする
-  void clearRegister() const noexcept;
 };

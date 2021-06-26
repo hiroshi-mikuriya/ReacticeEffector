@@ -23,7 +23,6 @@ void i2cTaskImpl(void const *argument)
   using namespace mpu6050;
   extern osThreadId i2cTaskHandle;
   s_i2c = new satoh::I2C(I2C1, i2cTaskHandle);
-  s_i2c->enableIRQ();
   osDelay(10); // なんとなく
   uint8_t iam = 0;
   s_i2c->readByte(SLAVE_ADDR, WHOAMI, iam);
