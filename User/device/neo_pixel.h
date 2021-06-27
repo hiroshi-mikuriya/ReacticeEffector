@@ -4,23 +4,14 @@
 ///
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
+#include "common/rgb.h"
 #include "main.h"
-#include <cstdint>
 #include <memory>
 
 namespace satoh
 {
 class NeoPixel;
-struct RGB;
 } // namespace satoh
-
-/// @brief 色値型
-struct satoh::RGB
-{
-  uint8_t red;
-  uint8_t green;
-  uint8_t blue;
-};
 
 /// @brief Neo Pixel 制御クラス
 class satoh::NeoPixel
