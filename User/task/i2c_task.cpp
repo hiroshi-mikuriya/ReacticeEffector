@@ -8,6 +8,7 @@
 #include "cmsis_os.h"
 #include "device/gyro.h"
 #include "device/i2c.h"
+#include "device/pca9635.h"
 #include "stm32f7xx_ll_i2c.h"
 #include "usbd_cdc_if.h"
 
@@ -23,8 +24,13 @@ void i2cTaskImpl(void const *argument)
   osDelay(10); // なんとなく
   satoh::Gyro mpu(s_i2c, satoh::MPU6050);
   satoh::Gyro icm(s_i2c, satoh::ICM20602);
-  for (;;)
+  satoh::PCA9635 pca9635(s_i2c);
+  for (int i = 0;; i = (i + 1) % 4)
   {
+    pca9635.set({0x80, 0x00, 0x00}, (i + 0) % 4);
+    pca9635.set({0x00, 0x80, 0x00}, (i + 1) % 4);
+    pca9635.set({0x00, 0x00, 0x80}, (i + 2) % 4);
+    pca9635.set({0x80, 0x80, 0x00}, (i + 3) % 4);
     if (mpu.ok())
     {
       int16_t acc[3] = {0};

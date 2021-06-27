@@ -147,6 +147,8 @@ void satoh::I2C::notifyErIRQ()
     osEvent ev = osSignalWait((sigs), (timeout)); \
     if (ev.status == osEventTimeout)              \
     {                                             \
+      LL_I2C_Disable(i2cx_);                      \
+      LL_I2C_Enable(i2cx_);                       \
       return Result::TIMEOUT;                     \
     }                                             \
     if (ev.value.signals & SIG_NACK)              \
@@ -166,12 +168,28 @@ satoh::I2C::Result satoh::I2C::write(uint8_t slaveAddr, uint8_t const *bytes, ui
   Finalizer fin(i2cx_);
   txbuf_ = bytes;
   LL_I2C_EnableIT_STOP(i2cx_);
-  LL_I2C_EnableIT_TX(i2cx_);
-  LL_I2C_EnableIT_TC(i2cx_);
+  // LL_I2C_EnableIT_TX(i2cx_);
+  // LL_I2C_EnableIT_TC(i2cx_);
   LL_I2C_EnableIT_NACK(i2cx_);
   LL_I2C_EnableIT_ERR(i2cx_);
   LL_I2C_HandleTransfer(i2cx_, slaveAddr, LL_I2C_ADDRSLAVE_7BIT, size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_WRITE);
-  WAIT_SIGNAL(SIG_TC | SIG_NACK, 10);
+  // WAIT_SIGNAL(SIG_TC | SIG_NACK, 10);
+  for (uint32_t i = 0; i < size; ++i)
+  {
+    // TODO 送信完了割り込みを待つようにしたい。
+    // MPU6050ではうまくいったが、PCM9635ではうまくいかなかったので暫定的にビジーループに戻す。
+    while (!LL_I2C_IsActiveFlag_TXIS(i2cx_))
+    {
+      auto ev = osSignalWait(SIG_NACK, 0);
+      if (ev.value.signals & SIG_NACK)
+      {
+        LL_I2C_Disable(i2cx_);
+        LL_I2C_Enable(i2cx_);
+        return Result::NACK;
+      }
+    }
+    LL_I2C_TransmitData8(i2cx_, *txbuf_++);
+  }
   WAIT_SIGNAL(SIG_STOP | SIG_NACK, 2);
   return Result::OK;
 }
