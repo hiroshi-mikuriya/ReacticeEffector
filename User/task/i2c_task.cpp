@@ -22,6 +22,7 @@ void i2cTaskImpl(void const *argument)
   s_i2c = new satoh::I2C(I2C1, i2cTaskHandle);
   osDelay(10); // なんとなく
   satoh::Gyro mpu(s_i2c, satoh::MPU6050);
+  satoh::Gyro icm(s_i2c, satoh::ICM20602);
   for (;;)
   {
     if (mpu.ok())
@@ -29,6 +30,15 @@ void i2cTaskImpl(void const *argument)
       int16_t acc[3] = {0};
       int16_t gyro[3] = {0};
       if (mpu.getAccelGyro(acc, gyro))
+      {
+        CDC_Transmit_FS(reinterpret_cast<uint8_t *>(acc), sizeof(acc));
+      }
+    }
+    if (icm.ok())
+    {
+      int16_t acc[3] = {0};
+      int16_t gyro[3] = {0};
+      if (icm.getAccelGyro(acc, gyro))
       {
         CDC_Transmit_FS(reinterpret_cast<uint8_t *>(acc), sizeof(acc));
       }

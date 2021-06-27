@@ -151,6 +151,8 @@ void satoh::I2C::notifyErIRQ()
     }                                             \
     if (ev.value.signals & SIG_NACK)              \
     {                                             \
+      LL_I2C_Disable(i2cx_);                      \
+      LL_I2C_Enable(i2cx_);                       \
       return Result::NACK;                        \
     }                                             \
   } while (0)
