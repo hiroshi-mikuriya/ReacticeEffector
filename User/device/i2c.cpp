@@ -5,21 +5,21 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "i2c.h"
+#include "stm32f7xx_ll_dma.h"
 #include "stm32f7xx_ll_i2c.h"
 
 namespace
 {
-constexpr uint32_t SIG_TC = 1 << 0;
-constexpr uint32_t SIG_TCR = 1 << 1;
-constexpr uint32_t SIG_STOP = 1 << 2;
-constexpr uint32_t SIG_NACK = 1 << 3;
+constexpr uint32_t SIG_STOP = 1 << 0;
+constexpr uint32_t SIG_NACK = 1 << 1;
+constexpr uint32_t SIG_DMAEND = 1 << 2;
+constexpr uint32_t SIG_DMAERR = 1 << 3;
 constexpr uint32_t SIG_ERR = 1 << 10;
 
 /// @brief I2C通信後の終了処理を行うクラス
 class Finalizer
 {
-  /// I2Cペリフェラル
-  I2C_TypeDef *const i2cx_;
+  I2C_TypeDef *const i2cx_; ///< I2Cペリフェラル
 
   /// @brief レジスタをクリアする
   void clearRegister() const noexcept
@@ -38,32 +38,61 @@ class Finalizer
     LL_I2C_DisableIT_ERR(i2cx_);
   }
 
+  /// @brief シグナルクリア
+  void clearSignals() const noexcept { osSignalWait(0xFF, 0); }
+
 public:
   /// @brief コンストラクタ
   /// @param[in] i2cx I2Cペリフェラル
-  explicit Finalizer(I2C_TypeDef *const i2cx) noexcept : i2cx_(i2cx) {}
+  explicit Finalizer(I2C_TypeDef *const i2cx) noexcept : i2cx_(i2cx) { clearSignals(); }
   /// @brief デストラクタ
   virtual ~Finalizer()
   {
     disableIT();
     clearRegister();
-    osSignalWait(0xFF, 0); // シグナルクリア
+    clearSignals();
   }
 };
 } // namespace
 
-satoh::I2C::I2C(I2C_TypeDef *const i2cx, osThreadId threadId) noexcept //
-    : i2cx_(i2cx),                                                     //
-      threadId_(threadId),                                             //
-      rxbuf_(0),                                                       //
-      txbuf_(0)                                                        //
+void satoh::I2C::start()
 {
   LL_I2C_Enable(i2cx_);
+  LL_I2C_EnableDMAReq_TX(i2cx_);
+  LL_DMA_EnableIT_TC(dma_, stream_);
+  LL_DMA_EnableIT_TE(dma_, stream_);
+}
+void satoh::I2C::stop()
+{
+  LL_DMA_DisableIT_TC(dma_, stream_);
+  LL_DMA_DisableIT_TE(dma_, stream_);
+  LL_DMA_DisableStream(dma_, stream_);
+  LL_I2C_DisableDMAReq_TX(i2cx_);
+  LL_I2C_Disable(i2cx_);
+}
+
+void satoh::I2C::restart()
+{
+  stop();
+  start();
+}
+
+satoh::I2C::I2C(I2C_TypeDef *const i2cx,  //
+                osThreadId threadId,      //
+                DMA_TypeDef *const dma,   //
+                uint32_t stream) noexcept //
+    : i2cx_(i2cx),                        //
+      threadId_(threadId),                //
+      dma_(dma),                          //
+      stream_(stream),                    //
+      rxbuf_(0)                           //
+{
+  start();
 }
 
 satoh::I2C::~I2C()
 {
-  LL_I2C_Disable(i2cx_);
+  stop();
 }
 
 void satoh::I2C::notifyEvIRQ()
@@ -71,18 +100,6 @@ void satoh::I2C::notifyEvIRQ()
   if (LL_I2C_IsActiveFlag_RXNE(i2cx_))
   {
     *rxbuf_++ = LL_I2C_ReceiveData8(i2cx_);
-  }
-  else if (LL_I2C_IsActiveFlag_TXIS(i2cx_))
-  {
-    LL_I2C_TransmitData8(i2cx_, *txbuf_++);
-  }
-  else if (LL_I2C_IsActiveFlag_TC(i2cx_))
-  {
-    osSignalSet(threadId_, SIG_TC);
-  }
-  else if (LL_I2C_IsActiveFlag_TCR(i2cx_))
-  {
-    osSignalSet(threadId_, SIG_TCR);
   }
   else if (LL_I2C_IsActiveFlag_STOP(i2cx_))
   {
@@ -138,6 +155,15 @@ void satoh::I2C::notifyErIRQ()
   }
 }
 
+void satoh::I2C::notifyTxEndIRQ()
+{
+  osSignalSet(threadId_, SIG_DMAEND);
+}
+void satoh::I2C::notifyTxErrorIRQ()
+{
+  osSignalSet(threadId_, SIG_DMAERR);
+}
+
 /// @brief シグナルを待機し、エラーが発生したらリターンする
 /// @param[in] sigs 待機するシグナルの種類
 /// @param[in] timeout タイムアウト時間（ミリ秒）
@@ -147,15 +173,18 @@ void satoh::I2C::notifyErIRQ()
     osEvent ev = osSignalWait((sigs), (timeout)); \
     if (ev.status == osEventTimeout)              \
     {                                             \
-      LL_I2C_Disable(i2cx_);                      \
-      LL_I2C_Enable(i2cx_);                       \
+      restart();                                  \
       return Result::TIMEOUT;                     \
     }                                             \
     if (ev.value.signals & SIG_NACK)              \
     {                                             \
-      LL_I2C_Disable(i2cx_);                      \
-      LL_I2C_Enable(i2cx_);                       \
+      restart();                                  \
       return Result::NACK;                        \
+    }                                             \
+    if (ev.value.signals & SIG_DMAERR)            \
+    {                                             \
+      restart();                                  \
+      return Result::ERROR;                       \
     }                                             \
   } while (0)
 
@@ -166,31 +195,18 @@ satoh::I2C::Result satoh::I2C::write(uint8_t slaveAddr, uint8_t const *bytes, ui
     return Result::BUSY;
   }
   Finalizer fin(i2cx_);
-  txbuf_ = bytes;
-  LL_I2C_EnableIT_STOP(i2cx_);
-  // LL_I2C_EnableIT_TX(i2cx_);
-  // LL_I2C_EnableIT_TC(i2cx_);
   LL_I2C_EnableIT_NACK(i2cx_);
-  LL_I2C_EnableIT_ERR(i2cx_);
+  LL_I2C_EnableIT_STOP(i2cx_);
+  LL_DMA_ConfigAddresses(dma_, stream_,                                              //
+                         reinterpret_cast<uint32_t>(bytes),                          //
+                         LL_I2C_DMA_GetRegAddr(i2cx_, LL_I2C_DMA_REG_DATA_TRANSMIT), //
+                         LL_DMA_DIRECTION_MEMORY_TO_PERIPH                           //
+  );
+  LL_DMA_SetDataLength(dma_, stream_, size);
+  LL_DMA_EnableStream(dma_, stream_);
   LL_I2C_HandleTransfer(i2cx_, slaveAddr, LL_I2C_ADDRSLAVE_7BIT, size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_WRITE);
-  // WAIT_SIGNAL(SIG_TC | SIG_NACK, 10);
-  for (uint32_t i = 0; i < size; ++i)
-  {
-    // TODO 送信完了割り込みを待つようにしたい。
-    // MPU6050ではうまくいったが、PCM9635ではうまくいかなかったので暫定的にビジーループに戻す。
-    while (!LL_I2C_IsActiveFlag_TXIS(i2cx_))
-    {
-      auto ev = osSignalWait(SIG_NACK, 0);
-      if (ev.value.signals & SIG_NACK)
-      {
-        LL_I2C_Disable(i2cx_);
-        LL_I2C_Enable(i2cx_);
-        return Result::NACK;
-      }
-    }
-    LL_I2C_TransmitData8(i2cx_, *txbuf_++);
-  }
-  WAIT_SIGNAL(SIG_STOP | SIG_NACK, 2);
+  WAIT_SIGNAL(SIG_DMAEND | SIG_DMAERR | SIG_NACK, 10);
+  WAIT_SIGNAL(SIG_STOP, 1);
   return Result::OK;
 }
 
@@ -205,7 +221,6 @@ satoh::I2C::Result satoh::I2C::read(uint8_t slaveAddr, uint8_t *buffer, uint32_t
   LL_I2C_EnableIT_RX(i2cx_);
   LL_I2C_EnableIT_STOP(i2cx_);
   LL_I2C_EnableIT_NACK(i2cx_);
-  LL_I2C_EnableIT_ERR(i2cx_);
   LL_I2C_HandleTransfer(i2cx_, slaveAddr, LL_I2C_ADDRSLAVE_7BIT, size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_READ);
   WAIT_SIGNAL(SIG_STOP | SIG_NACK, 10);
   return Result::OK;

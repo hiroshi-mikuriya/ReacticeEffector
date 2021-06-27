@@ -314,6 +314,28 @@ void EXTI15_10_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles DMA1 stream7 global interrupt.
+  */
+void DMA1_Stream7_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Stream7_IRQn 0 */
+  if (LL_DMA_IsActiveFlag_TC7(DMA1))
+  {
+    LL_DMA_ClearFlag_TC7(DMA1);
+    i2cTxEndIRQ();
+  }
+  /* USER CODE END DMA1_Stream7_IRQn 0 */
+
+  /* USER CODE BEGIN DMA1_Stream7_IRQn 1 */
+  if (LL_DMA_IsActiveFlag_TE7(DMA1))
+  {
+    LL_DMA_ClearFlag_TE7(DMA1);
+    i2cTxErrorIRQ();
+  }
+  /* USER CODE END DMA1_Stream7_IRQn 1 */
+}
+
+/**
   * @brief This function handles TIM7 global interrupt.
   */
 void TIM7_IRQHandler(void)

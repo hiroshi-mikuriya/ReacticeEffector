@@ -23,6 +23,12 @@ extern "C"
   /// @brief I2Cエラー割り込み
   void i2cErIRQ();
 
+  /// @brief I2C送信完了割り込み
+  void i2cTxEndIRQ();
+
+  /// @brief I2C送信エラー割り込み
+  void i2cTxErrorIRQ();
+
   /// @brief GPIO_IN_INT_MPU_N 割り込み
   void extiMpuIRQ(void);
 

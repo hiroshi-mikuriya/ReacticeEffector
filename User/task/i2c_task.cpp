@@ -20,7 +20,7 @@ satoh::I2C *s_i2c = 0;
 void i2cTaskImpl(void const *argument)
 {
   extern osThreadId i2cTaskHandle;
-  s_i2c = new satoh::I2C(I2C1, i2cTaskHandle);
+  s_i2c = new satoh::I2C(I2C1, i2cTaskHandle, DMA1, LL_DMA_STREAM_7);
   osDelay(10); // なんとなく
   satoh::Gyro mpu(s_i2c, satoh::MPU6050);
   satoh::Gyro icm(s_i2c, satoh::ICM20602);
@@ -61,6 +61,16 @@ void i2cEvIRQ()
 void i2cErIRQ()
 {
   s_i2c->notifyErIRQ();
+}
+
+void i2cTxEndIRQ()
+{
+  s_i2c->notifyTxEndIRQ();
+}
+
+void i2cTxErrorIRQ()
+{
+  s_i2c->notifyTxErrorIRQ();
 }
 
 void extiSwIRQ(void)
