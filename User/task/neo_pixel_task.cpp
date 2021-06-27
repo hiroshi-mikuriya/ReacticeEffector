@@ -49,7 +49,11 @@ void nepPixelTaskImpl(void const *argument)
         }
       }
       np.show();
-      osSignalWait(NEO_PIXEL_TX_END | NEO_PIXEL_TX_ERROR, osWaitForever);
+      osEvent ev = osSignalWait(NEO_PIXEL_TX_END | NEO_PIXEL_TX_ERROR, osWaitForever);
+      if (ev.value.signals & NEO_PIXEL_TX_ERROR)
+      {
+        return;
+      }
       osDelay(100);
     }
   }
