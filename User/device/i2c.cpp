@@ -55,37 +55,45 @@ public:
 };
 } // namespace
 
-void satoh::I2C::start()
+void satoh::I2C::start() const noexcept
 {
   LL_I2C_Enable(i2cx_);
+  LL_I2C_EnableDMAReq_RX(i2cx_);
   LL_I2C_EnableDMAReq_TX(i2cx_);
-  LL_DMA_EnableIT_TC(dma_, stream_);
-  LL_DMA_EnableIT_TE(dma_, stream_);
+  LL_DMA_EnableIT_TC(dma_, rxStream_);
+  LL_DMA_EnableIT_TE(dma_, rxStream_);
+  LL_DMA_EnableIT_TC(dma_, txStream_);
+  LL_DMA_EnableIT_TE(dma_, txStream_);
 }
-void satoh::I2C::stop()
+
+void satoh::I2C::stop() const noexcept
 {
-  LL_DMA_DisableIT_TC(dma_, stream_);
-  LL_DMA_DisableIT_TE(dma_, stream_);
-  LL_DMA_DisableStream(dma_, stream_);
+  LL_DMA_DisableIT_TC(dma_, rxStream_);
+  LL_DMA_DisableIT_TE(dma_, rxStream_);
+  LL_DMA_DisableIT_TC(dma_, txStream_);
+  LL_DMA_DisableIT_TE(dma_, txStream_);
+  LL_DMA_DisableStream(dma_, txStream_);
+  LL_I2C_DisableDMAReq_RX(i2cx_);
   LL_I2C_DisableDMAReq_TX(i2cx_);
   LL_I2C_Disable(i2cx_);
 }
 
-void satoh::I2C::restart()
+void satoh::I2C::restart() const noexcept
 {
   stop();
   start();
 }
 
-satoh::I2C::I2C(I2C_TypeDef *const i2cx,  //
-                osThreadId threadId,      //
-                DMA_TypeDef *const dma,   //
-                uint32_t stream) noexcept //
-    : i2cx_(i2cx),                        //
-      threadId_(threadId),                //
-      dma_(dma),                          //
-      stream_(stream),                    //
-      rxbuf_(0)                           //
+satoh::I2C::I2C(I2C_TypeDef *const i2cx,    //
+                osThreadId threadId,        //
+                DMA_TypeDef *const dma,     //
+                uint32_t rxStream,          //
+                uint32_t txStream) noexcept //
+    : i2cx_(i2cx),                          //
+      threadId_(threadId),                  //
+      dma_(dma),                            //
+      rxStream_(rxStream),                  //
+      txStream_(txStream)                   //
 {
   start();
 }
@@ -95,29 +103,21 @@ satoh::I2C::~I2C()
   stop();
 }
 
-void satoh::I2C::notifyEvIRQ()
+void satoh::I2C::notifyEvIRQ() noexcept
 {
-  if (LL_I2C_IsActiveFlag_RXNE(i2cx_))
-  {
-    *rxbuf_++ = LL_I2C_ReceiveData8(i2cx_);
-  }
-  else if (LL_I2C_IsActiveFlag_STOP(i2cx_))
+  if (LL_I2C_IsActiveFlag_STOP(i2cx_))
   {
     LL_I2C_ClearFlag_STOP(i2cx_);
     osSignalSet(threadId_, SIG_STOP);
   }
-  else if (LL_I2C_IsActiveFlag_NACK(i2cx_))
+  if (LL_I2C_IsActiveFlag_NACK(i2cx_))
   {
     LL_I2C_ClearFlag_NACK(i2cx_);
     osSignalSet(threadId_, SIG_NACK);
   }
-  else
-  {
-    osSignalSet(threadId_, SIG_ERR);
-  }
 }
 
-void satoh::I2C::notifyErIRQ()
+void satoh::I2C::notifyErIRQ() noexcept
 {
   if (LL_I2C_IsActiveFlag_ARLO(i2cx_))
   {
@@ -155,11 +155,22 @@ void satoh::I2C::notifyErIRQ()
   }
 }
 
-void satoh::I2C::notifyTxEndIRQ()
+void satoh::I2C::notifyRxEndIRQ() noexcept
 {
   osSignalSet(threadId_, SIG_DMAEND);
 }
-void satoh::I2C::notifyTxErrorIRQ()
+
+void satoh::I2C::notifyRxErrorIRQ() noexcept
+{
+  osSignalSet(threadId_, SIG_DMAERR);
+}
+
+void satoh::I2C::notifyTxEndIRQ() noexcept
+{
+  osSignalSet(threadId_, SIG_DMAEND);
+}
+
+void satoh::I2C::notifyTxErrorIRQ() noexcept
 {
   osSignalSet(threadId_, SIG_DMAERR);
 }
@@ -197,13 +208,13 @@ satoh::I2C::Result satoh::I2C::write(uint8_t slaveAddr, uint8_t const *bytes, ui
   Finalizer fin(i2cx_);
   LL_I2C_EnableIT_NACK(i2cx_);
   LL_I2C_EnableIT_STOP(i2cx_);
-  LL_DMA_ConfigAddresses(dma_, stream_,                                              //
+  LL_DMA_ConfigAddresses(dma_, txStream_,                                            //
                          reinterpret_cast<uint32_t>(bytes),                          //
                          LL_I2C_DMA_GetRegAddr(i2cx_, LL_I2C_DMA_REG_DATA_TRANSMIT), //
                          LL_DMA_DIRECTION_MEMORY_TO_PERIPH                           //
   );
-  LL_DMA_SetDataLength(dma_, stream_, size);
-  LL_DMA_EnableStream(dma_, stream_);
+  LL_DMA_SetDataLength(dma_, txStream_, size);
+  LL_DMA_EnableStream(dma_, txStream_);
   LL_I2C_HandleTransfer(i2cx_, slaveAddr, LL_I2C_ADDRSLAVE_7BIT, size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_WRITE);
   WAIT_SIGNAL(SIG_DMAEND | SIG_DMAERR | SIG_NACK, 10);
   WAIT_SIGNAL(SIG_STOP, 1);
@@ -217,11 +228,17 @@ satoh::I2C::Result satoh::I2C::read(uint8_t slaveAddr, uint8_t *buffer, uint32_t
     return Result::BUSY;
   }
   Finalizer fin(i2cx_);
-  rxbuf_ = buffer;
-  LL_I2C_EnableIT_RX(i2cx_);
   LL_I2C_EnableIT_STOP(i2cx_);
   LL_I2C_EnableIT_NACK(i2cx_);
+  LL_DMA_ConfigAddresses(dma_, rxStream_,                                           //
+                         LL_I2C_DMA_GetRegAddr(i2cx_, LL_I2C_DMA_REG_DATA_RECEIVE), //
+                         reinterpret_cast<uint32_t>(buffer),                        //
+                         LL_DMA_DIRECTION_PERIPH_TO_MEMORY                          //
+  );
+  LL_DMA_SetDataLength(dma_, rxStream_, size);
+  LL_DMA_EnableStream(dma_, rxStream_);
   LL_I2C_HandleTransfer(i2cx_, slaveAddr, LL_I2C_ADDRSLAVE_7BIT, size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_READ);
-  WAIT_SIGNAL(SIG_STOP | SIG_NACK, 10);
+  WAIT_SIGNAL(SIG_DMAEND | SIG_DMAERR | SIG_NACK, 10);
+  WAIT_SIGNAL(SIG_STOP, 1);
   return Result::OK;
 }

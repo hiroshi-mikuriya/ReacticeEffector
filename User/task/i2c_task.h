@@ -18,16 +18,22 @@ extern "C"
   void i2cTaskImpl(void const *argument);
 
   /// @brief I2Cイベント割り込み
-  void i2cEvIRQ();
+  void i2cEvIRQ(void);
 
   /// @brief I2Cエラー割り込み
-  void i2cErIRQ();
+  void i2cErIRQ(void);
+
+  /// @brief I2C受信完了割り込み
+  void i2cRxEndIRQ(void);
+
+  /// @brief I2C受信エラー割り込み
+  void i2cRxErrorIRQ(void);
 
   /// @brief I2C送信完了割り込み
-  void i2cTxEndIRQ();
+  void i2cTxEndIRQ(void);
 
   /// @brief I2C送信エラー割り込み
-  void i2cTxErrorIRQ();
+  void i2cTxErrorIRQ(void);
 
   /// @brief GPIO_IN_INT_MPU_N 割り込み
   void extiMpuIRQ(void);

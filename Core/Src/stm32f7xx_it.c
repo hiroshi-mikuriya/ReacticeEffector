@@ -162,16 +162,46 @@ void DebugMon_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles DMA1 stream0 global interrupt.
+  */
+void DMA1_Stream0_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Stream0_IRQn 0 */
+  if (LL_DMA_IsActiveFlag_TC0(DMA1))
+  {
+    LL_DMA_ClearFlag_TC0(DMA1);
+    i2cRxEndIRQ();
+  }
+  /* USER CODE END DMA1_Stream0_IRQn 0 */
+
+  /* USER CODE BEGIN DMA1_Stream0_IRQn 1 */
+  if (LL_DMA_IsActiveFlag_TE0(DMA1))
+  {
+    LL_DMA_ClearFlag_TE0(DMA1);
+    i2cRxErrorIRQ();
+  }
+  /* USER CODE END DMA1_Stream0_IRQn 1 */
+}
+
+/**
   * @brief This function handles DMA1 stream3 global interrupt.
   */
 void DMA1_Stream3_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Stream3_IRQn 0 */
-
+  if (LL_DMA_IsActiveFlag_TC3(DMA1))
+  {
+    LL_DMA_ClearFlag_TC3(DMA1);
+    // TODO SPI2 RX
+  }
   /* USER CODE END DMA1_Stream3_IRQn 0 */
 
   /* USER CODE BEGIN DMA1_Stream3_IRQn 1 */
-
+  if (LL_DMA_IsActiveFlag_TE3(DMA1))
+  {
+    LL_DMA_ClearFlag_TE3(DMA1);
+    // TODO SPI2 RX
+  }
   /* USER CODE END DMA1_Stream3_IRQn 1 */
 }
 
@@ -181,11 +211,19 @@ void DMA1_Stream3_IRQHandler(void)
 void DMA1_Stream4_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Stream4_IRQn 0 */
-
+  if (LL_DMA_IsActiveFlag_TC4(DMA1))
+  {
+    LL_DMA_ClearFlag_TC4(DMA1);
+    // TODO SPI2 TX
+  }
   /* USER CODE END DMA1_Stream4_IRQn 0 */
 
   /* USER CODE BEGIN DMA1_Stream4_IRQn 1 */
-
+  if (LL_DMA_IsActiveFlag_TE4(DMA1))
+  {
+    LL_DMA_ClearFlag_TE4(DMA1);
+    // TODO SPI2 TX
+  }
   /* USER CODE END DMA1_Stream4_IRQn 1 */
 }
 
