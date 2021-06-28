@@ -42,9 +42,8 @@ bool satoh::Gyro::write(uint8_t reg, uint8_t v)
 }
 bool satoh::Gyro::read(uint8_t reg, uint8_t *buffer, uint32_t size)
 {
-  return true                                                             //
-         && i2c_->write(slaveAddr_, &reg, sizeof(reg)) == I2C::Result::OK //
-         && i2c_->read(slaveAddr_, buffer, size) == I2C::Result::OK       //
+  return I2C::Result::OK == i2c_->write(slaveAddr_, &reg, sizeof(reg)) && //
+         I2C::Result::OK == i2c_->read(slaveAddr_, buffer, size)          //
       ;
 }
 
