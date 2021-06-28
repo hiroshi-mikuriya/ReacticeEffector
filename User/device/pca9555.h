@@ -6,43 +6,21 @@
 
 #pragma once
 
-#include "i2c.h"
+#include <cstdint>
 
 namespace satoh
 {
-class PCA9555;
-
-constexpr uint8_t LEVEL_METER = 0x20 << 1;
-constexpr uint8_t ROTARY_ENCODER = 0x21 << 1;
-} // namespace satoh
-
-class satoh::PCA9555
+namespace pca9555
 {
-  /// I2C通信オブジェクト
-  I2C *const i2c_;
-  /// スレーブアドレス
-  const uint8_t slaveAddr_;
-  /// デバイス状態
-  bool ok_;
-
-public:
-  /// @brief コンストラクタ
-  /// @param[in] i2c I2C通信オブジェクト
-  explicit PCA9555(I2C *i2c, uint8_t slaveAddr) noexcept;
-  /// @brief デストラクタ
-  virtual ~PCA9555();
-  /// @brief デバイス状態取得
-  /// @retval true 正常
-  /// @retval false 異常
-  bool ok() const noexcept;
-  /// @brief 出力ポートに書き込む
-  /// @param[in] d 書き込む値
-  /// @retval true 成功
-  /// @retval false 失敗
-  bool write(uint8_t const (&d)[2]) const noexcept;
-  /// @brief 入力ポートを読み込む
-  /// @param[out] d 読み込んだ値の格納先
-  /// @retval true 成功
-  /// @retval false 失敗
-  bool read(uint8_t (&d)[2]) const noexcept;
-};
+constexpr uint8_t LEVEL_METER = 0x20 << 1;     ///< レベルメータースレーブアドレス
+constexpr uint8_t ROTARY_ENCODER = 0x21 << 1;  ///< ロータリーエンコーダスレーブアドレス
+constexpr uint8_t INPUT_0 = 0x00;              ///<
+constexpr uint8_t INPUT_1 = 0x01;              ///<
+constexpr uint8_t OUTPUT_0 = 0x02;             ///<
+constexpr uint8_t OUTPUT_1 = 0x03;             ///<
+constexpr uint8_t POLARITY_INVERSION_0 = 0x04; ///<
+constexpr uint8_t POLARITY_INVERSION_1 = 0x05; ///<
+constexpr uint8_t CONFIGURATION_0 = 0x06;      ///<
+constexpr uint8_t CONFIGURATION_1 = 0x07;      ///<
+} // namespace pca9555
+} // namespace satoh

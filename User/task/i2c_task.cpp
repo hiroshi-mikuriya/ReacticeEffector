@@ -7,7 +7,7 @@
 #include "i2c_task.h"
 #include "cmsis_os.h"
 #include "device/gyro.h"
-#include "device/pca9555.h"
+#include "device/level_meter.h"
 #include "device/pca9635.h"
 #include "usbd_cdc_if.h"
 
@@ -23,20 +23,15 @@ void i2cTaskImpl(void const *argument)
   satoh::Gyro mpu6050(s_i2c, satoh::MPU6050);
   satoh::Gyro icm20602(s_i2c, satoh::ICM20602);
   satoh::PCA9635 led(s_i2c);
-  satoh::PCA9555 levelMeter(s_i2c, satoh::LEVEL_METER);
-  satoh::PCA9555 rotaryEncoder(s_i2c, satoh::ROTARY_ENCODER);
-  for (int i = 0;; i = (i + 1) % 4)
+  satoh::LevelMeter level(s_i2c);
+  for (int i = 0;; i = (i + 1) % 8)
   {
     led.set({0x80, 0x00, 0x00}, (i + 0) % 4);
     led.set({0x00, 0x80, 0x00}, (i + 1) % 4);
     led.set({0x00, 0x00, 0x80}, (i + 2) % 4);
     led.set({0x80, 0x80, 0x00}, (i + 3) % 4);
-    if (levelMeter.ok() && rotaryEncoder.ok())
-    {
-      uint8_t d[2] = {0};
-      rotaryEncoder.read(d);
-      levelMeter.write(d);
-    }
+    level.set(i, 0);
+    level.set(7 - i, 1);
     if (mpu6050.ok())
     {
       int16_t acc[3] = {0};
