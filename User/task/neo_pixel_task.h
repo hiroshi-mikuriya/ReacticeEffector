@@ -6,10 +6,15 @@
 
 #pragma once
 
+#include "cmsis_os.h"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
+  /// NeoPixelタスクハンドル
+  extern osThreadId neoPixelTaskHandle;
 
   /// @brief neoPixelTask内部処理
   /// @param[in] argument タスク引数

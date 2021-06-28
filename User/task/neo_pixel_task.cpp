@@ -15,7 +15,6 @@ constexpr int32_t NEO_PIXEL_TX_ERROR = 1 << 1;
 
 void nepPixelTaskImpl(void const *argument)
 {
-  LL_GPIO_SetOutputPin(LED_ACT_GPIO_Port, LED_ACT_Pin);
   constexpr uint32_t LED_COUNT = 100;
   constexpr uint8_t V = 0x20;
   satoh::NeoPixel np(SPI3, DMA1, LL_DMA_STREAM_5, LED_COUNT);
@@ -61,12 +60,10 @@ void nepPixelTaskImpl(void const *argument)
 
 void neoPixelTxEndIRQ(void)
 {
-  extern osThreadId neoPixelTaskHandle;
   osSignalSet(neoPixelTaskHandle, NEO_PIXEL_TX_END);
 }
 
 void neoPixelTxErrorIRQ(void)
 {
-  extern osThreadId neoPixelTaskHandle;
   osSignalSet(neoPixelTaskHandle, NEO_PIXEL_TX_ERROR);
 }
