@@ -10,10 +10,10 @@
   * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
+  * This software component is licensed by ST under Ultimate Liberty license
+  * SLA0044, the "License"; You may not use this file except in compliance with
+  * the License. You may obtain a copy of the License at:
+  *                             www.st.com/SLA0044
   *
   ******************************************************************************
   */
@@ -46,7 +46,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "user.h"
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -72,6 +72,10 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define TP13_Pin LL_GPIO_PIN_3
+#define TP13_GPIO_Port GPIOA
+#define TP14_Pin LL_GPIO_PIN_4
+#define TP14_GPIO_Port GPIOA
 #define GPIO_IN_INT_SW2_N_Pin LL_GPIO_PIN_5
 #define GPIO_IN_INT_SW2_N_GPIO_Port GPIOA
 #define GPIO_IN_INT_SW2_N_EXTI_IRQn EXTI9_5_IRQn

@@ -6,7 +6,6 @@
 
 #pragma once
 
-#include "main.h"
 #include "task/i2c_task.h"
 #include "task/neo_pixel_task.h"
 

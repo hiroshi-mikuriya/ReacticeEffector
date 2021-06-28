@@ -4,8 +4,10 @@
 ///
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
+#pragma once
+
 #include "common/rgb.h"
-#include "main.h"
+#include "stm32f7xx.h"
 #include <memory>
 
 namespace satoh

@@ -72,5 +72,4 @@ $ st-flash --format ihex write build/ReacticeEffector.hex
 CubeMXで自動生成したファイルのうち、以下は一部手動で編集した。
 * Core/Src/main.c
 * Core/Src/stm32f7xx_it.c
-* Core/Inc/main.h
 * USB_DEVICE/App/usbd_cdc_if.c

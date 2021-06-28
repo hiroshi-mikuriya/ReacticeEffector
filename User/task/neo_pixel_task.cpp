@@ -7,6 +7,7 @@
 #include "neo_pixel_task.h"
 #include "cmsis_os.h"
 #include "device/neo_pixel.h"
+#include "stm32f7xx_ll_dma.h"
 
 /// 送信完了通知
 constexpr int32_t NEO_PIXEL_TX_END = 1 << 0;

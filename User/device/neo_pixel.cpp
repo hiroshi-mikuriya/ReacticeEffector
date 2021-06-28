@@ -5,6 +5,8 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "neo_pixel.h"
+#include "stm32f7xx_ll_dma.h"
+#include "stm32f7xx_ll_spi.h"
 #include <string.h> // memset
 
 namespace
