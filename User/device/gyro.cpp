@@ -58,7 +58,7 @@ bool satoh::Gyro::ok() const noexcept
 {
   return ok_;
 }
-bool satoh::Gyro::getAccell(int16_t (&acc)[3]) noexcept
+bool satoh::Gyro::getAccel(int16_t (&acc)[3]) noexcept
 {
   uint8_t buf[6] = {0};
   bool res = read(ACCEL_XOUT_H, buf, sizeof(buf));

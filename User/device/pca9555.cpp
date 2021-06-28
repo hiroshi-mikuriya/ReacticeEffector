@@ -1,4 +1,4 @@
-/// @file      device/pca555.cpp
+/// @file      device/pca9555.cpp
 /// @author    SATOH GADGET
 /// @copyright Copyright© 2021 SATOH GADGET
 ///

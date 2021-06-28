@@ -52,7 +52,7 @@ public:
   /// @param[out] acc 加速度値格納先
   /// @retval true 取得成功
   /// @retval false 取得失敗
-  bool getAccell(int16_t (&acc)[3]) noexcept;
+  bool getAccel(int16_t (&acc)[3]) noexcept;
   /// @brief ジャイロ値取得
   /// @param[out] gyro ジャイロ値格納先
   /// @retval true 取得成功
