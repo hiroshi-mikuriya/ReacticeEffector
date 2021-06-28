@@ -5,6 +5,7 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "gyro.h"
+#include "common/big_endian.hpp"
 
 namespace
 {
@@ -25,14 +26,6 @@ constexpr uint8_t GYRO_ZOUT_L = 0x48;
 constexpr uint8_t PWR_MGMT_1 = 0x6B;
 constexpr uint8_t PWR_MGMT_2 = 0x6C;
 constexpr uint8_t WHOAMI = 0x75;
-
-/// @brief ビッグエンディアン形式で16ビット整数へ変換する
-/// @param[in] u データ列
-/// @return 16ビット整数
-inline int16_t to16be(uint8_t const *u)
-{
-  return static_cast<int16_t>((u[0] << 8) + u[1]);
-}
 } // namespace
 
 bool satoh::Gyro::write(uint8_t reg, uint8_t v)
@@ -64,9 +57,9 @@ bool satoh::Gyro::getAccel(int16_t (&acc)[3]) noexcept
   bool res = read(ACCEL_XOUT_H, buf, sizeof(buf));
   if (res)
   {
-    acc[0] = to16be(buf + 0);
-    acc[1] = to16be(buf + 2);
-    acc[2] = to16be(buf + 4);
+    acc[0] = BE<int16_t>::get(buf + 0);
+    acc[1] = BE<int16_t>::get(buf + 2);
+    acc[2] = BE<int16_t>::get(buf + 4);
   }
   return res;
 }
@@ -76,9 +69,9 @@ bool satoh::Gyro::getGyro(int16_t (&gyro)[3]) noexcept
   bool res = read(GYRO_XOUT_H, buf, sizeof(buf));
   if (res)
   {
-    gyro[0] = to16be(buf + 0);
-    gyro[1] = to16be(buf + 2);
-    gyro[2] = to16be(buf + 4);
+    gyro[0] = BE<int16_t>::get(buf + 0);
+    gyro[1] = BE<int16_t>::get(buf + 2);
+    gyro[2] = BE<int16_t>::get(buf + 4);
   }
   return res;
 }
@@ -88,12 +81,12 @@ bool satoh::Gyro::getAccelGyro(int16_t (&acc)[3], int16_t (&gyro)[3]) noexcept
   bool res = read(ACCEL_XOUT_H, buf, sizeof(buf));
   if (res)
   {
-    acc[0] = to16be(buf + 0);
-    acc[1] = to16be(buf + 2);
-    acc[2] = to16be(buf + 4);
-    gyro[0] = to16be(buf + 8);
-    gyro[1] = to16be(buf + 10);
-    gyro[2] = to16be(buf + 12);
+    acc[0] = BE<int16_t>::get(buf + 0);
+    acc[1] = BE<int16_t>::get(buf + 2);
+    acc[2] = BE<int16_t>::get(buf + 4);
+    gyro[0] = BE<int16_t>::get(buf + 8);
+    gyro[1] = BE<int16_t>::get(buf + 10);
+    gyro[2] = BE<int16_t>::get(buf + 12);
   }
   return res;
 }
