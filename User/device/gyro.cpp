@@ -9,6 +9,14 @@
 
 namespace
 {
+constexpr uint8_t SMPLRT_DIV = 0x19;
+constexpr uint8_t CONFIG = 0x1A;
+constexpr uint8_t GYRO_CONFIG = 0x1B;
+constexpr uint8_t ACCEL_CONFIG = 0x1C;
+constexpr uint8_t FIFO_EN = 0x23;
+constexpr uint8_t INT_PIN_CFG = 0x37;
+constexpr uint8_t INT_ENABLE = 0x38;
+constexpr uint8_t INT_STATUS = 0x3A;
 constexpr uint8_t ACCEL_XOUT_H = 0x3B;
 constexpr uint8_t ACCEL_XOUT_L = 0x3C;
 constexpr uint8_t ACCEL_YOUT_H = 0x3D;
@@ -23,17 +31,34 @@ constexpr uint8_t GYRO_YOUT_H = 0x45;
 constexpr uint8_t GYRO_YOUT_L = 0x46;
 constexpr uint8_t GYRO_ZOUT_H = 0x47;
 constexpr uint8_t GYRO_ZOUT_L = 0x48;
+constexpr uint8_t SIGNAL_PATH_RESET = 0x68;
+constexpr uint8_t USER_CTRL = 0x6A;
 constexpr uint8_t PWR_MGMT_1 = 0x6B;
 constexpr uint8_t PWR_MGMT_2 = 0x6C;
 constexpr uint8_t WHOAMI = 0x75;
 } // namespace
 
-bool satoh::Gyro::write(uint8_t reg, uint8_t v)
+bool satoh::Gyro::init() noexcept
+{
+  return true                        //
+         && write(SMPLRT_DIV, 99)    // ローパスフィルタ―を適用して10msでサンプリングすることを想定
+         && write(CONFIG, 2)         // 100Hzぐらいのフィルタ―にすればいいかな。
+         && write(GYRO_CONFIG, 0)    // 回転させないから角度は最小で± 250 °/ s
+         && write(ACCEL_CONFIG, 8)   // 加速度レンジは±4gぐらい？
+         && write(FIFO_EN, 0)        // FIFOは使わず、センサー値は各センサーのレジスタを読み出す
+         && write(INT_PIN_CFG, 0xD0) // 割り込みはオープンドレインの負論理、リードクリア
+         && write(INT_ENABLE, 1)     // データの準備ができたら割り込みを発生させる
+         && write(USER_CTRL, 0)      // FIFOは使わない
+         && write(PWR_MGMT_1, 0)     //
+      ;
+}
+
+bool satoh::Gyro::write(uint8_t reg, uint8_t v) noexcept
 {
   uint8_t a[2] = {reg, v};
   return I2C::Result::OK == i2c_->write(slaveAddr_, a, sizeof(a));
 }
-bool satoh::Gyro::read(uint8_t reg, uint8_t *buffer, uint32_t size)
+bool satoh::Gyro::read(uint8_t reg, uint8_t *buffer, uint32_t size) noexcept
 {
   return I2C::Result::OK == i2c_->write(slaveAddr_, &reg, sizeof(reg)) && //
          I2C::Result::OK == i2c_->read(slaveAddr_, buffer, size)          //
@@ -43,7 +68,7 @@ bool satoh::Gyro::read(uint8_t reg, uint8_t *buffer, uint32_t size)
 satoh::Gyro::Gyro(I2C *i2c, uint8_t slaveAddr) noexcept //
     : i2c_(i2c),                                        //
       slaveAddr_(slaveAddr),                            //
-      ok_(write(PWR_MGMT_1, 0))                         //
+      ok_(init())                                       //
 {
 }
 satoh::Gyro::~Gyro() {}

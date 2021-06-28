@@ -23,19 +23,23 @@ class satoh::Gyro
   const uint8_t slaveAddr_;
   /// 通信可否
   const bool ok_;
+  /// @brief センサ初期化
+  /// @retval true 書き込み成功
+  /// @retval false 書き込み失敗
+  bool init() noexcept;
   /// @brief I2C書き込み
   /// @param[in] reg レジスタ番号
   /// @param[in] v 値
   /// @retval true 書き込み成功
   /// @retval false 書き込み失敗
-  bool write(uint8_t reg, uint8_t v);
+  bool write(uint8_t reg, uint8_t v) noexcept;
   /// @brief I2C読み込み
   /// @param[in] reg レジスタ番号
   /// @param[out] buffer 読み込みデータを格納するバッファ
   /// @param[in] size 読み込みサイズ
   /// @retval true 読み込み成功
   /// @retval false 読み込み失敗
-  bool read(uint8_t reg, uint8_t *buffer, uint32_t size);
+  bool read(uint8_t reg, uint8_t *buffer, uint32_t size) noexcept;
 
 public:
   /// @brief コンストラクタ
