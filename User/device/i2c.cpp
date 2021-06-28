@@ -10,11 +10,11 @@
 
 namespace
 {
-constexpr uint32_t SIG_STOP = 1 << 0;
-constexpr uint32_t SIG_NACK = 1 << 1;
-constexpr uint32_t SIG_DMAEND = 1 << 2;
-constexpr uint32_t SIG_DMAERR = 1 << 3;
-constexpr uint32_t SIG_ERR = 1 << 10;
+constexpr int32_t SIG_STOP = (1 << 0) & satoh::I2C_CLS_SIG_MASK;
+constexpr int32_t SIG_NACK = (1 << 1) & satoh::I2C_CLS_SIG_MASK;
+constexpr int32_t SIG_DMAEND = (1 << 2) & satoh::I2C_CLS_SIG_MASK;
+constexpr int32_t SIG_DMAERR = (1 << 3) & satoh::I2C_CLS_SIG_MASK;
+constexpr int32_t SIG_ERR = (1 << 7) & satoh::I2C_CLS_SIG_MASK;
 
 /// @brief I2C通信後の終了処理を行うクラス
 class Finalizer

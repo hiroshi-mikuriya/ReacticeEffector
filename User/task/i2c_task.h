@@ -6,12 +6,16 @@
 
 #pragma once
 
+#include "cmsis_os.h"
 #include "stm32f7xx.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
+  /// I2Cタスクハンドル
+  extern osThreadId i2cTaskHandle;
 
   /// @brief i2cTask内部処理
   /// @param[in] argument タスク引数

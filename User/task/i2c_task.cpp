@@ -14,7 +14,12 @@
 namespace
 {
 satoh::I2C *s_i2c = 0;
-}
+/// I2Cタスク専用シグナルマスク
+constexpr int32_t I2C_TSK_SIG_MASK = 0x00FF0000;
+constexpr int32_t SIG_INT_MPU = (1 << 16) & I2C_TSK_SIG_MASK;
+constexpr int32_t SIG_INT_SW = (1 << 17) & I2C_TSK_SIG_MASK;
+constexpr int32_t SIG_INT_SW2 = (1 << 18) & I2C_TSK_SIG_MASK;
+} // namespace
 
 void i2cTaskImpl(void const *argument)
 {
@@ -86,15 +91,15 @@ void i2cTxErrorIRQ(void)
 
 void extiSwIRQ(void)
 {
-  // TODO
+  // osSignalSet(i2cTaskHandle, SIG_INT_SW);
 }
 
 void extiSw2IRQ(void)
 {
-  // TODO
+  // osSignalSet(i2cTaskHandle, SIG_INT_SW2);
 }
 
 void extiMpuIRQ(void)
 {
-  // TODO
+  // osSignalSet(i2cTaskHandle, SIG_INT_MPU);
 }

@@ -12,6 +12,8 @@
 namespace satoh
 {
 class I2C;
+/// I2Cクラス専用シグナルマスク
+constexpr int32_t I2C_CLS_SIG_MASK = 0x0000FFFF;
 } // namespace satoh
 
 /// @brief I2C通信クラス
