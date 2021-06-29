@@ -8,6 +8,7 @@
 
 #include "cmsis_os.h"
 #include "stm32f7xx.h"
+#include <memory>
 
 namespace satoh
 {
@@ -19,11 +20,13 @@ constexpr int32_t I2C_CLS_SIG_MASK = 0x0000FFFF;
 /// @brief I2C通信クラス
 class satoh::I2C
 {
-  I2C_TypeDef *const i2cx_; ///< I2Cペリフェラル
-  osThreadId threadId_;     ///< イベント通知先のスレッドID
-  DMA_TypeDef *const dma_;  ///< 送受信DMA
-  const uint32_t rxStream_; ///< 受信DMAストリーム
-  const uint32_t txStream_; ///< 送信DMAストリーム
+  I2C_TypeDef *const i2cx_;                   ///< I2Cペリフェラル
+  osThreadId threadId_;                       ///< イベント通知先のスレッドID
+  DMA_TypeDef *const dma_;                    ///< 送受信DMA
+  const uint32_t rxStream_;                   ///< 受信DMAストリーム
+  const uint32_t txStream_;                   ///< 送信DMAストリーム
+  alignas(4) std::unique_ptr<uint8_t> rxbuf_; ///< 受信バッファ
+  alignas(4) std::unique_ptr<uint8_t> txbuf_; ///< 送信バッファ
 
   /// @brief 初期化
   void start() const noexcept;

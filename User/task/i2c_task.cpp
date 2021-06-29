@@ -23,7 +23,6 @@ constexpr int32_t SIG_INT_SW2 = (1 << 18) & I2C_TSK_SIG_MASK;
 
 void i2cTaskImpl(void const *argument)
 {
-  extern osThreadId i2cTaskHandle;
   s_i2c = new satoh::I2C(I2C1, i2cTaskHandle, DMA1, LL_DMA_STREAM_0, LL_DMA_STREAM_7);
   satoh::Gyro mpu6050(s_i2c, satoh::MPU6050);
   satoh::Gyro icm20602(s_i2c, satoh::ICM20602);

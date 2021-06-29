@@ -7,6 +7,7 @@
 #include "i2c.h"
 #include "stm32f7xx_ll_dma.h"
 #include "stm32f7xx_ll_i2c.h"
+#include <cstring> // memcpy
 
 namespace
 {
@@ -64,6 +65,16 @@ void satoh::I2C::start() const noexcept
   LL_DMA_EnableIT_TE(dma_, rxStream_);
   LL_DMA_EnableIT_TC(dma_, txStream_);
   LL_DMA_EnableIT_TE(dma_, txStream_);
+  LL_DMA_ConfigAddresses(dma_, txStream_,                                            //
+                         reinterpret_cast<uint32_t>(txbuf_.get()),                   //
+                         LL_I2C_DMA_GetRegAddr(i2cx_, LL_I2C_DMA_REG_DATA_TRANSMIT), //
+                         LL_DMA_DIRECTION_MEMORY_TO_PERIPH                           //
+  );
+  LL_DMA_ConfigAddresses(dma_, rxStream_,                                           //
+                         LL_I2C_DMA_GetRegAddr(i2cx_, LL_I2C_DMA_REG_DATA_RECEIVE), //
+                         reinterpret_cast<uint32_t>(rxbuf_.get()),                  //
+                         LL_DMA_DIRECTION_PERIPH_TO_MEMORY                          //
+  );
 }
 
 void satoh::I2C::stop() const noexcept
@@ -93,7 +104,9 @@ satoh::I2C::I2C(I2C_TypeDef *const i2cx,    //
       threadId_(threadId),                  //
       dma_(dma),                            //
       rxStream_(rxStream),                  //
-      txStream_(txStream)                   //
+      txStream_(txStream),                  //
+      rxbuf_(new uint8_t[32]),              //
+      txbuf_(new uint8_t[256])              //
 {
   start();
 }
@@ -178,25 +191,25 @@ void satoh::I2C::notifyTxErrorIRQ() noexcept
 /// @brief シグナルを待機し、エラーが発生したらリターンする
 /// @param[in] sigs 待機するシグナルの種類
 /// @param[in] timeout タイムアウト時間（ミリ秒）
-#define WAIT_SIGNAL(sigs, timeout)                \
-  do                                              \
-  {                                               \
-    osEvent ev = osSignalWait((sigs), (timeout)); \
-    if (ev.status == osEventTimeout)              \
-    {                                             \
-      restart();                                  \
-      return Result::TIMEOUT;                     \
-    }                                             \
-    if (ev.value.signals & SIG_NACK)              \
-    {                                             \
-      restart();                                  \
-      return Result::NACK;                        \
-    }                                             \
-    if (ev.value.signals & SIG_DMAERR)            \
-    {                                             \
-      restart();                                  \
-      return Result::ERROR;                       \
-    }                                             \
+#define WAIT_SIGNAL(sigs, timeout)                 \
+  do                                               \
+  {                                                \
+    osEvent ev = osSignalWait((sigs), (timeout));  \
+    if (ev.status == osEventTimeout)               \
+    {                                              \
+      restart();                                   \
+      return Result::TIMEOUT;                      \
+    }                                              \
+    if (ev.value.signals & SIG_NACK)               \
+    {                                              \
+      restart();                                   \
+      return Result::NACK;                         \
+    }                                              \
+    if (ev.value.signals & (SIG_DMAERR | SIG_ERR)) \
+    {                                              \
+      restart();                                   \
+      return Result::ERROR;                        \
+    }                                              \
   } while (0)
 
 satoh::I2C::Result satoh::I2C::write(uint8_t slaveAddr, uint8_t const *bytes, uint32_t size) noexcept
@@ -208,15 +221,12 @@ satoh::I2C::Result satoh::I2C::write(uint8_t slaveAddr, uint8_t const *bytes, ui
   Finalizer fin(i2cx_);
   LL_I2C_EnableIT_NACK(i2cx_);
   LL_I2C_EnableIT_STOP(i2cx_);
-  LL_DMA_ConfigAddresses(dma_, txStream_,                                            //
-                         reinterpret_cast<uint32_t>(bytes),                          //
-                         LL_I2C_DMA_GetRegAddr(i2cx_, LL_I2C_DMA_REG_DATA_TRANSMIT), //
-                         LL_DMA_DIRECTION_MEMORY_TO_PERIPH                           //
-  );
+  LL_I2C_EnableIT_ERR(i2cx_);
+  memcpy(txbuf_.get(), bytes, size);
   LL_DMA_SetDataLength(dma_, txStream_, size);
   LL_DMA_EnableStream(dma_, txStream_);
   LL_I2C_HandleTransfer(i2cx_, slaveAddr, LL_I2C_ADDRSLAVE_7BIT, size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_WRITE);
-  WAIT_SIGNAL(SIG_DMAEND | SIG_DMAERR | SIG_NACK, 10);
+  WAIT_SIGNAL(SIG_DMAEND | SIG_DMAERR | SIG_NACK | SIG_ERR, 10);
   WAIT_SIGNAL(SIG_STOP, 1);
   return Result::OK;
 }
@@ -230,15 +240,12 @@ satoh::I2C::Result satoh::I2C::read(uint8_t slaveAddr, uint8_t *buffer, uint32_t
   Finalizer fin(i2cx_);
   LL_I2C_EnableIT_STOP(i2cx_);
   LL_I2C_EnableIT_NACK(i2cx_);
-  LL_DMA_ConfigAddresses(dma_, rxStream_,                                           //
-                         LL_I2C_DMA_GetRegAddr(i2cx_, LL_I2C_DMA_REG_DATA_RECEIVE), //
-                         reinterpret_cast<uint32_t>(buffer),                        //
-                         LL_DMA_DIRECTION_PERIPH_TO_MEMORY                          //
-  );
+  LL_I2C_EnableIT_ERR(i2cx_);
   LL_DMA_SetDataLength(dma_, rxStream_, size);
   LL_DMA_EnableStream(dma_, rxStream_);
   LL_I2C_HandleTransfer(i2cx_, slaveAddr, LL_I2C_ADDRSLAVE_7BIT, size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_READ);
-  WAIT_SIGNAL(SIG_DMAEND | SIG_DMAERR | SIG_NACK, 10);
+  WAIT_SIGNAL(SIG_DMAEND | SIG_DMAERR | SIG_NACK | SIG_ERR, 10);
   WAIT_SIGNAL(SIG_STOP, 1);
+  memcpy(buffer, rxbuf_.get(), size);
   return Result::OK;
 }
