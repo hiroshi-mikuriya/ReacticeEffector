@@ -34,8 +34,11 @@ void i2cTaskImpl(void const *argument)
     led.set({0x00, 0x80, 0x00}, (i + 1) % 4);
     led.set({0x00, 0x00, 0x80}, (i + 2) % 4);
     led.set({0x80, 0x80, 0x00}, (i + 3) % 4);
-    level.set(i, 0);
-    level.set(7 - i, 1);
+    level.setLeft(i);
+    level.setRight(7 - i);
+    level.setPower((i % 2) == 0);
+    level.setModulation((i % 2) == 1);
+    level.show();
     if (mpu6050.ok())
     {
       int16_t acc[3] = {0};

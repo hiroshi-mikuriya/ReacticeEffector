@@ -7,9 +7,27 @@
 #include "level_meter.h"
 #include "pca9555.h"
 
+namespace
+{
+constexpr uint8_t LEVEL[8] = {
+    0b11111111, //
+    0b11111110, //
+    0b11111100, //
+    0b11111000, //
+    0b11110000, //
+    0b11100000, //
+    0b11000000, //
+    0b10000000, //
+};
+}
+
 satoh::LevelMeter::LevelMeter(I2C *i2c) noexcept //
     : i2c_(i2c),                                 //
-      ok_(false)                                 //
+      ok_(false),                                //
+      left_(LEVEL[0]),                           //
+      right_(LEVEL[0]),                          //
+      power_(false),                             //
+      modulation_(false)                         //
 {
   uint8_t v[] = {pca9555::CONFIGURATION_0, 0, 0};
   ok_ = I2C::Result::OK == i2c_->write(pca9555::LEVEL_METER, v, sizeof(v));
@@ -22,26 +40,39 @@ bool satoh::LevelMeter::ok() const noexcept
   return ok_;
 }
 
-bool satoh::LevelMeter::set(uint8_t level, uint8_t n)
+void satoh::LevelMeter::setLeft(uint8_t level) noexcept
 {
-  if (7 < level || 1 < n)
+  if (level < sizeof(LEVEL))
   {
-    return false;
+    left_ = LEVEL[level];
   }
-  constexpr uint8_t LEVEL[8] = {
-      0b11111111, //
-      0b11111110, //
-      0b11111100, //
-      0b11111000, //
-      0b11110000, //
-      0b11100000, //
-      0b11000000, //
-      0b10000000, //
-  };
-  constexpr uint8_t REG[2] = {
-      pca9555::OUTPUT_0, //
-      pca9555::OUTPUT_1, //
-  };
-  uint8_t v[] = {REG[n], LEVEL[level]};
+}
+void satoh::LevelMeter::setRight(uint8_t level) noexcept
+{
+  if (level < sizeof(LEVEL))
+  {
+    right_ = LEVEL[level];
+  }
+}
+void satoh::LevelMeter::setPower(bool level) noexcept
+{
+  power_ = level;
+}
+void satoh::LevelMeter::setModulation(bool level) noexcept
+{
+  modulation_ = level;
+}
+bool satoh::LevelMeter::show() const noexcept
+{
+  uint8_t v[] = {pca9555::OUTPUT_0, left_, right_};
+  constexpr uint8_t MASK = 0b01111111;
+  if (power_)
+  {
+    v[2] &= MASK;
+  }
+  if (modulation_)
+  {
+    v[1] &= MASK;
+  }
   return I2C::Result::OK == i2c_->write(pca9555::LEVEL_METER, v, sizeof(v));
 }
