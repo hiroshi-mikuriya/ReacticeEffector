@@ -21,7 +21,7 @@ constexpr int32_t SIG_INT_SW = (1 << 17) & I2C_TSK_SIG_MASK;
 constexpr int32_t SIG_INT_SW2 = (1 << 18) & I2C_TSK_SIG_MASK;
 } // namespace
 
-void i2cTaskImpl(void const *argument)
+void i2cTaskProc(void const *argument)
 {
   s_i2c = new satoh::I2C(I2C1, i2cTaskHandle, DMA1, LL_DMA_STREAM_0, LL_DMA_STREAM_7);
   satoh::Gyro mpu6050(s_i2c, satoh::MPU6050);

@@ -19,7 +19,7 @@ extern "C"
 
   /// @brief i2cTask内部処理
   /// @param[in] argument タスク引数
-  void i2cTaskImpl(void const *argument);
+  void i2cTaskProc(void const *argument);
 
   /// @brief I2Cイベント割り込み
   void i2cEvIRQ(void);

@@ -67,7 +67,7 @@ static void MX_I2C1_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_SAI1_Init(void);
 void neoPixelTaskProc(void const * argument);
-void i2cTaskProc(void const * argument);
+extern void i2cTaskProc(void const * argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -152,6 +152,7 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+  MX_USB_DEVICE_Init();
   /* USER CODE END RTOS_THREADS */
 
   /* Start scheduler */
@@ -1132,27 +1133,17 @@ static void MX_GPIO_Init(void)
   * @retval None
   */
 /* USER CODE END Header_neoPixelTaskProc */
-void neoPixelTaskProc(void const * argument)
+__weak void neoPixelTaskProc(void const * argument)
 {
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 5 */
-  nepPixelTaskImpl(argument);
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
   /* USER CODE END 5 */
-}
-
-/* USER CODE BEGIN Header_i2cTaskProc */
-/**
-* @brief Function implementing the i2cTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_i2cTaskProc */
-void i2cTaskProc(void const * argument)
-{
-  /* USER CODE BEGIN i2cTaskProc */
-  i2cTaskImpl(argument);
-  /* USER CODE END i2cTaskProc */
 }
 
  /**

@@ -18,7 +18,7 @@ extern "C"
 
   /// @brief neoPixelTask内部処理
   /// @param[in] argument タスク引数
-  void nepPixelTaskImpl(void const *argument);
+  void neoPixelTaskProc(void const *argument);
 
   /// @brief NeoPixel DMA送信完了割り込み
   void neoPixelTxEndIRQ(void);

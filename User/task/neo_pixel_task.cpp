@@ -14,7 +14,7 @@ constexpr int32_t NEO_PIXEL_TX_END = 1 << 0;
 /// 送信エラー通知
 constexpr int32_t NEO_PIXEL_TX_ERROR = 1 << 1;
 
-void nepPixelTaskImpl(void const *argument)
+void neoPixelTaskProc(void const *argument)
 {
   constexpr uint32_t LED_COUNT = 100;
   constexpr uint8_t V = 0x20;
