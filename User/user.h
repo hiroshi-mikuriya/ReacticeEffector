@@ -8,6 +8,7 @@
 
 #include "task/i2c_task.h"
 #include "task/neo_pixel_task.h"
+#include "task/usb_task.h"
 
 #ifdef __cplusplus
 #include <cstdint>
@@ -16,11 +17,6 @@ extern "C"
 #else // C99
 #include <stdint.h>
 #endif
-
-  /// @brief USB受信割り込み
-  /// @param[in] bytes 受信データの先頭ポインタ
-  /// @param[in] size 受信データサイズ
-  void usbRxIRQ(uint8_t const *bytes, uint32_t size);
 
   /// @brief UART1受信割り込み
   void uart1RxIRQ(void);

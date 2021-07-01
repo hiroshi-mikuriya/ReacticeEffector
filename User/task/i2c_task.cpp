@@ -5,24 +5,21 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "i2c_task.h"
-#include "cmsis_os.h"
 #include "device/gyro.h"
 #include "device/level_meter.h"
 #include "device/pca9635.h"
-#include "usbd_cdc_if.h"
+#include "message/msglib.h"
+#include "stm32f7xx_ll_dma.h"
+#include "usb_task.h"
 
 namespace
 {
 satoh::I2C *s_i2c = 0;
-/// I2Cタスク専用シグナルマスク
-constexpr int32_t I2C_TSK_SIG_MASK = 0x00FF0000;
-constexpr int32_t SIG_INT_MPU = (1 << 16) & I2C_TSK_SIG_MASK;
-constexpr int32_t SIG_INT_SW = (1 << 17) & I2C_TSK_SIG_MASK;
-constexpr int32_t SIG_INT_SW2 = (1 << 18) & I2C_TSK_SIG_MASK;
 } // namespace
 
 void i2cTaskProc(void const *argument)
 {
+  satoh::addMsgTarget(4);
   s_i2c = new satoh::I2C(I2C1, i2cTaskHandle, DMA1, LL_DMA_STREAM_0, LL_DMA_STREAM_7);
   satoh::Gyro mpu6050(s_i2c, satoh::MPU6050);
   satoh::Gyro icm20602(s_i2c, satoh::ICM20602);
@@ -45,7 +42,7 @@ void i2cTaskProc(void const *argument)
       int16_t gyro[3] = {0};
       if (mpu6050.getAccelGyro(acc, gyro))
       {
-        CDC_Transmit_FS(reinterpret_cast<uint8_t *>(acc), sizeof(acc));
+        satoh::sendMsg(usbTxTaskHandle, satoh::msg::USB_TX_REQ, acc, sizeof(acc));
       }
     }
     if (icm20602.ok())
@@ -54,7 +51,7 @@ void i2cTaskProc(void const *argument)
       int16_t gyro[3] = {0};
       if (icm20602.getAccelGyro(acc, gyro))
       {
-        CDC_Transmit_FS(reinterpret_cast<uint8_t *>(acc), sizeof(acc));
+        satoh::sendMsg(usbTxTaskHandle, satoh::msg::USB_TX_REQ, acc, sizeof(acc));
       }
     }
     osDelay(100);
@@ -93,15 +90,15 @@ void i2cTxErrorIRQ(void)
 
 void extiSwIRQ(void)
 {
-  // osSignalSet(i2cTaskHandle, SIG_INT_SW);
+  // satoh::sendMsg(i2cTaskHandle, satoh::msg::ENCODER_UPDATE_REQ);
 }
 
 void extiSw2IRQ(void)
 {
-  // osSignalSet(i2cTaskHandle, SIG_INT_SW2);
+  // satoh::sendMsg(i2cTaskHandle, satoh::msg::KEY_UPDATE_REQ);
 }
 
 void extiMpuIRQ(void)
 {
-  // osSignalSet(i2cTaskHandle, SIG_INT_MPU);
+  // satoh::sendMsg(i2cTaskHandle, satoh::msg::GYRO_UPDATE_REQ);
 }

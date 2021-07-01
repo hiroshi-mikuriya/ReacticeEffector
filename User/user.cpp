@@ -7,12 +7,6 @@
 #include "user.h"
 #include "usbd_cdc_if.h"
 
-void usbRxIRQ(uint8_t const *bytes, uint32_t size)
-{
-  // TODO
-  CDC_Transmit_FS(const_cast<uint8_t *>(bytes), static_cast<uint16_t>(size));
-}
-
 void uart1RxIRQ(void)
 {
   // TODO
