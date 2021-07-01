@@ -7,6 +7,7 @@
 #include "neo_pixel_task.h"
 #include "cmsis_os.h"
 #include "device/neo_pixel.h"
+#include "message/msglib.h"
 #include "stm32f7xx_ll_dma.h"
 
 /// 送信完了通知
@@ -16,6 +17,7 @@ constexpr int32_t NEO_PIXEL_TX_ERROR = 1 << 1;
 
 void neoPixelTaskProc(void const *argument)
 {
+  satoh::addMsgTarget(1);
   constexpr uint32_t LED_COUNT = 100;
   constexpr uint8_t V = 0x20;
   satoh::NeoPixel np(SPI3, DMA1, LL_DMA_STREAM_5, LED_COUNT);
