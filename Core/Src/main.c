@@ -51,6 +51,7 @@ DMA_HandleTypeDef hdma_sai1_b;
 osThreadId neoPixelTaskHandle;
 osThreadId i2cTaskHandle;
 osThreadId usbTxTaskHandle;
+osThreadId appTaskHandle;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -70,6 +71,7 @@ static void MX_SAI1_Init(void);
 void neoPixelTaskProc(void const * argument);
 extern void i2cTaskProc(void const * argument);
 extern void usbTxTaskProc(void const * argument);
+extern void appTaskProc(void const * argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -155,6 +157,10 @@ int main(void)
   /* definition and creation of usbTxTask */
   osThreadDef(usbTxTask, usbTxTaskProc, osPriorityIdle, 0, 128);
   usbTxTaskHandle = osThreadCreate(osThread(usbTxTask), NULL);
+
+  /* definition and creation of appTask */
+  osThreadDef(appTask, appTaskProc, osPriorityIdle, 0, 256);
+  appTaskHandle = osThreadCreate(osThread(appTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

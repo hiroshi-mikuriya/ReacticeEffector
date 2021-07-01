@@ -25,36 +25,79 @@ void i2cTaskProc(void const *argument)
   satoh::Gyro icm20602(s_i2c, satoh::ICM20602);
   satoh::PCA9635 led(s_i2c);
   satoh::LevelMeter level(s_i2c);
-  for (int i = 0;; i = (i + 1) % 8)
+  for (;;)
   {
-    led.set({0x80, 0x00, 0x00}, (i + 0) % 4);
-    led.set({0x00, 0x80, 0x00}, (i + 1) % 4);
-    led.set({0x00, 0x00, 0x80}, (i + 2) % 4);
-    led.set({0x80, 0x80, 0x00}, (i + 3) % 4);
-    level.setLeft(i);
-    level.setRight(7 - i);
-    level.setPower((i % 2) == 0);
-    level.setModulation((i % 2) == 1);
-    level.show();
-    if (mpu6050.ok())
+    auto res = satoh::recvMsg();
+    if (res.status() != osOK)
     {
-      int16_t acc[3] = {0};
-      int16_t gyro[3] = {0};
-      if (mpu6050.getAccelGyro(acc, gyro))
-      {
-        satoh::sendMsg(usbTxTaskHandle, satoh::msg::USB_TX_REQ, acc, sizeof(acc));
-      }
+      continue;
     }
-    if (icm20602.ok())
+    auto *msg = res.msg();
+    if (msg == 0)
     {
-      int16_t acc[3] = {0};
-      int16_t gyro[3] = {0};
-      if (icm20602.getAccelGyro(acc, gyro))
-      {
-        satoh::sendMsg(usbTxTaskHandle, satoh::msg::USB_TX_REQ, acc, sizeof(acc));
-      }
+      continue;
     }
-    osDelay(100);
+    switch (msg->type)
+    {
+    case satoh::msg::LED_LEVEL_UPDATE_REQ:
+    {
+      auto *param = reinterpret_cast<satoh::msg::LED_LEVEL const *>(msg->bytes);
+      level.setLeft(param->left);
+      level.setRight(param->right);
+      level.show();
+      break;
+    }
+    case satoh::msg::LED_SIMPLE_REQ:
+    {
+      auto *param = reinterpret_cast<satoh::msg::LED_SIMPLE const *>(msg->bytes);
+      if (param->led == 0)
+      {
+        level.setPower(param->level);
+      }
+      else
+      {
+        level.setModulation(param->level);
+      }
+      level.show();
+      break;
+    }
+    case satoh::msg::LED_EFFECT_REQ:
+    {
+      auto *param = reinterpret_cast<satoh::msg::LED_EFFECT const *>(msg->bytes);
+      led.set(param->rgb, param->led);
+      break;
+    }
+    case satoh::msg::GYRO_UPDATE_REQ:
+    {
+      if (mpu6050.ok())
+      {
+        satoh::msg::ACC_GYRO ag{};
+        if (mpu6050.getAccelGyro(ag.acc, ag.gyro))
+        {
+          satoh::sendMsg(usbTxTaskHandle, satoh::msg::USB_TX_REQ, &ag, sizeof(ag));
+        }
+      }
+      if (icm20602.ok())
+      {
+        satoh::msg::ACC_GYRO ag{};
+        if (icm20602.getAccelGyro(ag.acc, ag.gyro))
+        {
+          satoh::sendMsg(usbTxTaskHandle, satoh::msg::USB_TX_REQ, &ag, sizeof(ag));
+        }
+      }
+      break;
+    }
+    case satoh::msg::KEY_UPDATE_REQ:
+    {
+      // TODO
+      break;
+    }
+    case satoh::msg::ENCODER_UPDATE_REQ:
+    {
+      // TODO
+      break;
+    }
+    }
   }
 }
 
