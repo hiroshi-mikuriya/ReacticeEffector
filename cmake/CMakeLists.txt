@@ -34,33 +34,10 @@ execute_process(COMMAND which arm-none-eabi-size    OUTPUT_STRIP_TRAILING_WHITES
 ##########
 # compiler options
 ##########
-add_compile_options(-mcpu=${CPU})
-add_compile_options(-mthumb)
-add_compile_options(${FPU})
-add_compile_options(${FLOAT_ABI})
-add_compile_options(-O2)
-add_compile_options(-Wall)
-add_compile_options(-fdata-sections)
-add_compile_options(-ffunction-sections)
-add_compile_options(-MMD)
-add_compile_options(-MP)
-
-set(CMAKE_C_FLAGS -std=gnu99)
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS -fno-use-cxa-atexit)
-set(CMAKE_AS_FLAGS "-x assembler-with-cpp")
-
-add_link_options(-mcpu=${CPU})
-add_link_options(-mthumb)
-add_link_options(${FPU})
-add_link_options(${FLOAT_ABI})
-add_link_options(--specs=nosys.specs)
-add_link_options(-T${CMAKE_CURRENT_SOURCE_DIR}/${LDSCRIPT})
-add_link_options(-lc)
-add_link_options(-lm)
-add_link_options(-lnosys)
-add_link_options(-Wl,-Map=${MAP_FILE},--cref)
-add_link_options(-Wl,--gc-sections)
+set(CMAKE_C_FLAGS "-mcpu=${CPU} -std=gnu11 -Os -ffunction-sections -fdata-sections -Wall -fstack-usage ${FPU} ${FLOAT_ABI} -mthumb")
+set(CMAKE_CXX_FLAGS "-mcpu=${CPU} -std=gnu++14 -Os -ffunction-sections -fdata-sections -fno-exceptions -fno-rtti -fno-use-cxa-atexit -Wall -fstack-usage ${FPU} ${FLOAT_ABI} -mthumb")
+set(CMAKE_AS_FLAGS "-mcpu=${CPU} -x assembler-with-cpp ${FPU} ${FLOAT_ABI} -mthumb")
+set(CMAKE_EXE_LINKER_FLAGS "-mcpu=${CPU} -T${CMAKE_CURRENT_SOURCE_DIR}/${LDSCRIPT} -Wl,-Map=${MAP_FILE} -Wl,--gc-sections -static ${FPU} ${FLOAT_ABI} -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group")
 
 enable_language(ASM)
 
@@ -105,16 +82,10 @@ include_directories(
 # source files
 ##########
 file(GLOB SRCS
-	${CORE}/Src/main.c
-	${CORE}/Src/freertos.c
-	${CORE}/Src/stm32f7xx_it.c
-	${CORE}/Src/stm32f7xx_hal_msp.c
-	${CORE}/Src/stm32f7xx_hal_timebase_tim.c
-	${CORE}/Src/system_stm32f7xx.c
+	${CORE}/Src/*.c
 	${CORE}/Startup/*.s
 	${USER}/*.cpp
-	${USER}/device/*.cpp
-	${USER}/task/*.cpp
+	${USER}/**/*.cpp
 	${DRIVER}/Src/*.c
 	${RTOS}/*.c
 	${RTOS}/CMSIS_RTOS/*.c
