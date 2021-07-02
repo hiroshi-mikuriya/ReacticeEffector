@@ -38,10 +38,10 @@ constexpr uint8_t PWR_MGMT_2 = 0x6C;
 constexpr uint8_t WHOAMI = 0x75;
 } // namespace
 
-bool satoh::Gyro::init() noexcept
+bool satoh::Gyro::init() const noexcept
 {
   return true                        //
-         && write(SMPLRT_DIV, 99)    // ローパスフィルタ―を適用して10msでサンプリングすることを想定
+         && write(SMPLRT_DIV, 9)     // ローパスフィルタ―を適用して10msでサンプリングすることを想定
          && write(CONFIG, 2)         // 100Hzぐらいのフィルタ―にすればいいかな。
          && write(GYRO_CONFIG, 0)    // 回転させないから角度は最小で± 250 °/ s
          && write(ACCEL_CONFIG, 8)   // 加速度レンジは±4gぐらい？
@@ -53,12 +53,12 @@ bool satoh::Gyro::init() noexcept
       ;
 }
 
-bool satoh::Gyro::write(uint8_t reg, uint8_t v) noexcept
+bool satoh::Gyro::write(uint8_t reg, uint8_t v) const noexcept
 {
   uint8_t a[2] = {reg, v};
   return I2C::Result::OK == i2c_->write(slaveAddr_, a, sizeof(a));
 }
-bool satoh::Gyro::read(uint8_t reg, uint8_t *buffer, uint32_t size) noexcept
+bool satoh::Gyro::read(uint8_t reg, uint8_t *buffer, uint32_t size) const noexcept
 {
   return I2C::Result::OK == i2c_->write(slaveAddr_, &reg, sizeof(reg)) && //
          I2C::Result::OK == i2c_->read(slaveAddr_, buffer, size)          //
@@ -76,7 +76,7 @@ bool satoh::Gyro::ok() const noexcept
 {
   return ok_;
 }
-bool satoh::Gyro::getAccel(int16_t (&acc)[3]) noexcept
+bool satoh::Gyro::getAccel(int16_t (&acc)[3]) const noexcept
 {
   uint8_t buf[6] = {0};
   bool res = read(ACCEL_XOUT_H, buf, sizeof(buf));
@@ -88,7 +88,7 @@ bool satoh::Gyro::getAccel(int16_t (&acc)[3]) noexcept
   }
   return res;
 }
-bool satoh::Gyro::getGyro(int16_t (&gyro)[3]) noexcept
+bool satoh::Gyro::getGyro(int16_t (&gyro)[3]) const noexcept
 {
   uint8_t buf[6] = {0};
   bool res = read(GYRO_XOUT_H, buf, sizeof(buf));
@@ -100,7 +100,7 @@ bool satoh::Gyro::getGyro(int16_t (&gyro)[3]) noexcept
   }
   return res;
 }
-bool satoh::Gyro::getAccelGyro(int16_t (&acc)[3], int16_t (&gyro)[3]) noexcept
+bool satoh::Gyro::getAccelGyro(int16_t (&acc)[3], int16_t (&gyro)[3]) const noexcept
 {
   uint8_t buf[6 + 2 + 6] = {0};
   bool res = read(ACCEL_XOUT_H, buf, sizeof(buf));

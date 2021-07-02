@@ -228,6 +228,7 @@ satoh::I2C::Result satoh::I2C::write(uint8_t slaveAddr, uint8_t const *bytes, ui
   LL_I2C_HandleTransfer(i2cx_, slaveAddr, LL_I2C_ADDRSLAVE_7BIT, size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_WRITE);
   WAIT_SIGNAL(SIG_DMAEND | SIG_DMAERR | SIG_NACK | SIG_ERR, 10);
   WAIT_SIGNAL(SIG_STOP, 1);
+  osDelay(1);
   return Result::OK;
 }
 
@@ -247,5 +248,6 @@ satoh::I2C::Result satoh::I2C::read(uint8_t slaveAddr, uint8_t *buffer, uint32_t
   WAIT_SIGNAL(SIG_DMAEND | SIG_DMAERR | SIG_NACK | SIG_ERR, 10);
   WAIT_SIGNAL(SIG_STOP, 1);
   memcpy(buffer, rxbuf_.get(), size);
+  osDelay(1);
   return Result::OK;
 }

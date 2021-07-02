@@ -48,13 +48,19 @@ bool satoh::PCA9635::write(uint8_t reg, uint8_t const *bytes, uint32_t size)
   return I2C::Result::OK == i2c_->write(SLAVE_ADDR, d, size + 1);
 }
 
-satoh::PCA9635::PCA9635(I2C *i2c) noexcept : i2c_(i2c)
+satoh::PCA9635::PCA9635(I2C *i2c) noexcept //
+    : i2c_(i2c),                           //
+      ok_(false)                           //
 {
   uint8_t v0[] = {0b10000001, 0b00000001};
   uint8_t v1[] = {0xFF, 0xFF, 0xFF, 0x00};
-  write(MODE1, v0, sizeof(v0)) && write(LEDOUT0, v1, sizeof(v1));
+  ok_ = write(MODE1, v0, sizeof(v0)) && write(LEDOUT0, v1, sizeof(v1));
 }
 satoh::PCA9635::~PCA9635() {}
+bool satoh::PCA9635::ok() const noexcept
+{
+  return ok_;
+}
 bool satoh::PCA9635::set(RGB const &rgb, uint8_t n)
 {
   if (3 < n)

@@ -35,21 +35,6 @@ MailInfo *find(osThreadId threadId)
   }
   return 0;
 }
-/// @brief 空のメール情報取得
-/// @retval 0以外 空のメール情報のポインタ
-/// @retval 0 見つからない
-MailInfo *findEmpty()
-{
-  for (uint32_t i = 0; i < MAX_MAIL_INFO_COUNT; ++i)
-  {
-    MailInfo *info = &s_mails[i];
-    if (info->threadId == 0)
-    {
-      return info;
-    }
-  }
-  return 0;
-}
 } // namespace
 
 osStatus satoh::addMsgTarget(uint32_t msgCount) noexcept
@@ -59,11 +44,11 @@ osStatus satoh::addMsgTarget(uint32_t msgCount) noexcept
   {
     return osErrorOS;
   }
-  if (find(threadId))
+  if (find(threadId) != 0)
   {
     return osErrorValue;
   }
-  MailInfo *info = findEmpty();
+  MailInfo *info = find(0);
   if (info == 0)
   {
     return osErrorNoMemory;
@@ -153,6 +138,7 @@ satoh::Result &satoh::Result::operator=(Result &&that) noexcept
 {
   if (this != &that)
   {
+    reset();
     status_ = that.status_;
     msg_ = that.msg_;
     mail_ = that.mail_;

@@ -24,8 +24,8 @@ constexpr uint8_t OLED = 5 << 4;
 constexpr uint8_t USB = 6 << 4;
 } // namespace cat
 
-/// ジャイロ - 更新依頼
-constexpr uint8_t GYRO_UPDATE_REQ = 1 | cat::GYRO;
+/// ジャイロ - 取得依頼
+constexpr uint8_t GYRO_GET_REQ = 1 | cat::GYRO;
 /// ジャイロ - 加速度・ジャイロ値通知
 constexpr uint8_t GYRO_NOTIFY = 2 | cat::GYRO;
 /// LED - レベルメーター（左右）更新依頼
@@ -34,12 +34,12 @@ constexpr uint8_t LED_LEVEL_UPDATE_REQ = 1 | cat::LED;
 constexpr uint8_t LED_SIMPLE_REQ = 2 | cat::LED;
 /// LED - EFFECT LED点灯状態変更依頼
 constexpr uint8_t LED_EFFECT_REQ = 3 | cat::LED;
-/// ENCODER - エンコーダ値更新依頼
-constexpr uint8_t ENCODER_UPDATE_REQ = 1 | cat::ENCODER;
+/// ENCODER - エンコーダ値取得依頼
+constexpr uint8_t ENCODER_GET_REQ = 1 | cat::ENCODER;
 /// ENCODER - エンコーダ値通知
 constexpr uint8_t ENCODER_NOTIFY = 2 | cat::ENCODER;
-/// キー入力 - 更新依頼
-constexpr uint8_t KEY_UPDATE_REQ = 1 | cat::KEY;
+/// キー入力 - 取得依頼
+constexpr uint8_t KEY_GET_REQ = 1 | cat::KEY;
 /// キー入力 - キー取得値通知
 constexpr uint8_t KEY_NOTIFY = 2 | cat::KEY;
 /// OLED - 画面更新依頼

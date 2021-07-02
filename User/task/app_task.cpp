@@ -47,15 +47,7 @@ void appTaskProc(void const *argument)
     }
     osDelay(DELAY);
     {
-      satoh::sendMsg(i2cTaskHandle, satoh::msg::GYRO_UPDATE_REQ);
-    }
-    osDelay(DELAY);
-    {
-      satoh::sendMsg(i2cTaskHandle, satoh::msg::ENCODER_UPDATE_REQ);
-    }
-    osDelay(DELAY);
-    {
-      satoh::sendMsg(i2cTaskHandle, satoh::msg::KEY_UPDATE_REQ);
+      satoh::sendMsg(i2cTaskHandle, satoh::msg::GYRO_GET_REQ);
     }
     osDelay(DELAY);
   }

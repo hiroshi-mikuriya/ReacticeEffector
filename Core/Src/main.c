@@ -48,10 +48,11 @@ SAI_HandleTypeDef hsai_BlockB1;
 DMA_HandleTypeDef hdma_sai1_a;
 DMA_HandleTypeDef hdma_sai1_b;
 
-osThreadId neoPixelTaskHandle;
-osThreadId i2cTaskHandle;
 osThreadId usbTxTaskHandle;
+osThreadId i2cTaskHandle;
+osThreadId neoPixelTaskHandle;
 osThreadId appTaskHandle;
+osThreadId soundTaskHandle;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -68,10 +69,11 @@ static void MX_SPI4_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_SAI1_Init(void);
-void neoPixelTaskProc(void const * argument);
+void usbTxTaskProc(void const * argument);
 extern void i2cTaskProc(void const * argument);
-extern void usbTxTaskProc(void const * argument);
+extern void neoPixelTaskProc(void const * argument);
 extern void appTaskProc(void const * argument);
+extern void soundTaskProc(void const * argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -146,21 +148,25 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* definition and creation of neoPixelTask */
-  osThreadDef(neoPixelTask, neoPixelTaskProc, osPriorityLow, 0, 128);
-  neoPixelTaskHandle = osThreadCreate(osThread(neoPixelTask), NULL);
+  /* definition and creation of usbTxTask */
+  osThreadDef(usbTxTask, usbTxTaskProc, osPriorityLow, 0, 128);
+  usbTxTaskHandle = osThreadCreate(osThread(usbTxTask), NULL);
 
   /* definition and creation of i2cTask */
   osThreadDef(i2cTask, i2cTaskProc, osPriorityNormal, 0, 128);
   i2cTaskHandle = osThreadCreate(osThread(i2cTask), NULL);
 
-  /* definition and creation of usbTxTask */
-  osThreadDef(usbTxTask, usbTxTaskProc, osPriorityIdle, 0, 128);
-  usbTxTaskHandle = osThreadCreate(osThread(usbTxTask), NULL);
+  /* definition and creation of neoPixelTask */
+  osThreadDef(neoPixelTask, neoPixelTaskProc, osPriorityIdle, 0, 128);
+  neoPixelTaskHandle = osThreadCreate(osThread(neoPixelTask), NULL);
 
   /* definition and creation of appTask */
   osThreadDef(appTask, appTaskProc, osPriorityIdle, 0, 256);
   appTaskHandle = osThreadCreate(osThread(appTask), NULL);
+
+  /* definition and creation of soundTask */
+  osThreadDef(soundTask, soundTaskProc, osPriorityRealtime, 0, 128);
+  soundTaskHandle = osThreadCreate(osThread(soundTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -433,25 +439,24 @@ static void MX_SAI1_Init(void)
 
   /* USER CODE END SAI1_Init 1 */
   hsai_BlockA1.Instance = SAI1_Block_A;
-  hsai_BlockA1.Init.AudioMode = SAI_MODEMASTER_TX;
+  hsai_BlockA1.Init.AudioMode = SAI_MODEMASTER_RX;
   hsai_BlockA1.Init.Synchro = SAI_ASYNCHRONOUS;
   hsai_BlockA1.Init.OutputDrive = SAI_OUTPUTDRIVE_DISABLE;
   hsai_BlockA1.Init.NoDivider = SAI_MASTERDIVIDER_ENABLE;
   hsai_BlockA1.Init.FIFOThreshold = SAI_FIFOTHRESHOLD_EMPTY;
-  hsai_BlockA1.Init.AudioFrequency = SAI_AUDIO_FREQUENCY_192K;
+  hsai_BlockA1.Init.AudioFrequency = SAI_AUDIO_FREQUENCY_96K;
   hsai_BlockA1.Init.SynchroExt = SAI_SYNCEXT_DISABLE;
   hsai_BlockA1.Init.MonoStereoMode = SAI_STEREOMODE;
   hsai_BlockA1.Init.CompandingMode = SAI_NOCOMPANDING;
-  hsai_BlockA1.Init.TriState = SAI_OUTPUT_NOTRELEASED;
   if (HAL_SAI_InitProtocol(&hsai_BlockA1, SAI_I2S_STANDARD, SAI_PROTOCOL_DATASIZE_24BIT, 2) != HAL_OK)
   {
     Error_Handler();
   }
   hsai_BlockB1.Instance = SAI1_Block_B;
-  hsai_BlockB1.Init.AudioMode = SAI_MODESLAVE_RX;
+  hsai_BlockB1.Init.AudioMode = SAI_MODESLAVE_TX;
   hsai_BlockB1.Init.Synchro = SAI_SYNCHRONOUS;
   hsai_BlockB1.Init.OutputDrive = SAI_OUTPUTDRIVE_DISABLE;
-  hsai_BlockB1.Init.FIFOThreshold = SAI_FIFOTHRESHOLD_EMPTY;
+  hsai_BlockB1.Init.FIFOThreshold = SAI_FIFOTHRESHOLD_HF;
   hsai_BlockB1.Init.SynchroExt = SAI_SYNCEXT_DISABLE;
   hsai_BlockB1.Init.MonoStereoMode = SAI_STEREOMODE;
   hsai_BlockB1.Init.CompandingMode = SAI_NOCOMPANDING;
@@ -1138,14 +1143,14 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_neoPixelTaskProc */
+/* USER CODE BEGIN Header_usbTxTaskProc */
 /**
-  * @brief  Function implementing the neoPixelTask thread.
+  * @brief  Function implementing the usbTxTask thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_neoPixelTaskProc */
-__weak void neoPixelTaskProc(void const * argument)
+/* USER CODE END Header_usbTxTaskProc */
+__weak void usbTxTaskProc(void const * argument)
 {
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();

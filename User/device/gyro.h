@@ -26,20 +26,20 @@ class satoh::Gyro
   /// @brief センサ初期化
   /// @retval true 書き込み成功
   /// @retval false 書き込み失敗
-  bool init() noexcept;
+  bool init() const noexcept;
   /// @brief I2C書き込み
   /// @param[in] reg レジスタ番号
   /// @param[in] v 値
   /// @retval true 書き込み成功
   /// @retval false 書き込み失敗
-  bool write(uint8_t reg, uint8_t v) noexcept;
+  bool write(uint8_t reg, uint8_t v) const noexcept;
   /// @brief I2C読み込み
   /// @param[in] reg レジスタ番号
   /// @param[out] buffer 読み込みデータを格納するバッファ
   /// @param[in] size 読み込みサイズ
   /// @retval true 読み込み成功
   /// @retval false 読み込み失敗
-  bool read(uint8_t reg, uint8_t *buffer, uint32_t size) noexcept;
+  bool read(uint8_t reg, uint8_t *buffer, uint32_t size) const noexcept;
 
 public:
   /// @brief コンストラクタ
@@ -56,16 +56,16 @@ public:
   /// @param[out] acc 加速度値格納先
   /// @retval true 取得成功
   /// @retval false 取得失敗
-  bool getAccel(int16_t (&acc)[3]) noexcept;
+  bool getAccel(int16_t (&acc)[3]) const noexcept;
   /// @brief ジャイロ値取得
   /// @param[out] gyro ジャイロ値格納先
   /// @retval true 取得成功
   /// @retval false 取得失敗
-  bool getGyro(int16_t (&gyro)[3]) noexcept;
+  bool getGyro(int16_t (&gyro)[3]) const noexcept;
   /// @brief 加速度値とジャイロ値取得
   /// @param[out] acc 加速度値格納先
   /// @param[out] gyro ジャイロ値格納先
   /// @retval true 取得成功
   /// @retval false 取得失敗
-  bool getAccelGyro(int16_t (&acc)[3], int16_t (&gyro)[3]) noexcept;
+  bool getAccelGyro(int16_t (&acc)[3], int16_t (&gyro)[3]) const noexcept;
 };
