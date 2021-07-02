@@ -113,10 +113,10 @@ void i2cTaskProc(void const *argument)
   s_i2c = new satoh::I2C(I2C1, i2cTaskHandle, DMA1, LL_DMA_STREAM_0, LL_DMA_STREAM_7);
   initPCM3060(s_i2c);
   satoh::SSD1306 oled(s_i2c);
-  satoh::Gyro mpu6050(s_i2c, satoh::MPU6050);
-  satoh::Gyro icm20602(s_i2c, satoh::ICM20602);
   satoh::PCA9635 led(s_i2c);
   satoh::LevelMeter level(s_i2c);
+  satoh::Gyro mpu6050(s_i2c, satoh::MPU6050);
+  satoh::Gyro icm20602(s_i2c, satoh::ICM20602);
   for (;;)
   {
     auto res = satoh::recvMsg();
@@ -198,5 +198,5 @@ void extiSw2IRQ(void)
 
 void extiMpuIRQ(void)
 {
-  // satoh::sendMsg(i2cTaskHandle, satoh::msg::GYRO_GET_REQ);
+  satoh::sendMsg(i2cTaskHandle, satoh::msg::GYRO_GET_REQ);
 }

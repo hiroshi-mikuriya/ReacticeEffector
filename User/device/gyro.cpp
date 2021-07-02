@@ -40,7 +40,13 @@ constexpr uint8_t WHOAMI = 0x75;
 
 bool satoh::Gyro::init() const noexcept
 {
+  if (!write(PWR_MGMT_1, 0x80)) // reset
+  {
+    return false;
+  }
+  osDelay(100);
   return true                        //
+         && write(PWR_MGMT_1, 0)     //
          && write(SMPLRT_DIV, 9)     // ローパスフィルタ―を適用して10msでサンプリングすることを想定
          && write(CONFIG, 2)         // 100Hzぐらいのフィルタ―にすればいいかな。
          && write(GYRO_CONFIG, 0)    // 回転させないから角度は最小で± 250 °/ s
@@ -49,19 +55,18 @@ bool satoh::Gyro::init() const noexcept
          && write(INT_PIN_CFG, 0xD0) // 割り込みはオープンドレインの負論理、リードクリア
          && write(INT_ENABLE, 1)     // データの準備ができたら割り込みを発生させる
          && write(USER_CTRL, 0)      // FIFOは使わない
-         && write(PWR_MGMT_1, 0)     //
       ;
 }
 
 bool satoh::Gyro::write(uint8_t reg, uint8_t v) const noexcept
 {
   uint8_t a[2] = {reg, v};
-  return I2C::Result::OK == i2c_->write(slaveAddr_, a, sizeof(a));
+  return I2C::OK == i2c_->write(slaveAddr_, a, sizeof(a));
 }
 bool satoh::Gyro::read(uint8_t reg, uint8_t *buffer, uint32_t size) const noexcept
 {
-  return I2C::Result::OK == i2c_->write(slaveAddr_, &reg, sizeof(reg)) && //
-         I2C::Result::OK == i2c_->read(slaveAddr_, buffer, size)          //
+  return I2C::OK == i2c_->write(slaveAddr_, &reg, sizeof(reg), false) && //
+         I2C::OK == i2c_->read(slaveAddr_, buffer, size)                 //
       ;
 }
 

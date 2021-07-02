@@ -23,7 +23,7 @@ void initPCM3060(satoh::I2C *i2c)
   LL_GPIO_SetOutputPin(PCM_RST_GPIO_Port, PCM_RST_Pin);
   constexpr uint8_t SLAVE_ADDR = 0x47 << 1;
   uint8_t v[] = {0x40, 0xC1}; // ADC/DACをNormalモードにする  S / E = 1 : Single End modeで使う
-  if (i2c->write(SLAVE_ADDR, v, sizeof(v)) == satoh::I2C::Result::OK)
+  if (i2c->write(SLAVE_ADDR, v, sizeof(v)) == satoh::I2C::OK)
   {
     osSignalSet(soundTaskHandle, SIG_INITADC);
   }

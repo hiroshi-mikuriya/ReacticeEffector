@@ -66,7 +66,7 @@ bool satoh::SSD1306::init() const noexcept
       CTRL_10,    // control byte, Co bit = 1, D/C# = 0 (command)
       0xAF,       // Display On 0xAF
   };
-  return I2C::Result::OK == i2c_->write(SLAVE_ADDR, v, sizeof(v));
+  return I2C::OK == i2c_->write(SLAVE_ADDR, v, sizeof(v));
 }
 
 namespace
@@ -78,13 +78,14 @@ void satoh::SSD1306::updateScreen()
 {
   for (uint8_t page = 0; page < PAGE; ++page)
   {
+    uint8_t addr = static_cast<uint8_t>(0xB0 | page);
     uint8_t v0[] = {
-        CTRL_10,     // control byte, Co bit = 1, D/C# = 0 (command)
-        0xB0 | page, // set page start address(B0～B7)
-        CTRL_00,     // control byte, Co bit = 0, D/C# = 0 (command)
-        0x21,        // set Column Address
-        0,           // Column Start Address(0-127)
-        WIDTH - 1,   // Column Stop Address(0-127)
+        CTRL_10,   // control byte, Co bit = 1, D/C# = 0 (command)
+        addr,      // set page start address(B0～B7)
+        CTRL_00,   // control byte, Co bit = 0, D/C# = 0 (command)
+        0x21,      // set Column Address
+        0,         // Column Start Address(0-127)
+        WIDTH - 1, // Column Stop Address(0-127)
     };
     i2c_->write(SLAVE_ADDR, v0, sizeof(v0));
     // column = 8byte x 16

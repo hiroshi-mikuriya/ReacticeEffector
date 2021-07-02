@@ -46,9 +46,5 @@ void appTaskProc(void const *argument)
       satoh::sendMsg(i2cTaskHandle, satoh::msg::LED_LEVEL_UPDATE_REQ, &src, sizeof(src));
     }
     osDelay(DELAY);
-    {
-      satoh::sendMsg(i2cTaskHandle, satoh::msg::GYRO_GET_REQ);
-    }
-    osDelay(DELAY);
   }
 }

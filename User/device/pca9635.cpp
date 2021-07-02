@@ -45,7 +45,7 @@ bool satoh::PCA9635::write(uint8_t reg, uint8_t const *bytes, uint32_t size)
   uint8_t d[32] = {0};
   d[0] = static_cast<uint8_t>(reg | 0x80);
   memcpy(d + 1, bytes, size);
-  return I2C::Result::OK == i2c_->write(SLAVE_ADDR, d, size + 1);
+  return I2C::OK == i2c_->write(SLAVE_ADDR, d, size + 1);
 }
 
 satoh::PCA9635::PCA9635(I2C *i2c) noexcept //
