@@ -1,4 +1,4 @@
-/// @file      device/i2c.h
+/// @file      peripheral/i2c.h
 /// @author    SATOH GADGET
 /// @copyright Copyright© 2021 SATOH GADGET
 ///
@@ -20,13 +20,13 @@ constexpr int32_t I2C_CLS_SIG_MASK = 0x0000FFFF;
 /// @brief I2C通信クラス
 class satoh::I2C
 {
-  I2C_TypeDef *const i2cx_;                   ///< I2Cペリフェラル
-  osThreadId threadId_;                       ///< イベント通知先のスレッドID
-  DMA_TypeDef *const dma_;                    ///< 送受信DMA
-  const uint32_t rxStream_;                   ///< 受信DMAストリーム
-  const uint32_t txStream_;                   ///< 送信DMAストリーム
-  alignas(4) std::unique_ptr<uint8_t> rxbuf_; ///< 受信バッファ
-  alignas(4) std::unique_ptr<uint8_t> txbuf_; ///< 送信バッファ
+  I2C_TypeDef *const i2cx_;                           ///< I2Cペリフェラル
+  osThreadId threadId_;                               ///< イベント通知先のスレッドID
+  DMA_TypeDef *const dma_;                            ///< 送受信DMA
+  const uint32_t rxStream_;                           ///< 受信DMAストリーム
+  const uint32_t txStream_;                           ///< 送信DMAストリーム
+  alignas(4) mutable std::unique_ptr<uint8_t> rxbuf_; ///< 受信バッファ
+  alignas(4) mutable std::unique_ptr<uint8_t> txbuf_; ///< 送信バッファ
 
   /// @brief 初期化
   void start() const noexcept;
@@ -76,7 +76,7 @@ public:
   /// @retval TIMEOUT タイムアウト
   /// @retval NACK    NACK
   /// @retval ERROR   エラー
-  Result write(uint8_t slaveAddr, uint8_t const *bytes, uint32_t size, bool withSleep = true) noexcept;
+  Result write(uint8_t slaveAddr, uint8_t const *bytes, uint32_t size, bool withSleep = true) const noexcept;
   /// @brief データを読み込む
   /// @param[in] slaveAddr スレーブアドレス
   /// @param[in] buf 読み込んだデータを格納するバッファ
@@ -87,5 +87,5 @@ public:
   /// @retval TIMEOUT タイムアウト
   /// @retval NACK    NACK
   /// @retval ERROR   エラー
-  Result read(uint8_t slaveAddr, uint8_t *buffer, uint32_t size, bool withSleep = true) noexcept;
+  Result read(uint8_t slaveAddr, uint8_t *buffer, uint32_t size, bool withSleep = true) const noexcept;
 };

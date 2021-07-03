@@ -21,16 +21,20 @@ constexpr uint8_t LEVEL[8] = {
 };
 }
 
+bool satoh::LevelMeter::init() const noexcept
+{
+  uint8_t v[] = {pca9555::CONFIGURATION_0, 0, 0};
+  return write(v, sizeof(v));
+}
+
 satoh::LevelMeter::LevelMeter(I2C *i2c) noexcept //
-    : i2c_(i2c),                                 //
-      ok_(false),                                //
+    : I2CDeviceBase(i2c, pca9555::LEVEL_METER),  //
+      ok_(init()),                               //
       left_(LEVEL[0]),                           //
       right_(LEVEL[0]),                          //
       power_(false),                             //
       modulation_(false)                         //
 {
-  uint8_t v[] = {pca9555::CONFIGURATION_0, 0, 0};
-  ok_ = I2C::OK == i2c_->write(pca9555::LEVEL_METER, v, sizeof(v));
 }
 
 satoh::LevelMeter::~LevelMeter() {}
@@ -74,5 +78,5 @@ bool satoh::LevelMeter::show() const noexcept
   {
     v[1] &= MASK;
   }
-  return I2C::OK == i2c_->write(pca9555::LEVEL_METER, v, sizeof(v));
+  return write(v, sizeof(v));
 }

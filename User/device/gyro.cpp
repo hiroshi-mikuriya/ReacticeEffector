@@ -40,6 +40,10 @@ constexpr uint8_t WHOAMI = 0x75;
 
 bool satoh::Gyro::init() const noexcept
 {
+  auto write = [this](uint8_t reg, uint8_t d) {
+    uint8_t v[] = {reg, d};
+    return I2CDeviceBase::write(v, sizeof(v));
+  };
   if (!write(PWR_MGMT_1, 0x80)) // reset
   {
     return false;
@@ -58,21 +62,8 @@ bool satoh::Gyro::init() const noexcept
       ;
 }
 
-bool satoh::Gyro::write(uint8_t reg, uint8_t v) const noexcept
-{
-  uint8_t a[2] = {reg, v};
-  return I2C::OK == i2c_->write(slaveAddr_, a, sizeof(a));
-}
-bool satoh::Gyro::read(uint8_t reg, uint8_t *buffer, uint32_t size) const noexcept
-{
-  return I2C::OK == i2c_->write(slaveAddr_, &reg, sizeof(reg), false) && //
-         I2C::OK == i2c_->read(slaveAddr_, buffer, size)                 //
-      ;
-}
-
 satoh::Gyro::Gyro(I2C *i2c, uint8_t slaveAddr) noexcept //
-    : i2c_(i2c),                                        //
-      slaveAddr_(slaveAddr),                            //
+    : I2CDeviceBase(i2c, slaveAddr),                    //
       ok_(init())                                       //
 {
 }

@@ -8,11 +8,13 @@
 #include "device/gyro.h"
 #include "device/level_meter.h"
 #include "device/pca9635.h"
+#include "device/rotary_encoder.h"
 #include "device/ssd1306.h"
 #include "message/msglib.h"
-#include "sound_task.h"
 #include "stm32f7xx_ll_dma.h"
-#include "usb_task.h"
+#include "task/app_task.h"
+#include "task/sound_task.h"
+#include "task/usb_task.h"
 
 namespace
 {
@@ -28,7 +30,7 @@ void gyroGetProc(satoh::Gyro const &mpu6050, satoh::Gyro const &icm20602) noexce
     satoh::msg::ACC_GYRO ag{};
     if (mpu6050.getAccelGyro(ag.acc, ag.gyro))
     {
-      satoh::sendMsg(usbTxTaskHandle, satoh::msg::USB_TX_REQ, &ag, sizeof(ag));
+      satoh::sendMsg(appTaskHandle, satoh::msg::GYRO_NOTIFY, &ag, sizeof(ag));
     }
     return;
   }
@@ -37,7 +39,7 @@ void gyroGetProc(satoh::Gyro const &mpu6050, satoh::Gyro const &icm20602) noexce
     satoh::msg::ACC_GYRO ag{};
     if (icm20602.getAccelGyro(ag.acc, ag.gyro))
     {
-      satoh::sendMsg(usbTxTaskHandle, satoh::msg::USB_TX_REQ, &ag, sizeof(ag));
+      satoh::sendMsg(appTaskHandle, satoh::msg::GYRO_NOTIFY, &ag, sizeof(ag));
     }
     return;
   }
@@ -91,9 +93,22 @@ void keyUpdateProc()
   // TODO
 }
 /// @brief エンコーダ状態取得処理
-void encoderGetProc()
+void encoderGetProc(satoh::RotaryEncoder &encoder)
 {
-  // TODO
+  if (encoder.ok())
+  {
+    satoh::msg::ROTARY_ENCODER enc{};
+    satoh::msg::EFFECT_KEY key{};
+    int res = encoder.read(key.button, enc.angleDiff);
+    if (res & 1)
+    {
+      satoh::sendMsg(appTaskHandle, satoh::msg::ROTARY_ENCODER_NOTIFY, &enc, sizeof(enc));
+    }
+    if (res & 2)
+    {
+      satoh::sendMsg(appTaskHandle, satoh::msg::EFFECT_KEY_CHANGED_NOTIFY, &key, sizeof(key));
+    }
+  }
 }
 /// @brief OLED表示更新処理
 /// @param[in] oled OLED通信オブジェクト
@@ -115,6 +130,7 @@ void i2cTaskProc(void const *argument)
   satoh::SSD1306 oled(s_i2c);
   satoh::PCA9635 led(s_i2c);
   satoh::LevelMeter level(s_i2c);
+  satoh::RotaryEncoder encoder(s_i2c);
   satoh::Gyro mpu6050(s_i2c, satoh::MPU6050);
   satoh::Gyro icm20602(s_i2c, satoh::ICM20602);
   for (;;)
@@ -147,7 +163,7 @@ void i2cTaskProc(void const *argument)
       keyUpdateProc(/* key */);
       break;
     case satoh::msg::ENCODER_GET_REQ:
-      encoderGetProc(/* encoder */);
+      encoderGetProc(encoder);
       break;
     case satoh::msg::OLED_UPDATE_REQ:
       oledGetProc(oled, msg);

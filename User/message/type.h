@@ -36,8 +36,10 @@ constexpr uint8_t LED_SIMPLE_REQ = 2 | cat::LED;
 constexpr uint8_t LED_EFFECT_REQ = 3 | cat::LED;
 /// ENCODER - エンコーダ値取得依頼
 constexpr uint8_t ENCODER_GET_REQ = 1 | cat::ENCODER;
-/// ENCODER - エンコーダ値通知
-constexpr uint8_t ENCODER_NOTIFY = 2 | cat::ENCODER;
+/// ENCODER - ロータリーエンコーダ値通知
+constexpr uint8_t ROTARY_ENCODER_NOTIFY = 2 | cat::ENCODER;
+/// ENCODER - エフェクトキー変化通知
+constexpr uint8_t EFFECT_KEY_CHANGED_NOTIFY = 3 | cat::ENCODER;
 /// キー入力 - 取得依頼
 constexpr uint8_t KEY_GET_REQ = 1 | cat::KEY;
 /// キー入力 - キー取得値通知
@@ -53,6 +55,8 @@ struct ACC_GYRO;
 struct LED_LEVEL;
 struct LED_SIMPLE;
 struct LED_EFFECT;
+struct ROTARY_ENCODER;
+struct EFFECT_KEY;
 } // namespace msg
 } // namespace satoh
 
@@ -79,4 +83,21 @@ struct satoh::msg::LED_EFFECT
 {
   uint8_t led; ///< LED番号（0 - 3）
   RGB rgb;     ///< 色
+};
+/// @brief ロータリーエンコーダ値通知
+struct satoh::msg::ROTARY_ENCODER
+{
+  /// 回転量の変化
+  /// @arg -1 左方向回転
+  /// @arg 0 変化なし
+  /// @arg 1 右方向回転
+  int8_t angleDiff[4];
+};
+/// @brief エフェクトキー変化通知
+struct satoh::msg::EFFECT_KEY
+{
+  /// キー状態
+  /// @arg 0 BUTTON_UP
+  /// @arg 1 BUTTON_DOWN
+  uint8_t button[4];
 };

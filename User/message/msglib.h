@@ -48,7 +48,7 @@ struct satoh::Message
 {
   uint8_t type;       ///< メッセージ種別
   uint16_t size;      ///< データサイズ
-  uint8_t bytes[512]; ///< データ
+  uint8_t bytes[128]; ///< データ
 };
 
 /// @brief 受信結果型

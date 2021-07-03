@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "i2c.h"
+#include "i2c_device_base.hpp"
 
 namespace satoh
 {
@@ -14,14 +14,18 @@ class LevelMeter;
 }
 
 /// @brief レベルメーター制御クラス
-class satoh::LevelMeter
+class satoh::LevelMeter : public satoh::I2CDeviceBase
 {
-  I2C *const i2c_;  ///< I2C通信オブジェクト
-  bool ok_;         ///< デバイス状態
+  const bool ok_;   ///< デバイス状態
   uint8_t left_;    ///< レベルメーター（左）
   uint8_t right_;   ///< レベルメーター（右）
   bool power_;      ///< Power LED
   bool modulation_; ///< Modulation LED
+
+  /// @brief デバイス初期化
+  /// @retval true 通信成功
+  /// @retval false 通信失敗
+  bool init() const noexcept;
 
 public:
   /// @brief コンストラクタ
@@ -32,7 +36,7 @@ public:
   /// @brief デバイス状態取得
   /// @retval true 正常
   /// @retval false 異常
-  bool ok() const noexcept;
+  bool ok() const noexcept override;
   /// @brief レベルメーター（左）のレベルを設定する
   /// @note この関数を呼んだだけでは点灯状態は変化しない
   /// @param[in] level レベル（0 - 7）

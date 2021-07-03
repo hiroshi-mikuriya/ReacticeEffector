@@ -5,17 +5,16 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "common/rgb.h"
-#include "i2c.h"
+#include "i2c_device_base.hpp"
 
 namespace satoh
 {
 class PCA9635;
 }
 
-class satoh::PCA9635
+/// @brief PCA9635制御クラス（エフェクトLED）
+class satoh::PCA9635 : public satoh::I2CDeviceBase
 {
-  /// I2C通信オブジェクト
-  I2C *const i2c_;
   /// 通信可否
   bool ok_;
   /// @brief I2C書き込み
@@ -33,7 +32,7 @@ public:
   /// @brief 通信可否
   /// @retval true 可
   /// @retval false 不可（デバイス繋がっていない等）
-  bool ok() const noexcept;
+  bool ok() const noexcept override;
   /// @brief LEDの色値を設定
   /// @param[in] rgb 色値
   /// @param[in] n LED番号（0 - 3）

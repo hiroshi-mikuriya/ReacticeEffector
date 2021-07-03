@@ -10,7 +10,7 @@
 #include "stm32f7xx.h"
 
 #ifdef __cplusplus
-#include "device/i2c.h"
+#include "peripheral/i2c.h"
 /// @brief PCM3060初期化
 /// @param[in] i2c I2C通信クラス
 /// @note I2Cタスクから呼ぶこと

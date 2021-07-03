@@ -12,8 +12,8 @@ namespace satoh
 {
 namespace pca9555
 {
-constexpr uint8_t LEVEL_METER = 0x20 << 1;     ///< レベルメータースレーブアドレス
-constexpr uint8_t ROTARY_ENCODER = 0x21 << 1;  ///< ロータリーエンコーダスレーブアドレス
+constexpr uint8_t LEVEL_METER = 0x20;          ///< レベルメータースレーブアドレス
+constexpr uint8_t ROTARY_ENCODER = 0x21;       ///< ロータリーエンコーダスレーブアドレス
 constexpr uint8_t INPUT_0 = 0x00;              ///<
 constexpr uint8_t INPUT_1 = 0x01;              ///<
 constexpr uint8_t OUTPUT_0 = 0x02;             ///<

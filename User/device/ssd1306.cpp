@@ -9,7 +9,7 @@
 
 namespace
 {
-constexpr uint8_t SLAVE_ADDR = 0x3C << 1;
+constexpr uint8_t SLAVE_ADDR = 0x3C;
 constexpr uint8_t CTRL_00 = 0b00000000; // control byte, Co bit = 0, D/C# = 0 (command)
 constexpr uint8_t CTRL_01 = 0b01000000; //control byte, Co bit = 0 (continue), D/C# = 1 (data)
 constexpr uint8_t CTRL_10 = 0b10000000; // control byte, Co bit = 1, D/C# = 0 (command)
@@ -66,7 +66,7 @@ bool satoh::SSD1306::init() const noexcept
       CTRL_10,    // control byte, Co bit = 1, D/C# = 0 (command)
       0xAF,       // Display On 0xAF
   };
-  return I2C::OK == i2c_->write(SLAVE_ADDR, v, sizeof(v));
+  return write(v, sizeof(v));
 }
 
 namespace
@@ -87,14 +87,14 @@ void satoh::SSD1306::updateScreen()
         0,         // Column Start Address(0-127)
         WIDTH - 1, // Column Stop Address(0-127)
     };
-    i2c_->write(SLAVE_ADDR, v0, sizeof(v0));
+    write(v0, sizeof(v0));
     // column = 8byte x 16
     for (int col = 0; col < 16; ++col)
     {
       uint8_t v1[9] = {
           CTRL_01, //control byte, Co bit = 0 (continue), D/C# = 1 (data)
       };
-      i2c_->write(SLAVE_ADDR, v1, sizeof(v1));
+      write(v1, sizeof(v1));
     }
   }
   // とりあえず図形を表示
@@ -107,7 +107,7 @@ void satoh::SSD1306::updateScreen()
         0,         // Column Start Address←水平開始位置はここで決める(0～127)
         WIDTH - 1, // Column Stop Address　画面をフルに使う
     };
-    i2c_->write(SLAVE_ADDR, v, sizeof(v));
+    write(v, sizeof(v));
   }
   {
     uint8_t v[] = {
@@ -121,12 +121,12 @@ void satoh::SSD1306::updateScreen()
         DotB1[6], //
         DotB1[7], //
     };
-    i2c_->write(SLAVE_ADDR, v, sizeof(v));
+    write(v, sizeof(v));
   }
 }
 
 satoh::SSD1306::SSD1306(I2C *i2c) noexcept //
-    : i2c_(i2c),                           //
+    : I2CDeviceBase(i2c, SLAVE_ADDR),      //
       buf_(new uint8_t[BUF_SIZE]),         //
       ok_(init())                          //
 {

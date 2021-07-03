@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "i2c.h"
+#include "i2c_device_base.hpp"
 #include <memory>
 
 namespace satoh
@@ -14,10 +14,9 @@ namespace satoh
 class SSD1306;
 }
 
-class satoh::SSD1306
+/// @brief SSD1306制御クラス（OLED）
+class satoh::SSD1306 : public satoh::I2CDeviceBase
 {
-  /// I2C通信オブジェクト
-  I2C *const i2c_;
   /// バッファ
   std::unique_ptr<uint8_t> buf_;
   /// 通信可否
@@ -38,5 +37,5 @@ public:
   /// @brief 通信可否
   /// @retval true 可
   /// @retval false 不可（デバイス繋がっていない等）
-  bool ok() const noexcept;
+  bool ok() const noexcept override;
 };
