@@ -62,6 +62,7 @@ $ st-flash --format ihex write build/ReacticeEffector.hex
 
 （ファイル）
 ├── README.md（このファイル）
+├── Doxyfile（doxygen設定）
 ├── ReacticeEffector.ioc（CubeMXファイル）
 ├── STM32F745VGTX_FLASH.ld（自動生成・FLASH設定）
 ├── build.sh（CMakeビルド実行スクリプト）
