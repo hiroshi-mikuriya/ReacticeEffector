@@ -5,8 +5,6 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "neo_pixel.h"
-#include "stm32f7xx_ll_dma.h"
-#include "stm32f7xx_ll_spi.h"
 #include <string.h> // memset
 
 namespace
@@ -36,36 +34,15 @@ inline uint32_t getBufferIndex(uint32_t ledNum) noexcept
 }
 } // namespace
 
-satoh::NeoPixel::NeoPixel(SPI_TypeDef *spi, //
-                          DMA_TypeDef *dma, //
-                          uint32_t stream,
-                          uint32_t ledCount) noexcept //
-    : spi_(spi),                                      //
-      dma_(dma),                                      //
-      stream_(stream),                                //
-      ledCount_(ledCount),                            //
-      buf_(new uint8_t[getBufferIndex(ledCount_)])    //
+satoh::NeoPixel::NeoPixel(SpiMaster *spi, uint32_t ledCount) noexcept //
+    : spi_(spi),                                                      //
+      ledCount_(ledCount),                                            //
+      buf_(new uint8_t[getBufferIndex(ledCount_)])                    //
 {
   clear();
-  LL_SPI_Enable(spi_);
-  LL_DMA_ConfigAddresses(dma_, stream_,                          //
-                         reinterpret_cast<uint32_t>(buf_.get()), //
-                         LL_SPI_DMA_GetRegAddr(spi_),            //
-                         LL_DMA_DIRECTION_MEMORY_TO_PERIPH       //
-  );
-  LL_DMA_EnableIT_TC(dma_, stream_);
-  LL_DMA_EnableIT_TE(dma_, stream_);
-  LL_DMA_SetDataLength(dma_, stream_, getBufferIndex(ledCount_) / 2);
-  LL_SPI_EnableDMAReq_TX(spi_);
 }
 
-satoh::NeoPixel::~NeoPixel()
-{
-  LL_SPI_DisableDMAReq_TX(spi_);
-  LL_DMA_DisableIT_TC(dma_, stream_);
-  LL_DMA_DisableIT_TE(dma_, stream_);
-  LL_SPI_Disable(spi_);
-}
+satoh::NeoPixel::~NeoPixel() {}
 
 void satoh::NeoPixel::set(RGB const &rgb, uint32_t n) noexcept
 {
@@ -83,10 +60,5 @@ void satoh::NeoPixel::clear() noexcept
 }
 bool satoh::NeoPixel::show() const noexcept
 {
-  if (LL_DMA_IsEnabledStream(dma_, stream_))
-  {
-    return false;
-  }
-  LL_DMA_EnableStream(dma_, stream_);
-  return true;
+  return SpiMaster::OK == spi_->send(buf_.get(), getBufferIndex(ledCount_));
 }

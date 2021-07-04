@@ -10,63 +10,50 @@
 #include "message/msglib.h"
 #include "stm32f7xx_ll_dma.h"
 
-/// 送信完了通知
-constexpr int32_t NEO_PIXEL_TX_END = 1 << 0;
-/// 送信エラー通知
-constexpr int32_t NEO_PIXEL_TX_ERROR = 1 << 1;
+namespace
+{
+satoh::SpiMaster *s_spi = 0;
+} // namespace
 
 void neoPixelTaskProc(void const *argument)
 {
-  satoh::addMsgTarget(1);
+  satoh::addMsgTarget(2);
   constexpr uint32_t LED_COUNT = 100;
-  constexpr uint8_t V = 0x20;
-  satoh::NeoPixel np(SPI3, DMA1, LL_DMA_STREAM_5, LED_COUNT);
-  for (;;)
+  s_spi = new satoh::SpiMaster(neoPixelTaskHandle, SPI3, DMA1, LL_DMA_STREAM_5, LED_COUNT * 3 * 8);
+  satoh::NeoPixel np(s_spi, LED_COUNT);
+  satoh::msg::NEO_PIXEL_PATTERN ptn{};
+  satoh::msg::NEO_PIXEL_SPEED speed = {100};
+  for (int i = 0; i < 6; i = (i + 1) % 6)
   {
-    for (int i = 0; i < 6; ++i)
+    auto res = satoh::recvMsg(speed.interval);
+    if (res.status() == osOK && res.msg())
     {
-      np.clear();
-      for (uint32_t n = 0; n < LED_COUNT; ++n)
+      auto msg = res.msg();
+      if (msg->type == satoh::msg::NEO_PIXEL_SET_SPEED)
       {
-        switch ((n + i) % 6)
-        {
-        case 0:
-          np.set({V, 0, 0}, n);
-          break;
-        case 1:
-          np.set({V, V, 0}, n);
-          break;
-        case 2:
-          np.set({0, V, 0}, n);
-          break;
-        case 3:
-          np.set({0, V, V}, n);
-          break;
-        case 4:
-          np.set({0, 0, V}, n);
-          break;
-        case 5:
-          np.set({V, 0, V}, n);
-          break;
-        }
+        speed = *reinterpret_cast<satoh::msg::NEO_PIXEL_SPEED const *>(msg->bytes);
       }
-      np.show();
-      osEvent ev = osSignalWait(NEO_PIXEL_TX_END | NEO_PIXEL_TX_ERROR, osWaitForever);
-      if (ev.value.signals & NEO_PIXEL_TX_ERROR)
+      if (msg->type == satoh::msg::NEO_PIXEL_SET_PATTERN)
       {
-        return;
+        ptn = *reinterpret_cast<satoh::msg::NEO_PIXEL_PATTERN const *>(msg->bytes);
       }
-      osDelay(100);
+      continue;
     }
+    np.clear();
+    for (uint32_t n = 0; n < LED_COUNT; ++n)
+    {
+      np.set(ptn.rgb[(n + i) % 6], n);
+    }
+    np.show();
   }
 }
 
 void neoPixelTxEndIRQ(void)
 {
-  osSignalSet(neoPixelTaskHandle, NEO_PIXEL_TX_END);
+  s_spi->notifyTxEndIRQ();
 }
 
 void neoPixelTxErrorIRQ(void)
 {
-  osSignalSet(neoPixelTaskHandle, NEO_PIXEL_TX_ERROR);
+  s_spi->notifyTxErrorIRQ();
 }

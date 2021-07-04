@@ -24,7 +24,7 @@ class satoh::RotaryEncoder : public satoh::I2CDeviceBase
   /// @brief デバイス初期化
   /// @retval true 通信成功
   /// @retval false 通信失敗
-  bool init() const noexcept;
+  bool init() noexcept;
 
 public:
   /// @brief コンストラクタ

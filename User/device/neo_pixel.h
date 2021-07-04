@@ -7,8 +7,7 @@
 #pragma once
 
 #include "common/rgb.h"
-#include "stm32f7xx.h"
-#include <memory>
+#include "peripheral/spi_master.h"
 
 namespace satoh
 {
@@ -18,19 +17,14 @@ class NeoPixel;
 /// @brief Neo Pixel 制御クラス
 class satoh::NeoPixel
 {
-  SPI_TypeDef *const spi_;       ///< SPIペリフェラル
-  DMA_TypeDef *const dma_;       ///< 送信DMA
-  const uint32_t stream_;        ///< 送信DMAストリーム
+  SpiMaster *spi_;               ///< SPI通信クラス
   const uint32_t ledCount_;      ///< LED数
-  std::unique_ptr<uint8_t> buf_; ///< DMA送信バッファ
-
+  std::unique_ptr<uint8_t> buf_; ///< 送信バッファ
 public:
   /// @brief コンストラクタ
-  /// @param[in] spi SPIペリフェラル
-  /// @param[in] dma 送信DMA
-  /// @param[in] stream 送信DMAストリーム
+  /// @param[in] spi SPI通信クラス
   /// @param[in] ledCount LED数
-  NeoPixel(SPI_TypeDef *spi, DMA_TypeDef *dma, uint32_t stream, uint32_t ledCount) noexcept;
+  NeoPixel(SpiMaster *spi, uint32_t ledCount) noexcept;
   /// @brief デストラクタ
   virtual ~NeoPixel();
   /// @brief 色値を設定する（この関数を呼んだだけでは光らない）

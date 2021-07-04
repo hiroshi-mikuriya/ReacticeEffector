@@ -8,18 +8,15 @@
 #include "pca9555.h"
 #include <cstring> // memset
 
-bool satoh::RotaryEncoder::init() const noexcept
+bool satoh::RotaryEncoder::init() noexcept
 {
-  // 初期値をデフォルトから変化させる必要はないが、通信可否確認のため一応行う
-  uint8_t v[] = {pca9555::CONFIGURATION_0, 0xFF, 0xFF};
-  return write(v, sizeof(v));
+  return I2CDeviceBase::read(pca9555::INPUT_0, cache_, sizeof(cache_));
 }
 
 satoh::RotaryEncoder::RotaryEncoder(I2C *i2c) noexcept //
     : I2CDeviceBase(i2c, pca9555::ROTARY_ENCODER),     //
       ok_(init())                                      //
 {
-  memset(cache_, 0xFF, sizeof(cache_));
 }
 
 satoh::RotaryEncoder::~RotaryEncoder() {}
@@ -31,9 +28,8 @@ bool satoh::RotaryEncoder::ok() const noexcept
 
 int satoh::RotaryEncoder::read(uint8_t (&button)[4], int8_t (&angleDiff)[4]) noexcept
 {
-  uint8_t reg = pca9555::INPUT_0;
   uint8_t buf[2] = {0};
-  if (!I2CDeviceBase::read(reg, buf, sizeof(buf)))
+  if (!I2CDeviceBase::read(pca9555::INPUT_0, buf, sizeof(buf)))
   {
     return -1;
   }

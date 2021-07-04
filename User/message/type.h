@@ -16,12 +16,14 @@ namespace msg
 /// @brief メッセージカテゴリ定義
 namespace cat
 {
-constexpr uint8_t GYRO = 1 << 4;
-constexpr uint8_t LED = 2 << 4;
-constexpr uint8_t ENCODER = 3 << 4;
-constexpr uint8_t KEY = 4 << 4;
-constexpr uint8_t OLED = 5 << 4;
-constexpr uint8_t USB = 6 << 4;
+constexpr uint8_t SHIFT = 4;
+constexpr uint8_t GYRO = 1 << SHIFT;
+constexpr uint8_t LED = 2 << SHIFT;
+constexpr uint8_t ENCODER = 3 << SHIFT;
+constexpr uint8_t KEY = 4 << SHIFT;
+constexpr uint8_t OLED = 5 << SHIFT;
+constexpr uint8_t USB = 6 << SHIFT;
+constexpr uint8_t NEOPIXEL = 7 << SHIFT;
 } // namespace cat
 
 /// ジャイロ - 取得依頼
@@ -41,15 +43,19 @@ constexpr uint8_t ROTARY_ENCODER_NOTIFY = 2 | cat::ENCODER;
 /// ENCODER - エフェクトキー変化通知
 constexpr uint8_t EFFECT_KEY_CHANGED_NOTIFY = 3 | cat::ENCODER;
 /// キー入力 - 取得依頼
-constexpr uint8_t KEY_GET_REQ = 1 | cat::KEY;
+constexpr uint8_t MODE_KEY_GET_REQ = 1 | cat::KEY;
 /// キー入力 - キー取得値通知
-constexpr uint8_t KEY_NOTIFY = 2 | cat::KEY;
+constexpr uint8_t MODE_KEY_NOTIFY = 2 | cat::KEY;
 /// OLED - 画面更新依頼
 constexpr uint8_t OLED_UPDATE_REQ = 1 | cat::OLED;
 /// USB - 送信依頼
 constexpr uint8_t USB_TX_REQ = 1 | cat::USB;
 /// USB - 受信通知
 constexpr uint8_t USB_RX_NOTIFY = 2 | cat::USB;
+/// NeoPixel - 点灯パターン指定
+constexpr uint8_t NEO_PIXEL_SET_PATTERN = 1 | cat::NEOPIXEL;
+/// NeoPixel - 点灯スピード指定
+constexpr uint8_t NEO_PIXEL_SET_SPEED = 2 | cat::NEOPIXEL;
 
 struct ACC_GYRO;
 struct LED_LEVEL;
@@ -57,6 +63,9 @@ struct LED_SIMPLE;
 struct LED_EFFECT;
 struct ROTARY_ENCODER;
 struct EFFECT_KEY;
+struct MODE_KEY;
+struct NEO_PIXEL_PATTERN;
+struct NEO_PIXEL_SPEED;
 } // namespace msg
 } // namespace satoh
 
@@ -100,4 +109,44 @@ struct satoh::msg::EFFECT_KEY
   /// @arg 0 BUTTON_UP
   /// @arg 1 BUTTON_DOWN
   uint8_t button[4];
+};
+/// @brief モードキー変化通知
+struct satoh::msg::MODE_KEY
+{
+  /// TAPキー状態
+  /// @arg 0 BUTTON_UP
+  /// @arg 1 BUTTON_DOWN
+  uint8_t tap;
+  /// UPキー状態
+  /// @arg 0 BUTTON_UP
+  /// @arg 1 BUTTON_DOWN
+  uint8_t up;
+  /// DOWNキー状態
+  /// @arg 0 BUTTON_UP
+  /// @arg 1 BUTTON_DOWN
+  uint8_t down;
+  /// OKキー状態
+  /// @arg 0 BUTTON_UP
+  /// @arg 1 BUTTON_DOWN
+  uint8_t ok;
+  /// リターンキー状態
+  /// @arg 0 BUTTON_UP
+  /// @arg 1 BUTTON_DOWN
+  uint8_t rtn;
+  /// RE1キー状態
+  /// @arg 0 BUTTON_UP
+  /// @arg 1 BUTTON_DOWN
+  uint8_t re1;
+};
+/// NeoPixel - 点灯パターン指定型
+struct satoh::msg::NEO_PIXEL_PATTERN
+{
+  /// 点灯パターン
+  RGB rgb[6];
+};
+/// NeoPixel - 点灯スピード指定型
+struct satoh::msg::NEO_PIXEL_SPEED
+{
+  /// インターバル（ミリ秒）
+  uint32_t interval;
 };

@@ -159,7 +159,7 @@ void i2cTaskProc(void const *argument)
     case satoh::msg::GYRO_GET_REQ:
       gyroGetProc(mpu6050, icm20602);
       break;
-    case satoh::msg::KEY_GET_REQ:
+    case satoh::msg::MODE_KEY_GET_REQ:
       keyUpdateProc(/* key */);
       break;
     case satoh::msg::ENCODER_GET_REQ:
@@ -209,7 +209,7 @@ void extiSwIRQ(void)
 
 void extiSw2IRQ(void)
 {
-  satoh::sendMsg(i2cTaskHandle, satoh::msg::KEY_GET_REQ);
+  satoh::sendMsg(i2cTaskHandle, satoh::msg::MODE_KEY_GET_REQ);
 }
 
 void extiMpuIRQ(void)
