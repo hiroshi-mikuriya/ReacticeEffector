@@ -1,4 +1,4 @@
-/// @file      task/adc_tasl.cpp
+/// @file      task/adc_task.cpp
 /// @author    SATOH GADGET
 /// @copyright Copyright© 2021 SATOH GADGET
 ///
@@ -7,12 +7,15 @@
 #include "task/adc_task.h"
 #include "message/msglib.h"
 #include "stm32f7xx_ll_adc.h"
+#include "stm32f7xx_ll_dma.h"
 #include "task/i2c_task.h"
 #include <algorithm>
 
 namespace
 {
-constexpr int32_t SIG_ADC = 1 << 0;
+constexpr int32_t SIG_DMAEND = 1 << 0;
+constexpr int32_t SIG_DMAERR = 1 << 1;
+constexpr int32_t SIG_TIMER = 1 << 2;
 
 /// @brief 幅測定クラス
 class RangeMeter
@@ -40,41 +43,70 @@ public:
   /// @return 幅
   uint16_t getRange() const noexcept { return max_ - min_; }
 };
+/// @brief サンプリング結果からレベル値を計算する通知
+void notifySamplingEnd(void const *arg)
+{
+  osSignalSet(adcTaskHandle, SIG_TIMER);
+}
 } // namespace
 
 void adcTaskProc(void const *argument)
 {
-  LL_ADC_EnableIT_EOCS(ADC1);
-  LL_ADC_Enable(ADC1);
-  LL_ADC_REG_StartConversionSWStart(ADC1);
+  ADC_TypeDef *const adc = ADC1;
+  DMA_TypeDef *const dma = DMA2;
+  const uint32_t stream = LL_DMA_STREAM_4;
+  uint16_t buf[2] = {};
+  LL_DMA_DisableStream(dma, stream);
+  LL_DMA_ConfigAddresses(dma, stream,                                             //
+                         LL_ADC_DMA_GetRegAddr(adc, LL_ADC_DMA_REG_REGULAR_DATA), //
+                         reinterpret_cast<uint32_t>(buf),                         //
+                         LL_DMA_DIRECTION_PERIPH_TO_MEMORY                        //
+  );
+  LL_DMA_SetDataLength(dma, stream, sizeof(buf) / 2);
+  LL_DMA_EnableIT_TC(dma, stream);
+  LL_DMA_EnableIT_TE(dma, stream);
+  LL_DMA_EnableStream(dma, stream);
+  LL_ADC_Enable(adc);
+  LL_ADC_REG_StartConversionSWStart(adc);
   constexpr uint32_t FREQ = 50;
   constexpr uint32_t INTERVAL = 1000 / FREQ;
-  uint32_t lastTxTick = HAL_GetTick();
-  RangeMeter meter;
+  osTimerDef(timer, notifySamplingEnd);
+  osTimerId tid = osTimerCreate(osTimer(timer), osTimerPeriodic, 0);
+  osTimerStart(tid, INTERVAL);
+  RangeMeter left, right;
   for (;;)
   {
-    osSignalWait(SIG_ADC, osWaitForever);
-    uint16_t v = LL_ADC_REG_ReadConversionData12(ADC1);
-    meter.update(v);
-    uint32_t now = HAL_GetTick();
-    if (INTERVAL <= now - lastTxTick)
+    osEvent ev = osSignalWait(SIG_DMAEND | SIG_DMAERR | SIG_TIMER, osWaitForever);
+    if (ev.value.signals & SIG_DMAEND)
     {
-      uint16_t power = meter.getRange();
-      meter.reset();
-      lastTxTick = now;
+      left.update(buf[0]);
+      right.update(buf[1]);
+    }
+    else if (ev.value.signals & SIG_TIMER)
+    {
+      uint16_t leftVol = left.getRange();
+      uint16_t rightVol = right.getRange();
+      left.reset();
+      right.reset();
       satoh::msg::LED_LEVEL level{};
-      level.left = static_cast<uint8_t>(std::min(power / 60, 7));
-      level.right = static_cast<uint8_t>(std::min(power / 60, 7));
+      constexpr int DIV = 100;
+      level.left = static_cast<uint8_t>(std::min(leftVol / DIV, 7));
+      level.right = static_cast<uint8_t>(std::min(rightVol / DIV, 7));
       satoh::sendMsg(i2cTaskHandle, satoh::msg::LED_LEVEL_UPDATE_REQ, &level, sizeof(level));
+    }
+    else if (ev.value.signals & SIG_DMAERR)
+    {
+      continue;
     }
   }
 }
 
-void adc1IRQ(void)
+void adc1CpltIRQ(void)
 {
-  if (LL_ADC_IsActiveFlag_EOCS(ADC1))
-  {
-    LL_ADC_ClearFlag_EOCS(ADC1);
-    osSignalSet(adcTaskHandle, SIG_ADC);
-  }
+  osSignalSet(adcTaskHandle, SIG_DMAEND);
+}
+
+void adc1ErrorIRQ(void)
+{
+  osSignalSet(adcTaskHandle, SIG_DMAERR);
 }

@@ -164,8 +164,8 @@ void HAL_SAI_MspInit(SAI_HandleTypeDef* hsai)
 
     /* Peripheral DMA init*/
 
-    hdma_sai1_b.Instance = DMA2_Stream4;
-    hdma_sai1_b.Init.Channel = DMA_CHANNEL_1;
+    hdma_sai1_b.Instance = DMA2_Stream5;
+    hdma_sai1_b.Init.Channel = DMA_CHANNEL_0;
     hdma_sai1_b.Init.Direction = DMA_MEMORY_TO_PERIPH;
     hdma_sai1_b.Init.PeriphInc = DMA_PINC_DISABLE;
     hdma_sai1_b.Init.MemInc = DMA_MINC_ENABLE;

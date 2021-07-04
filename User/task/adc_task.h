@@ -1,4 +1,4 @@
-/// @file      task/adc_tasl.h
+/// @file      task/adc_task.h
 /// @author    SATOH GADGET
 /// @copyright Copyright© 2021 SATOH GADGET
 ///
@@ -20,8 +20,11 @@ extern "C"
   /// @param[in] argument タスク引数
   void adcTaskProc(void const *argument);
 
-  /// @brief ADC割り込み
-  void adc1IRQ(void);
+  /// @brief ADC変換完了DMA割り込み
+  void adc1CpltIRQ(void);
+
+  /// @brief ADC変換エラーDMA割り込み
+  void adc1ErrorIRQ(void);
 
 #ifdef __cplusplus
 }

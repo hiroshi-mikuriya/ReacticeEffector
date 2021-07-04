@@ -275,20 +275,6 @@ void DMA1_Stream6_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles ADC1, ADC2 and ADC3 global interrupts.
-  */
-void ADC_IRQHandler(void)
-{
-  /* USER CODE BEGIN ADC_IRQn 0 */
-  adc1IRQ();
-  /* USER CODE END ADC_IRQn 0 */
-
-  /* USER CODE BEGIN ADC_IRQn 1 */
-
-  /* USER CODE END ADC_IRQn 1 */
-}
-
-/**
   * @brief This function handles EXTI line[9:5] interrupts.
   */
 void EXTI9_5_IRQHandler(void)
@@ -496,11 +482,19 @@ void DMA2_Stream3_IRQHandler(void)
 void DMA2_Stream4_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2_Stream4_IRQn 0 */
-
+  if (LL_DMA_IsActiveFlag_TC4(DMA2))
+  {
+    LL_DMA_ClearFlag_TC4(DMA2);
+    adc1CpltIRQ();
+  }
   /* USER CODE END DMA2_Stream4_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_sai1_b);
-  /* USER CODE BEGIN DMA2_Stream4_IRQn 1 */
 
+  /* USER CODE BEGIN DMA2_Stream4_IRQn 1 */
+  if (LL_DMA_IsActiveFlag_TE4(DMA2))
+  {
+    LL_DMA_ClearFlag_TE4(DMA2);
+    adc1ErrorIRQ();
+  }
   /* USER CODE END DMA2_Stream4_IRQn 1 */
 }
 
@@ -516,6 +510,20 @@ void OTG_FS_IRQHandler(void)
   /* USER CODE BEGIN OTG_FS_IRQn 1 */
 
   /* USER CODE END OTG_FS_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA2 stream5 global interrupt.
+  */
+void DMA2_Stream5_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Stream5_IRQn 0 */
+
+  /* USER CODE END DMA2_Stream5_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_sai1_b);
+  /* USER CODE BEGIN DMA2_Stream5_IRQn 1 */
+
+  /* USER CODE END DMA2_Stream5_IRQn 1 */
 }
 
 /**
