@@ -48,7 +48,6 @@ extern "C"
   /// @param[in] hsai SAI
   void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai)
   {
-    LL_GPIO_TogglePin(TP13_GPIO_Port, TP13_Pin);
     uint32_t s = sizeof(rxbuf) / 2;
     memcpy(txbuf, rxbuf, s);
     // TODO
@@ -57,7 +56,6 @@ extern "C"
   /// @param[in] hsai SAI
   void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai)
   {
-    LL_GPIO_TogglePin(TP14_GPIO_Port, TP14_Pin);
     uint32_t s = sizeof(rxbuf) / 2;
     memcpy(txbuf + BLOCK_SIZE * 2, rxbuf + BLOCK_SIZE * 2, s);
     // TODO

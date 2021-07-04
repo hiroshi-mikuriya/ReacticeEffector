@@ -53,6 +53,7 @@ osThreadId i2cTaskHandle;
 osThreadId neoPixelTaskHandle;
 osThreadId appTaskHandle;
 osThreadId soundTaskHandle;
+osThreadId adcTaskHandle;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -74,6 +75,7 @@ extern void i2cTaskProc(void const * argument);
 extern void neoPixelTaskProc(void const * argument);
 extern void appTaskProc(void const * argument);
 extern void soundTaskProc(void const * argument);
+extern void adcTaskProc(void const * argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -167,6 +169,10 @@ int main(void)
   /* definition and creation of soundTask */
   osThreadDef(soundTask, soundTaskProc, osPriorityRealtime, 0, 128);
   soundTaskHandle = osThreadCreate(osThread(soundTask), NULL);
+
+  /* definition and creation of adcTask */
+  osThreadDef(adcTask, adcTaskProc, osPriorityIdle, 0, 128);
+  adcTaskHandle = osThreadCreate(osThread(adcTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -284,6 +290,10 @@ static void MX_ADC1_Init(void)
   GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
   LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /* ADC1 interrupt Init */
+  NVIC_SetPriority(ADC_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),5, 0));
+  NVIC_EnableIRQ(ADC_IRQn);
+
   /* USER CODE BEGIN ADC1_Init 1 */
 
   /* USER CODE END ADC1_Init 1 */
@@ -291,22 +301,26 @@ static void MX_ADC1_Init(void)
   */
   ADC_InitStruct.Resolution = LL_ADC_RESOLUTION_12B;
   ADC_InitStruct.DataAlignment = LL_ADC_DATA_ALIGN_RIGHT;
-  ADC_InitStruct.SequencersScanMode = LL_ADC_SEQ_SCAN_DISABLE;
+  ADC_InitStruct.SequencersScanMode = LL_ADC_SEQ_SCAN_ENABLE;
   LL_ADC_Init(ADC1, &ADC_InitStruct);
   ADC_REG_InitStruct.TriggerSource = LL_ADC_REG_TRIG_SOFTWARE;
-  ADC_REG_InitStruct.SequencerLength = LL_ADC_REG_SEQ_SCAN_DISABLE;
+  ADC_REG_InitStruct.SequencerLength = LL_ADC_REG_SEQ_SCAN_ENABLE_2RANKS;
   ADC_REG_InitStruct.SequencerDiscont = LL_ADC_REG_SEQ_DISCONT_DISABLE;
-  ADC_REG_InitStruct.ContinuousMode = LL_ADC_REG_CONV_SINGLE;
+  ADC_REG_InitStruct.ContinuousMode = LL_ADC_REG_CONV_CONTINUOUS;
   ADC_REG_InitStruct.DMATransfer = LL_ADC_REG_DMA_TRANSFER_NONE;
   LL_ADC_REG_Init(ADC1, &ADC_REG_InitStruct);
-  LL_ADC_REG_SetFlagEndOfConversion(ADC1, LL_ADC_REG_FLAG_EOC_UNITARY_CONV);
-  ADC_CommonInitStruct.CommonClock = LL_ADC_CLOCK_SYNC_PCLK_DIV4;
+  LL_ADC_REG_SetFlagEndOfConversion(ADC1, LL_ADC_REG_FLAG_EOC_SEQUENCE_CONV);
+  ADC_CommonInitStruct.CommonClock = LL_ADC_CLOCK_SYNC_PCLK_DIV8;
   ADC_CommonInitStruct.Multimode = LL_ADC_MULTI_INDEPENDENT;
   LL_ADC_CommonInit(__LL_ADC_COMMON_INSTANCE(ADC1), &ADC_CommonInitStruct);
   /** Configure Regular Channel
   */
   LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_1, LL_ADC_CHANNEL_1);
-  LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_1, LL_ADC_SAMPLINGTIME_3CYCLES);
+  LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_1, LL_ADC_SAMPLINGTIME_480CYCLES);
+  /** Configure Regular Channel
+  */
+  LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_2, LL_ADC_CHANNEL_2);
+  LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_2, LL_ADC_SAMPLINGTIME_480CYCLES);
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */

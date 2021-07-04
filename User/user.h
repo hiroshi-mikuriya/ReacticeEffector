@@ -6,8 +6,11 @@
 
 #pragma once
 
+#include "task/adc_task.h"
+#include "task/app_task.h"
 #include "task/i2c_task.h"
 #include "task/neo_pixel_task.h"
+#include "task/sound_task.h"
 #include "task/usb_task.h"
 
 #ifdef __cplusplus

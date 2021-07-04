@@ -53,8 +53,6 @@ constexpr satoh::msg::NEO_PIXEL_PATTERN PATTERNS[] = {RAINBOW, RED, GREEN, BLUE}
 void appTaskProc(void const *argument)
 {
   satoh::addMsgTarget(4);
-  constexpr int MAX_LEVEL = 8;
-  satoh::msg::LED_LEVEL level{};
   satoh::msg::NEO_PIXEL_SPEED speed = {100};
   for (;;)
   {
@@ -107,10 +105,6 @@ void appTaskProc(void const *argument)
     case satoh::msg::ROTARY_ENCODER_NOTIFY:
     {
       auto *param = reinterpret_cast<satoh::msg::ROTARY_ENCODER const *>(msg->bytes);
-      // レベルメーター
-      level.left = (level.left + MAX_LEVEL + param->angleDiff[2]) % MAX_LEVEL;
-      level.right = (level.right + MAX_LEVEL + param->angleDiff[3]) % MAX_LEVEL;
-      satoh::sendMsg(i2cTaskHandle, satoh::msg::LED_LEVEL_UPDATE_REQ, &level, sizeof(level));
       // POWER LED, MODULATION LED
       for (uint8_t i = 0; i < 2; ++i)
       {
