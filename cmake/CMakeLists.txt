@@ -34,10 +34,16 @@ execute_process(COMMAND which arm-none-eabi-size    OUTPUT_STRIP_TRAILING_WHITES
 ##########
 # compiler options
 ##########
-set(CMAKE_C_FLAGS "-mcpu=${CPU} -std=gnu11 -Os -ffunction-sections -fdata-sections -Wall -fstack-usage ${FPU} ${FLOAT_ABI} -mthumb")
-set(CMAKE_CXX_FLAGS "-mcpu=${CPU} -std=gnu++14 -Os -ffunction-sections -fdata-sections -fno-exceptions -fno-rtti -fno-use-cxa-atexit -Wall -fstack-usage ${FPU} ${FLOAT_ABI} -mthumb")
+add_compile_options(-O3)
+add_compile_options(-Wall)
+add_compile_options(-ffunction-sections)
+add_compile_options(-fdata-sections)
+add_compile_options(-fstack-usage)
+
+set(CMAKE_C_FLAGS "-mcpu=${CPU} -std=gnu11 ${FPU} ${FLOAT_ABI} -mthumb")
+set(CMAKE_CXX_FLAGS "-mcpu=${CPU} -std=gnu++14 -fno-exceptions -fno-rtti -fno-use-cxa-atexit ${FPU} ${FLOAT_ABI} -mthumb")
 set(CMAKE_AS_FLAGS "-mcpu=${CPU} -x assembler-with-cpp ${FPU} ${FLOAT_ABI} -mthumb")
-set(CMAKE_EXE_LINKER_FLAGS "-mcpu=${CPU} -T${CMAKE_CURRENT_SOURCE_DIR}/${LDSCRIPT} -Wl,-Map=${MAP_FILE} -Wl,--gc-sections -static ${FPU} ${FLOAT_ABI} -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group")
+set(CMAKE_EXE_LINKER_FLAGS "-mcpu=${CPU} -T${CMAKE_CURRENT_SOURCE_DIR}/${LDSCRIPT} --specs=nosys.specs -Wl,-Map=${MAP_FILE} -Wl,--gc-sections -static --specs=nano.specs ${FPU} ${FLOAT_ABI} -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group")
 
 enable_language(ASM)
 
