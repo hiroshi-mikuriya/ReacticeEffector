@@ -23,7 +23,7 @@ void neoPixelTaskProc(void const *argument)
   satoh::NeoPixel np(s_spi, LED_COUNT);
   satoh::msg::NEO_PIXEL_PATTERN ptn{};
   satoh::msg::NEO_PIXEL_SPEED speed = {100};
-  for (int i = 0; i < 6; i = (i + 1) % 6)
+  for (int i = 0;; i = (i + 1) % 6)
   {
     auto res = satoh::recvMsg(speed.interval);
     if (res.status() == osOK && res.msg())

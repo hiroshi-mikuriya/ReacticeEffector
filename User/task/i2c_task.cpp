@@ -5,6 +5,7 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "i2c_task.h"
+#include "device/at42qt1070.h"
 #include "device/gyro.h"
 #include "device/level_meter.h"
 #include "device/pca9635.h"
@@ -88,9 +89,24 @@ void ledEffectProc(satoh::PCA9635 &led, satoh::Message const *msg) noexcept
   }
 }
 /// @brief キー状態取得処理
-void keyUpdateProc()
+void keyUpdateProc(satoh::AT42QT1070 &modeKey)
 {
-  // TODO
+  if (modeKey.ok())
+  {
+    bool keys[6] = {};
+    if (!modeKey.read(keys))
+    {
+      return;
+    }
+    satoh::msg::MODE_KEY msg{};
+    msg.tap = keys[0];
+    msg.re1 = keys[1];
+    msg.down = keys[2];
+    msg.ok = keys[3];
+    msg.up = keys[4];
+    msg.rtn = keys[5];
+    satoh::sendMsg(appTaskHandle, satoh::msg::MODE_KEY_NOTIFY, &msg, sizeof(msg));
+  }
 }
 /// @brief エンコーダ状態取得処理
 void encoderGetProc(satoh::RotaryEncoder &encoder)
@@ -131,6 +147,7 @@ void i2cTaskProc(void const *argument)
   satoh::PCA9635 led(s_i2c);
   satoh::LevelMeter level(s_i2c);
   satoh::RotaryEncoder encoder(s_i2c);
+  satoh::AT42QT1070 modeKey(s_i2c);
   satoh::Gyro mpu6050(s_i2c, satoh::MPU6050);
   satoh::Gyro icm20602(s_i2c, satoh::ICM20602);
   for (;;)
@@ -157,12 +174,15 @@ void i2cTaskProc(void const *argument)
       ledEffectProc(led, msg);
       break;
     case satoh::msg::GYRO_GET_REQ:
+      res.reset();
       gyroGetProc(mpu6050, icm20602);
       break;
     case satoh::msg::MODE_KEY_GET_REQ:
-      keyUpdateProc(/* key */);
+      res.reset();
+      keyUpdateProc(modeKey);
       break;
     case satoh::msg::ENCODER_GET_REQ:
+      res.reset();
       encoderGetProc(encoder);
       break;
     case satoh::msg::OLED_UPDATE_REQ:

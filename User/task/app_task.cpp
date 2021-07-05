@@ -70,20 +70,25 @@ void appTaskProc(void const *argument)
     {
     case satoh::msg::MODE_KEY_NOTIFY:
     {
-      // TODO
+      auto *param = reinterpret_cast<satoh::msg::MODE_KEY const *>(msg->bytes);
+      if (param->up)
+      {
+        speed.interval -= 10;
+        if (speed.interval <= 0)
+        {
+          speed.interval = 10;
+        }
+        satoh::sendMsg(neoPixelTaskHandle, satoh::msg::NEO_PIXEL_SET_SPEED, &speed, sizeof(speed));
+      }
+      if (param->down)
+      {
+        speed.interval += 10;
+        satoh::sendMsg(neoPixelTaskHandle, satoh::msg::NEO_PIXEL_SET_SPEED, &speed, sizeof(speed));
+      }
       break;
     }
     case satoh::msg::EFFECT_KEY_CHANGED_NOTIFY:
     {
-      constexpr uint8_t V = 0x80;
-      constexpr satoh::RGB COLORS[] = {
-          {V, 0, 0}, //
-          {V, V, 0}, //
-          {0, V, 0}, //
-          {0, V, V}, //
-          {0, 0, V}, //
-          {V, 0, V}, //
-      };
       auto *param = reinterpret_cast<satoh::msg::EFFECT_KEY const *>(msg->bytes);
       for (int i = 0; i < 4; ++i)
       {
@@ -91,7 +96,7 @@ void appTaskProc(void const *argument)
         {
           satoh::msg::LED_EFFECT src{};
           src.led = i;
-          src.rgb = COLORS[rand() % 6];
+          src.rgb = RAINBOW.rgb[rand() % 6];
           satoh::sendMsg(i2cTaskHandle, satoh::msg::LED_EFFECT_REQ, &src, sizeof(src));
           auto ptn = PATTERNS[i];
           satoh::sendMsg(neoPixelTaskHandle, satoh::msg::NEO_PIXEL_SET_PATTERN, &ptn, sizeof(ptn));
@@ -117,22 +122,22 @@ void appTaskProc(void const *argument)
         }
       }
       // NeoPixel Speed
-      if (param->angleDiff[1] != 0)
+      for (uint8_t i = 0; i < 4; ++i)
       {
-        if (0 < param->angleDiff[1])
+        if (param->angleDiff[i] == 1)
         {
           speed.interval -= 10;
+          if (speed.interval <= 0)
+          {
+            speed.interval = 10;
+          }
         }
-        else
+        if (param->angleDiff[i] == -1)
         {
           speed.interval += 10;
         }
-        if (speed.interval <= 0)
-        {
-          speed.interval = 10;
-        }
-        satoh::sendMsg(neoPixelTaskHandle, satoh::msg::NEO_PIXEL_SET_SPEED, &speed, sizeof(speed));
       }
+      satoh::sendMsg(neoPixelTaskHandle, satoh::msg::NEO_PIXEL_SET_SPEED, &speed, sizeof(speed));
       break;
     }
     }

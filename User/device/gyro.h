@@ -4,6 +4,8 @@
 ///
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
+#pragma once
+
 #include "i2c_device_base.hpp"
 
 namespace satoh

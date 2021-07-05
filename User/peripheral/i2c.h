@@ -70,22 +70,20 @@ public:
   /// @param[in] slaveAddr スレーブアドレス
   /// @param[in] bytes 書き込みデータの先頭ポインタ
   /// @param[in] size 書き込むバイト数
-  /// @param[in] withSleep 通信後1msスリープ有無
   /// @retval OK      成功
   /// @retval BUSY    ビジー
   /// @retval TIMEOUT タイムアウト
   /// @retval NACK    NACK
   /// @retval ERROR   エラー
-  Result write(uint8_t slaveAddr, uint8_t const *bytes, uint32_t size, bool withSleep = true) const noexcept;
+  Result write(uint8_t slaveAddr, uint8_t const *bytes, uint32_t size) const noexcept;
   /// @brief データを読み込む
   /// @param[in] slaveAddr スレーブアドレス
   /// @param[in] buf 読み込んだデータを格納するバッファ
   /// @param[in] size 読み込むバイト数
-  /// @param[in] withSleep 通信後1msスリープ有無
   /// @retval OK      成功
   /// @retval BUSY    ビジー
   /// @retval TIMEOUT タイムアウト
   /// @retval NACK    NACK
   /// @retval ERROR   エラー
-  Result read(uint8_t slaveAddr, uint8_t *buffer, uint32_t size, bool withSleep = true) const noexcept;
+  Result read(uint8_t slaveAddr, uint8_t *buffer, uint32_t size) const noexcept;
 };

@@ -40,6 +40,7 @@ constexpr uint8_t WHOAMI = 0x75;
 
 bool satoh::Gyro::init() const noexcept
 {
+  osDelay(1);
   auto write = [this](uint8_t reg, uint8_t d) {
     uint8_t v[] = {reg, d};
     return I2CDeviceBase::write(v, sizeof(v));

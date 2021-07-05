@@ -151,11 +151,11 @@ int main(void)
 
   /* Create the thread(s) */
   /* definition and creation of usbTxTask */
-  osThreadDef(usbTxTask, usbTxTaskProc, osPriorityLow, 0, 128);
+  osThreadDef(usbTxTask, usbTxTaskProc, osPriorityNormal, 0, 128);
   usbTxTaskHandle = osThreadCreate(osThread(usbTxTask), NULL);
 
   /* definition and creation of i2cTask */
-  osThreadDef(i2cTask, i2cTaskProc, osPriorityNormal, 0, 128);
+  osThreadDef(i2cTask, i2cTaskProc, osPriorityHigh, 0, 256);
   i2cTaskHandle = osThreadCreate(osThread(i2cTask), NULL);
 
   /* definition and creation of neoPixelTask */

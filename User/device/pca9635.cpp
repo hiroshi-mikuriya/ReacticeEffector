@@ -40,7 +40,7 @@ constexpr uint8_t SUBADR3 = 0x1a;
 constexpr uint8_t ALLCALLADR = 0x1b;
 } // namespace
 
-bool satoh::PCA9635::write(uint8_t reg, uint8_t const *bytes, uint32_t size)
+bool satoh::PCA9635::write(uint8_t reg, uint8_t const *bytes, uint32_t size) const noexcept
 {
   uint8_t d[32] = {0};
   d[0] = static_cast<uint8_t>(reg | 0x80);
@@ -48,13 +48,18 @@ bool satoh::PCA9635::write(uint8_t reg, uint8_t const *bytes, uint32_t size)
   return I2CDeviceBase::write(d, size + 1);
 }
 
-satoh::PCA9635::PCA9635(I2C *i2c) noexcept //
-    : I2CDeviceBase(i2c, SLAVE_ADDR),      //
-      ok_(false)                           //
+bool satoh::PCA9635::init() const noexcept
 {
+  osDelay(1);
   uint8_t v0[] = {0b10000001, 0b00000001};
   uint8_t v1[] = {0xFF, 0xFF, 0xFF, 0x00};
-  ok_ = write(MODE1, v0, sizeof(v0)) && write(LEDOUT0, v1, sizeof(v1));
+  return write(MODE1, v0, sizeof(v0)) && write(LEDOUT0, v1, sizeof(v1));
+}
+
+satoh::PCA9635::PCA9635(I2C *i2c) noexcept //
+    : I2CDeviceBase(i2c, SLAVE_ADDR),      //
+      ok_(init())                          //
+{
 }
 satoh::PCA9635::~PCA9635() {}
 bool satoh::PCA9635::ok() const noexcept

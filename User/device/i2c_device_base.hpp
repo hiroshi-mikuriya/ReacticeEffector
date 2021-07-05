@@ -34,7 +34,7 @@ protected:
   /// @retval false 失敗
   bool read(uint8_t reg, uint8_t *buffer, uint32_t size) const noexcept
   {
-    return I2C::OK == i2c_->write(slaveAddr_, &reg, sizeof(reg), false) && I2C::OK == i2c_->read(slaveAddr_, buffer, size);
+    return I2C::OK == i2c_->write(slaveAddr_, &reg, sizeof(reg)) && I2C::OK == i2c_->read(slaveAddr_, buffer, size);
   }
 
 public:

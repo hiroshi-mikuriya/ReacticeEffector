@@ -4,6 +4,8 @@
 ///
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
+#pragma once
+
 #include "common/rgb.h"
 #include "i2c_device_base.hpp"
 
@@ -16,12 +18,16 @@ class PCA9635;
 class satoh::PCA9635 : public satoh::I2CDeviceBase
 {
   /// 通信可否
-  bool ok_;
+  const bool ok_;
   /// @brief I2C書き込み
   /// @param[in] reg 書き込み先のレジスタ
   /// @param[in] bytes 書き込みデータ
   /// @param[in] size 書き込みサイズ
-  bool write(uint8_t reg, uint8_t const *bytes, uint32_t size) noexcept;
+  bool write(uint8_t reg, uint8_t const *bytes, uint32_t size) const noexcept;
+  /// @brief デバイス初期化
+  /// @retval true 通信成功
+  /// @retval false 通信失敗
+  bool init() const noexcept;
 
 public:
   /// @brief コンストラクタ

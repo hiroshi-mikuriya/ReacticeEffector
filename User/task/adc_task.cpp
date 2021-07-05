@@ -43,6 +43,21 @@ public:
   /// @return 幅
   uint16_t getRange() const noexcept { return max_ - min_; }
 };
+/// @brief 振幅をレベルに変換する
+/// @param[in] v 振幅
+/// @return レベル
+uint8_t getLevel(uint16_t v)
+{
+  for (uint8_t i = 0; i < 7; ++i)
+  {
+    uint16_t th = 1 << (i + 7);
+    if (v < th)
+    {
+      return i;
+    }
+  }
+  return 7;
+}
 /// @brief サンプリング結果からレベル値を計算する通知
 void notifySamplingEnd(void const *arg)
 {
@@ -56,7 +71,6 @@ void adcTaskProc(void const *argument)
   DMA_TypeDef *const dma = DMA2;
   const uint32_t stream = LL_DMA_STREAM_4;
   uint16_t buf[2] = {};
-  LL_DMA_DisableStream(dma, stream);
   LL_DMA_ConfigAddresses(dma, stream,                                             //
                          LL_ADC_DMA_GetRegAddr(adc, LL_ADC_DMA_REG_REGULAR_DATA), //
                          reinterpret_cast<uint32_t>(buf),                         //
@@ -82,21 +96,14 @@ void adcTaskProc(void const *argument)
       left.update(buf[0]);
       right.update(buf[1]);
     }
-    else if (ev.value.signals & SIG_TIMER)
+    if (ev.value.signals & SIG_TIMER)
     {
-      uint16_t leftVol = left.getRange();
-      uint16_t rightVol = right.getRange();
+      satoh::msg::LED_LEVEL level{};
+      level.left = getLevel(left.getRange());
+      level.right = getLevel(right.getRange());
+      satoh::sendMsg(i2cTaskHandle, satoh::msg::LED_LEVEL_UPDATE_REQ, &level, sizeof(level));
       left.reset();
       right.reset();
-      satoh::msg::LED_LEVEL level{};
-      constexpr int DIV = 100;
-      level.left = static_cast<uint8_t>(std::min(leftVol / DIV, 7));
-      level.right = static_cast<uint8_t>(std::min(rightVol / DIV, 7));
-      satoh::sendMsg(i2cTaskHandle, satoh::msg::LED_LEVEL_UPDATE_REQ, &level, sizeof(level));
-    }
-    else if (ev.value.signals & SIG_DMAERR)
-    {
-      continue;
     }
   }
 }

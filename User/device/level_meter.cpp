@@ -23,6 +23,7 @@ constexpr uint8_t LEVEL[8] = {
 
 bool satoh::LevelMeter::init() const noexcept
 {
+  osDelay(1);
   uint8_t v[] = {pca9555::CONFIGURATION_0, 0, 0};
   return write(v, sizeof(v));
 }
