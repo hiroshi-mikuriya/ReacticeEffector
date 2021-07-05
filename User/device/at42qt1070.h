@@ -17,6 +17,8 @@ class satoh::AT42QT1070 : public satoh::I2CDeviceBase
 {
   /// 通信可否
   const bool ok_;
+  /// 前回測定値
+  mutable uint8_t cache_;
   /// @brief センサ初期化
   /// @retval true 書き込み成功
   /// @retval false 書き込み失敗
@@ -40,7 +42,8 @@ public:
   ///   @arg 3 MODE
   ///   @arg 4 UP
   ///   @arg 5 RETURN
-  /// @retval true 通信成功
-  /// @retval false 通信失敗
-  bool read(bool (&keys)[6]) const noexcept;
+  /// @retval -1 通信失敗
+  /// @retval 0 変化なし
+  /// @retval 1 変化あり
+  int read(bool (&keys)[6]) const noexcept;
 };

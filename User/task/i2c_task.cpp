@@ -14,8 +14,8 @@
 #include "message/msglib.h"
 #include "stm32f7xx_ll_dma.h"
 #include "task/app_task.h"
+#include "task/i2c_monitor_task.h"
 #include "task/sound_task.h"
-#include "task/usb_task.h"
 
 namespace
 {
@@ -94,7 +94,7 @@ void keyUpdateProc(satoh::AT42QT1070 &modeKey)
   if (modeKey.ok())
   {
     bool keys[6] = {};
-    if (!modeKey.read(keys))
+    if (modeKey.read(keys) <= 0)
     {
       return;
     }
@@ -225,11 +225,13 @@ void i2cTxErrorIRQ(void)
 void extiSwIRQ(void)
 {
   satoh::sendMsg(i2cTaskHandle, satoh::msg::ENCODER_GET_REQ);
+  notifyExtiSwIRQ();
 }
 
 void extiSw2IRQ(void)
 {
   satoh::sendMsg(i2cTaskHandle, satoh::msg::MODE_KEY_GET_REQ);
+  notifyExtiSw2IRQ();
 }
 
 void extiMpuIRQ(void)

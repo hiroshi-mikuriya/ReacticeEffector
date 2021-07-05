@@ -47,20 +47,17 @@ constexpr satoh::msg::NEO_PIXEL_PATTERN RED = {{
     {V / 2, 0, 0}, //
     {V / 4, 0, 0}, //
 }};
-constexpr satoh::msg::NEO_PIXEL_PATTERN PATTERNS[] = {RAINBOW, RED, GREEN, BLUE};
 } // namespace
 
 void appTaskProc(void const *argument)
 {
   satoh::addMsgTarget(4);
   satoh::msg::NEO_PIXEL_SPEED speed = {100};
-  for (;;)
+  satoh::msg::LED_SIMPLE power = {0, false};
+  satoh::msg::LED_SIMPLE modulation = {1, false};
+  for (int n = 0;; n = (n + 1) % 6)
   {
     auto res = satoh::recvMsg();
-    if (res.status() != osOK)
-    {
-      continue;
-    }
     auto *msg = res.msg();
     if (msg == 0)
     {
@@ -73,34 +70,54 @@ void appTaskProc(void const *argument)
       auto *param = reinterpret_cast<satoh::msg::MODE_KEY const *>(msg->bytes);
       if (param->up)
       {
-        speed.interval -= 10;
-        if (speed.interval <= 0)
-        {
-          speed.interval = 10;
-        }
-        satoh::sendMsg(neoPixelTaskHandle, satoh::msg::NEO_PIXEL_SET_SPEED, &speed, sizeof(speed));
+        satoh::msg::LED_EFFECT led{0, RAINBOW.rgb[n]};
+        satoh::sendMsg(i2cTaskHandle, satoh::msg::LED_EFFECT_REQ, &led, sizeof(led));
+      }
+      if (param->ok)
+      {
+        satoh::msg::LED_EFFECT led{1, RAINBOW.rgb[n]};
+        satoh::sendMsg(i2cTaskHandle, satoh::msg::LED_EFFECT_REQ, &led, sizeof(led));
+      }
+      if (param->rtn)
+      {
+        satoh::msg::LED_EFFECT led{2, RAINBOW.rgb[n]};
+        satoh::sendMsg(i2cTaskHandle, satoh::msg::LED_EFFECT_REQ, &led, sizeof(led));
       }
       if (param->down)
       {
-        speed.interval += 10;
-        satoh::sendMsg(neoPixelTaskHandle, satoh::msg::NEO_PIXEL_SET_SPEED, &speed, sizeof(speed));
+        satoh::msg::LED_EFFECT led{3, RAINBOW.rgb[n]};
+        satoh::sendMsg(i2cTaskHandle, satoh::msg::LED_EFFECT_REQ, &led, sizeof(led));
+      }
+      if (param->tap)
+      {
+        modulation.level = !modulation.level;
+        satoh::sendMsg(i2cTaskHandle, satoh::msg::LED_SIMPLE_REQ, &modulation, sizeof(modulation));
+      }
+      if (param->re1)
+      {
+        power.level = !power.level;
+        satoh::sendMsg(i2cTaskHandle, satoh::msg::LED_SIMPLE_REQ, &power, sizeof(power));
       }
       break;
     }
     case satoh::msg::EFFECT_KEY_CHANGED_NOTIFY:
     {
       auto *param = reinterpret_cast<satoh::msg::EFFECT_KEY const *>(msg->bytes);
-      for (int i = 0; i < 4; ++i)
+      if (param->button[0])
       {
-        if (param->button[i])
-        {
-          satoh::msg::LED_EFFECT src{};
-          src.led = i;
-          src.rgb = RAINBOW.rgb[rand() % 6];
-          satoh::sendMsg(i2cTaskHandle, satoh::msg::LED_EFFECT_REQ, &src, sizeof(src));
-          auto ptn = PATTERNS[i];
-          satoh::sendMsg(neoPixelTaskHandle, satoh::msg::NEO_PIXEL_SET_PATTERN, &ptn, sizeof(ptn));
-        }
+        satoh::sendMsg(neoPixelTaskHandle, satoh::msg::NEO_PIXEL_SET_PATTERN, &RAINBOW, sizeof(RAINBOW));
+      }
+      if (param->button[1])
+      {
+        satoh::sendMsg(neoPixelTaskHandle, satoh::msg::NEO_PIXEL_SET_PATTERN, &RED, sizeof(RED));
+      }
+      if (param->button[2])
+      {
+        satoh::sendMsg(neoPixelTaskHandle, satoh::msg::NEO_PIXEL_SET_PATTERN, &GREEN, sizeof(GREEN));
+      }
+      if (param->button[3])
+      {
+        satoh::sendMsg(neoPixelTaskHandle, satoh::msg::NEO_PIXEL_SET_PATTERN, &BLUE, sizeof(BLUE));
       }
       break;
     }
@@ -110,29 +127,13 @@ void appTaskProc(void const *argument)
     case satoh::msg::ROTARY_ENCODER_NOTIFY:
     {
       auto *param = reinterpret_cast<satoh::msg::ROTARY_ENCODER const *>(msg->bytes);
-      // POWER LED, MODULATION LED
-      for (uint8_t i = 0; i < 2; ++i)
-      {
-        if (param->angleDiff[0] != 0)
-        {
-          satoh::msg::LED_SIMPLE src{};
-          src.led = i;
-          src.level = 0 < param->angleDiff[0];
-          satoh::sendMsg(i2cTaskHandle, satoh::msg::LED_SIMPLE_REQ, &src, sizeof(src));
-        }
-      }
-      // NeoPixel Speed
       for (uint8_t i = 0; i < 4; ++i)
       {
-        if (param->angleDiff[i] == 1)
+        if (0 < param->angleDiff[i] && 10 < speed.interval)
         {
           speed.interval -= 10;
-          if (speed.interval <= 0)
-          {
-            speed.interval = 10;
-          }
         }
-        if (param->angleDiff[i] == -1)
+        if (param->angleDiff[i] < 0)
         {
           speed.interval += 10;
         }

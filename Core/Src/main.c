@@ -54,6 +54,7 @@ osThreadId neoPixelTaskHandle;
 osThreadId appTaskHandle;
 osThreadId soundTaskHandle;
 osThreadId adcTaskHandle;
+osThreadId i2cMonitorTaskHandle;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -76,6 +77,7 @@ extern void neoPixelTaskProc(void const * argument);
 extern void appTaskProc(void const * argument);
 extern void soundTaskProc(void const * argument);
 extern void adcTaskProc(void const * argument);
+extern void i2cMonitorTaskProc(void const * argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -173,6 +175,10 @@ int main(void)
   /* definition and creation of adcTask */
   osThreadDef(adcTask, adcTaskProc, osPriorityIdle, 0, 128);
   adcTaskHandle = osThreadCreate(osThread(adcTask), NULL);
+
+  /* definition and creation of i2cMonitorTask */
+  osThreadDef(i2cMonitorTask, i2cMonitorTaskProc, osPriorityIdle, 0, 128);
+  i2cMonitorTaskHandle = osThreadCreate(osThread(i2cMonitorTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
