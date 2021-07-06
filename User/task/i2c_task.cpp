@@ -77,7 +77,7 @@ void ledSimpleProc(satoh::LevelMeter &level, satoh::Message const *msg) noexcept
     level.show();
   }
 }
-/// @brief エフェクトLED更新処理
+/// @brief エフェクトLED更新処理（LED指定）
 /// @param[in] led エフェクトLEDと通信するオブジェクト
 /// @param[in] msg リクエストメッセージ
 void ledEffectProc(satoh::PCA9635 &led, satoh::Message const *msg) noexcept
@@ -88,12 +88,23 @@ void ledEffectProc(satoh::PCA9635 &led, satoh::Message const *msg) noexcept
     led.set(param->rgb, param->led);
   }
 }
+/// @brief エフェクトLED更新処理（全LED）
+/// @param[in] led エフェクトLEDと通信するオブジェクト
+/// @param[in] msg リクエストメッセージ
+void ledAllEffectProc(satoh::PCA9635 &led, satoh::Message const *msg) noexcept
+{
+  if (led.ok())
+  {
+    auto *param = reinterpret_cast<satoh::msg::LED_ALL_EFFECT const *>(msg->bytes);
+    led.set(param->rgb);
+  }
+}
 /// @brief キー状態取得処理
 void keyUpdateProc(satoh::AT42QT1070 &modeKey)
 {
   if (modeKey.ok())
   {
-    bool keys[6] = {};
+    uint8_t keys[6] = {};
     if (modeKey.read(keys) <= 0)
     {
       return;
@@ -172,6 +183,9 @@ void i2cTaskProc(void const *argument)
       break;
     case satoh::msg::LED_EFFECT_REQ:
       ledEffectProc(led, msg);
+      break;
+    case satoh::msg::LED_ALL_EFFECT_REQ:
+      ledAllEffectProc(led, msg);
       break;
     case satoh::msg::GYRO_GET_REQ:
       res.reset();

@@ -38,8 +38,8 @@ public:
   bool ok() const noexcept override;
   /// @brief デバイスからレジスタを読み出す
   /// @param[out] button ボタン状態
-  ///   @arg 0 BUTTON_UP
-  ///   @arg 1 BUTTON_DOWN
+  ///   @arg BUTTON_UP ボタン離し中
+  ///   @arg BUTTON_DOWN ボタン押下中
   /// @param[out] angleDiff 角度変化量
   /// @retval -1 通信失敗
   /// @retval 0 前回から変更なし

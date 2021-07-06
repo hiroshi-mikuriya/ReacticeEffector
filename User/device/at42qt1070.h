@@ -45,5 +45,5 @@ public:
   /// @retval -1 通信失敗
   /// @retval 0 変化なし
   /// @retval 1 変化あり
-  int read(bool (&keys)[6]) const noexcept;
+  int read(uint8_t (&keys)[6]) const noexcept;
 };

@@ -40,7 +40,7 @@ constexpr uint8_t SUBADR3 = 0x1a;
 constexpr uint8_t ALLCALLADR = 0x1b;
 } // namespace
 
-bool satoh::PCA9635::write(uint8_t reg, uint8_t const *bytes, uint32_t size) const noexcept
+bool satoh::PCA9635::write(uint8_t reg, void const *bytes, uint32_t size) const noexcept
 {
   uint8_t d[32] = {0};
   d[0] = static_cast<uint8_t>(reg | 0x80);
@@ -66,13 +66,16 @@ bool satoh::PCA9635::ok() const noexcept
 {
   return ok_;
 }
-bool satoh::PCA9635::set(RGB const &rgb, uint8_t n)
+bool satoh::PCA9635::set(RGB const &rgb, uint8_t n) const noexcept
 {
   if (3 < n)
   {
     return false;
   }
   uint8_t reg = PWM0 + n * 3;
-  uint8_t const v[] = {rgb.red, rgb.green, rgb.blue};
-  return write(reg, v, sizeof(v));
+  return write(reg, &rgb, sizeof(rgb));
+}
+bool satoh::PCA9635::set(RGB const (&rgb)[4]) const noexcept
+{
+  return write(PWM0, &rgb, sizeof(rgb));
 }

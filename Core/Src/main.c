@@ -153,7 +153,7 @@ int main(void)
 
   /* Create the thread(s) */
   /* definition and creation of usbTxTask */
-  osThreadDef(usbTxTask, usbTxTaskProc, osPriorityNormal, 0, 128);
+  osThreadDef(usbTxTask, usbTxTaskProc, osPriorityAboveNormal, 0, 128);
   usbTxTaskHandle = osThreadCreate(osThread(usbTxTask), NULL);
 
   /* definition and creation of i2cTask */
@@ -169,7 +169,7 @@ int main(void)
   appTaskHandle = osThreadCreate(osThread(appTask), NULL);
 
   /* definition and creation of soundTask */
-  osThreadDef(soundTask, soundTaskProc, osPriorityRealtime, 0, 128);
+  osThreadDef(soundTask, soundTaskProc, osPriorityNormal, 0, 128);
   soundTaskHandle = osThreadCreate(osThread(soundTask), NULL);
 
   /* definition and creation of adcTask */
@@ -485,7 +485,7 @@ static void MX_SAI1_Init(void)
   hsai_BlockA1.Init.SynchroExt = SAI_SYNCEXT_DISABLE;
   hsai_BlockA1.Init.MonoStereoMode = SAI_STEREOMODE;
   hsai_BlockA1.Init.CompandingMode = SAI_NOCOMPANDING;
-  if (HAL_SAI_InitProtocol(&hsai_BlockA1, SAI_I2S_STANDARD, SAI_PROTOCOL_DATASIZE_24BIT, 2) != HAL_OK)
+  if (HAL_SAI_InitProtocol(&hsai_BlockA1, SAI_I2S_STANDARD, SAI_PROTOCOL_DATASIZE_32BIT, 2) != HAL_OK)
   {
     Error_Handler();
   }
@@ -498,7 +498,7 @@ static void MX_SAI1_Init(void)
   hsai_BlockB1.Init.MonoStereoMode = SAI_STEREOMODE;
   hsai_BlockB1.Init.CompandingMode = SAI_NOCOMPANDING;
   hsai_BlockB1.Init.TriState = SAI_OUTPUT_NOTRELEASED;
-  if (HAL_SAI_InitProtocol(&hsai_BlockB1, SAI_I2S_STANDARD, SAI_PROTOCOL_DATASIZE_24BIT, 2) != HAL_OK)
+  if (HAL_SAI_InitProtocol(&hsai_BlockB1, SAI_I2S_STANDARD, SAI_PROTOCOL_DATASIZE_32BIT, 2) != HAL_OK)
   {
     Error_Handler();
   }

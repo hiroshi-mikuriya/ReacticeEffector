@@ -5,6 +5,7 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "rotary_encoder.h"
+#include "message/type.h"
 #include "pca9555.h"
 #include <cstring> // memset
 
@@ -59,7 +60,7 @@ int satoh::RotaryEncoder::read(uint8_t (&button)[4], int8_t (&angleDiff)[4]) noe
     }
     // ボタン押下の確認
     uint8_t bit = 1 << i;
-    button[i] = (buf[1] & bit) ? 0 : 1;
+    button[i] = (buf[1] & bit) ? msg::BUTTON_UP : msg::BUTTON_DOWN;
   }
   if (cache_[1] != buf[1])
   {

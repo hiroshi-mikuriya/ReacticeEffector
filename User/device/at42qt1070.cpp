@@ -5,6 +5,7 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "at42qt1070.h"
+#include "message/type.h"
 
 namespace
 {
@@ -54,7 +55,7 @@ bool satoh::AT42QT1070::ok() const noexcept
 {
   return ok_;
 }
-int satoh::AT42QT1070::read(bool (&keys)[6]) const noexcept
+int satoh::AT42QT1070::read(uint8_t (&keys)[6]) const noexcept
 {
   uint8_t v[2] = {0};
   // DETECTION_STATUSを読み出さないと次回の割り込みが発生しなくなる
@@ -66,10 +67,10 @@ int satoh::AT42QT1070::read(bool (&keys)[6]) const noexcept
   {
     return 0;
   }
-  for (int i = 0; i < 6; ++i)
+  for (uint32_t i = 0; i < sizeof(keys); ++i)
   {
     uint8_t bit = 1 << i;
-    keys[i] = !!(v[1] & bit);
+    keys[i] = (v[1] & bit) ? msg::BUTTON_DOWN : msg::BUTTON_UP;
   }
   cache_ = v[1];
   return 1;
