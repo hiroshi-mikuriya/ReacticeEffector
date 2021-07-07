@@ -8,6 +8,7 @@
 #include "message/msglib.h"
 #include "task/i2c_task.h"
 #include "task/neo_pixel_task.h"
+#include "task/sound_task.h"
 #include "task/usb_task.h"
 #include <cstdlib> // rand
 
@@ -130,6 +131,7 @@ void appTaskProc(void const *argument)
       break;
     case satoh::msg::ROTARY_ENCODER_NOTIFY:
     {
+      satoh::sendMsg(soundTaskHandle, msg->type, msg->bytes, msg->size); // TODO 仮
       auto *param = reinterpret_cast<satoh::msg::ROTARY_ENCODER const *>(msg->bytes);
       for (uint8_t i = 0; i < 4; ++i)
       {
