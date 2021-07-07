@@ -23,18 +23,20 @@ protected:
   /// @brief デバイスに書き込む
   /// @param[in] bytes 書き込みデータの先頭ポインタ
   /// @param[in] size 書き込むバイト数
+  /// @param[in] withSleep 通信完了後の1ミリ秒スリープ有無
   /// @retval true 成功
   /// @retval false 失敗
-  bool write(uint8_t const *bytes, uint32_t size) const noexcept { return I2C::OK == i2c_->write(slaveAddr_, bytes, size); }
+  bool write(uint8_t const *bytes, uint32_t size, bool withSleep = true) const noexcept { return I2C::OK == i2c_->write(slaveAddr_, bytes, size, withSleep); }
   /// @brief デバイスから読み込む
   /// @param[in] reg 読み込み先のレジスタ番号
   /// @param[in] buf 読み込んだデータを格納するバッファ
   /// @param[in] size 読み込むバイト数
+  /// @param[in] withSleep 通信完了後の1ミリ秒スリープ有無
   /// @retval true 成功
   /// @retval false 失敗
-  bool read(uint8_t reg, uint8_t *buffer, uint32_t size) const noexcept
+  bool read(uint8_t reg, uint8_t *buffer, uint32_t size, bool withSleep = true) const noexcept
   {
-    return I2C::OK == i2c_->write(slaveAddr_, &reg, sizeof(reg)) && I2C::OK == i2c_->read(slaveAddr_, buffer, size);
+    return I2C::OK == i2c_->write(slaveAddr_, &reg, sizeof(reg), false) && I2C::OK == i2c_->read(slaveAddr_, buffer, size, withSleep);
   }
 
 public:

@@ -17,7 +17,10 @@ satoh::SpiMaster *s_spi = 0;
 
 void neoPixelTaskProc(void const *argument)
 {
-  satoh::addMsgTarget(2);
+  if (satoh::addMsgTarget(2) != osOK)
+  {
+    return;
+  }
   constexpr uint32_t LED_COUNT = 100;
   s_spi = new satoh::SpiMaster(neoPixelTaskHandle, SPI3, DMA1, LL_DMA_STREAM_5, LED_COUNT * 3 * 8);
   satoh::NeoPixel np(s_spi, LED_COUNT);

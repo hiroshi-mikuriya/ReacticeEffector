@@ -23,7 +23,6 @@ constexpr uint8_t LEVEL[8] = {
 
 bool satoh::LevelMeter::init() const noexcept
 {
-  osDelay(1);
   uint8_t v[] = {pca9555::CONFIGURATION_0, 0, 0};
   return write(v, sizeof(v));
 }
@@ -79,5 +78,5 @@ bool satoh::LevelMeter::show() const noexcept
   {
     v[1] &= MASK;
   }
-  return write(v, sizeof(v));
+  return write(v, sizeof(v), false);
 }

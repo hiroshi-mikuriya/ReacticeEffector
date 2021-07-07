@@ -169,7 +169,7 @@ int main(void)
   appTaskHandle = osThreadCreate(osThread(appTask), NULL);
 
   /* definition and creation of soundTask */
-  osThreadDef(soundTask, soundTaskProc, osPriorityNormal, 0, 128);
+  osThreadDef(soundTask, soundTaskProc, osPriorityRealtime, 0, 128);
   soundTaskHandle = osThreadCreate(osThread(soundTask), NULL);
 
   /* definition and creation of adcTask */

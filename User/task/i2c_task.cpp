@@ -151,7 +151,10 @@ void oledGetProc(satoh::SSD1306 &oled, satoh::Message const *msg)
 
 void i2cTaskProc(void const *argument)
 {
-  satoh::addMsgTarget(4);
+  if (satoh::addMsgTarget(4) != osOK)
+  {
+    return;
+  }
   s_i2c = new satoh::I2C(I2C1, i2cTaskHandle, DMA1, LL_DMA_STREAM_0, LL_DMA_STREAM_7);
   initPCM3060(s_i2c);
   satoh::SSD1306 oled(s_i2c);

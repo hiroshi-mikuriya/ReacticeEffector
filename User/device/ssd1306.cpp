@@ -21,7 +21,6 @@ constexpr uint32_t BUF_SIZE = WIDTH * HEIGHT / 8;
 
 bool satoh::SSD1306::init() const noexcept
 {
-  osDelay(1);
   uint8_t v[] = {
       CTRL_10,    // control byte, Co bit = 1, D/C# = 0 (command)
       0xAE,       // display off

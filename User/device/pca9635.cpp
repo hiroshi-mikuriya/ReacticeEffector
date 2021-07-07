@@ -50,7 +50,6 @@ bool satoh::PCA9635::write(uint8_t reg, void const *bytes, uint32_t size) const 
 
 bool satoh::PCA9635::init() const noexcept
 {
-  osDelay(1);
   uint8_t v0[] = {0b10000001, 0b00000001};
   uint8_t v1[] = {0xFF, 0xFF, 0xFF, 0x00};
   return write(MODE1, v0, sizeof(v0)) && write(LEDOUT0, v1, sizeof(v1));

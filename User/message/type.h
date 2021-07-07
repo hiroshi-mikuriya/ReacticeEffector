@@ -7,7 +7,7 @@
 #pragma once
 
 #include "common/rgb.h"
-#include <cstdint>
+#include "effector/effector_base.h"
 
 namespace satoh
 {
@@ -24,6 +24,7 @@ constexpr uint8_t KEY = 4 << SHIFT;
 constexpr uint8_t OLED = 5 << SHIFT;
 constexpr uint8_t USB = 6 << SHIFT;
 constexpr uint8_t NEOPIXEL = 7 << SHIFT;
+constexpr uint8_t SOUND = 8 << SHIFT;
 } // namespace cat
 
 /// ジャイロ - 取得依頼
@@ -58,6 +59,12 @@ constexpr uint8_t USB_RX_NOTIFY = 2 | cat::USB;
 constexpr uint8_t NEO_PIXEL_SET_PATTERN = 1 | cat::NEOPIXEL;
 /// NeoPixel - 点灯スピード指定
 constexpr uint8_t NEO_PIXEL_SET_SPEED = 2 | cat::NEOPIXEL;
+/// Sound - DMA半分受信完了通知
+constexpr uint8_t SOUND_DMA_HALF_NOTIFY = 1 | cat::SOUND;
+/// Sound - DMA全部受信完了通知
+constexpr uint8_t SOUND_DMA_CPLT_NOTIFY = 2 | cat::SOUND;
+/// Sound - エフェクター変更要求
+constexpr uint8_t SOUND_CHANGE_EFFECTOR_REQ = 3 | cat::SOUND;
 
 struct ACC_GYRO;
 struct LED_LEVEL;
@@ -69,6 +76,7 @@ struct EFFECT_KEY;
 struct MODE_KEY;
 struct NEO_PIXEL_PATTERN;
 struct NEO_PIXEL_SPEED;
+struct SOUND_EFFECTOR;
 
 constexpr uint8_t BUTTON_UP = 0;   ///< ボタン離し中
 constexpr uint8_t BUTTON_DOWN = 1; ///< ボタン押下中
@@ -160,4 +168,10 @@ struct satoh::msg::NEO_PIXEL_SPEED
 {
   /// インターバル（ミリ秒）
   uint32_t interval;
+};
+/// Sound - エフェクター変更要求型
+struct satoh::msg::SOUND_EFFECTOR
+{
+  /// エフェクタークラスのポインタ
+  EffectorBase *fx[4];
 };

@@ -11,7 +11,6 @@
 
 bool satoh::RotaryEncoder::init() noexcept
 {
-  osDelay(1);
   return I2CDeviceBase::read(pca9555::INPUT_0, cache_, sizeof(cache_));
 }
 

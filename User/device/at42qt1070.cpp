@@ -22,12 +22,6 @@ constexpr uint8_t AVE_AKS_KEY_6 = 0x2D;
 constexpr uint8_t FO_MO_GUARD_NO = 0x35;
 } // namespace
 
-bool sleep()
-{
-  osDelay(1);
-  return true;
-}
-
 bool satoh::AT42QT1070::init() const noexcept
 {
   uint8_t v0[] = {AVE_AKS_KEY_6, 0};
@@ -36,7 +30,6 @@ bool satoh::AT42QT1070::init() const noexcept
   bool res = true                                                 //
              && write(v0, sizeof(v0))                             //
              && write(v1, sizeof(v1))                             //
-             && sleep()                                           //
              && I2CDeviceBase::read(KEY_STATUS, buf, sizeof(buf)) //
       ;
   if (res)

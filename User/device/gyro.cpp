@@ -40,7 +40,6 @@ constexpr uint8_t WHOAMI = 0x75;
 
 bool satoh::Gyro::init() const noexcept
 {
-  osDelay(1);
   auto write = [this](uint8_t reg, uint8_t d) {
     uint8_t v[] = {reg, d};
     return I2CDeviceBase::write(v, sizeof(v));
@@ -76,7 +75,7 @@ bool satoh::Gyro::ok() const noexcept
 bool satoh::Gyro::getAccel(int16_t (&acc)[3]) const noexcept
 {
   uint8_t buf[6] = {0};
-  bool res = read(ACCEL_XOUT_H, buf, sizeof(buf));
+  bool res = read(ACCEL_XOUT_H, buf, sizeof(buf), false);
   if (res)
   {
     acc[0] = BE<int16_t>::get(buf + 0);
@@ -88,7 +87,7 @@ bool satoh::Gyro::getAccel(int16_t (&acc)[3]) const noexcept
 bool satoh::Gyro::getGyro(int16_t (&gyro)[3]) const noexcept
 {
   uint8_t buf[6] = {0};
-  bool res = read(GYRO_XOUT_H, buf, sizeof(buf));
+  bool res = read(GYRO_XOUT_H, buf, sizeof(buf), false);
   if (res)
   {
     gyro[0] = BE<int16_t>::get(buf + 0);
@@ -100,7 +99,7 @@ bool satoh::Gyro::getGyro(int16_t (&gyro)[3]) const noexcept
 bool satoh::Gyro::getAccelGyro(int16_t (&acc)[3], int16_t (&gyro)[3]) const noexcept
 {
   uint8_t buf[6 + 2 + 6] = {0};
-  bool res = read(ACCEL_XOUT_H, buf, sizeof(buf));
+  bool res = read(ACCEL_XOUT_H, buf, sizeof(buf), false);
   if (res)
   {
     acc[0] = BE<int16_t>::get(buf + 0);
