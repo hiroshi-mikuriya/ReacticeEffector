@@ -40,9 +40,10 @@ public:
   /// @brief デストラクタ
   virtual ~EffectorBase() {}
   /// @brief エフェクト処理実行
-  /// @param[inout] v 音声データ
+  /// @param[inout] left L音声データ
+  /// @param[inout] right R音声データ
   /// @param[in] size 音声データ数
-  virtual void effect(float *v, uint32_t size) noexcept = 0;
+  virtual void effect(float *left, float *right, uint32_t size) noexcept = 0;
   /// @brief エフェクト名を取得
   /// @param[out] buf 文字列格納先
   /// @return 文字数
@@ -57,7 +58,7 @@ public:
   /// @param[in] n 減算対象のパラメータ番号
   virtual void decrementParam(uint32_t n) noexcept = 0;
   /// @brief パラメータ設定
-  /// @param[in] n 減算対象のパラメータ番号
+  /// @param[in] n 設定対象のパラメータ番号
   /// @param[in] ratio 比率（0.0f 〜 1.0f）
   virtual void setParam(uint32_t n, float ratio) noexcept = 0;
   /// @brief パラメータ名文字列取得
@@ -83,7 +84,7 @@ class satoh::EffectParameter
   const T min_;               ///< 最小値
   const T max_;               ///< 最大値
   T v_;                       ///< 値
-  const T scale_;             ///< スケール・目盛り
+  const T step_;              ///< 目盛り
   char name_[8];              ///< パラメータ名
   const uint32_t nameLength_; ///< パラメータ文字列長
 
@@ -95,32 +96,52 @@ public:
   /// @param[in] min 最小値
   /// @param[in] max 最大値
   /// @param[in] v 初期値
-  /// @param[in] scale スケール・目盛り
+  /// @param[in] step 目盛り
   /// @param[in] name パラメータ名
-  explicit EffectParameter(T min, T max, T v, T scale, const char *name) noexcept //
-      : min_(min), max_(max), v_(v), scale_(scale), nameLength_(strlen(name))
+  explicit EffectParameter(T min, T max, T v, T step, const char *name) noexcept //
+      : min_(min), max_(max), v_(v), step_(step), nameLength_(strlen(name))
   {
     strcpy(name_, name);
   }
   /// @brief コンストラクタ（初期値は最大と最小の中間値にする）
   /// @param[in] min 最小値
   /// @param[in] max 最大値
-  /// @param[in] scale スケール・目盛り
+  /// @param[in] step 目盛り
   /// @param[in] name パラメータ名
-  explicit EffectParameter(T min, T max, T scale, const char *name) noexcept //
-      : EffectParameter(min, max, (max + min) / 2, scale, name)
+  explicit EffectParameter(T min, T max, T step, const char *name) noexcept //
+      : EffectParameter(min, max, (max + min) / 2, step, name)
   {
+  }
+  /// @brief 値取得
+  /// @return 値
+  T getValue() const noexcept { return v_; }
+  /// @brief 最大値取得
+  /// @return 最大値
+  T getMax() const noexcept { return max_; }
+  /// @brief 最小値取得
+  /// @return 最小値
+  T getMin() const noexcept { return min_; }
+  /// @brief 目盛り取得
+  /// @return 目盛り
+  T getStep() const noexcept { return step_; }
+  /// @brief パラメータ名取得
+  /// @param[out] buf 格納先
+  /// @return 文字列長
+  uint32_t getName(char *buf) const noexcept
+  {
+    strcpy(buf, name_);
+    return nameLength_;
   }
   /// @brief 加算する
   void increment() noexcept
   {
-    v_ += scale_;
+    v_ += step_;
     compress();
   }
   /// @brief 減算する
   void decrement() noexcept
   {
-    v_ -= scale_;
+    v_ -= step_;
     compress();
   }
   /// @brief 値を設定する
@@ -130,15 +151,4 @@ public:
     v_ = (max_ - min_) * ratio + min_;
     compress();
   }
-  /// @brief パラメータ名取得
-  /// @param[out] buf 格納先
-  /// @return 文字列長
-  uint32_t getName(char *buf) const noexcept
-  {
-    strcpy(buf, name_);
-    return nameLength_;
-  }
-  /// @brief 値取得
-  /// @return 値
-  T getValue() const noexcept { return v_; }
 };

@@ -165,7 +165,7 @@ int main(void)
   neoPixelTaskHandle = osThreadCreate(osThread(neoPixelTask), NULL);
 
   /* definition and creation of appTask */
-  osThreadDef(appTask, appTaskProc, osPriorityIdle, 0, 256);
+  osThreadDef(appTask, appTaskProc, osPriorityIdle, 0, 512);
   appTaskHandle = osThreadCreate(osThread(appTask), NULL);
 
   /* definition and creation of soundTask */

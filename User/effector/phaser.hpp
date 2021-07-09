@@ -1,4 +1,4 @@
-/// @file      effector/overdrive.hpp
+/// @file      effector/phaser.hpp
 /// @author    SATOH GADGET
 /// @copyright Copyright© 2021 SATOH GADGET
 ///
@@ -7,35 +7,32 @@
 #pragma once
 
 #include "effector_base.h"
-#include "lib_calc.hpp"
 #include "lib_filter.hpp"
+#include "lib_osc.hpp"
 #include <cstdio> // sprintf
 
 namespace satoh
 {
-class OverDrive;
+class Phaser;
 }
 
-/// @brief Sodiumから拝借したオーバードライブ
-class satoh::OverDrive : public satoh::EffectorBase
+/// @brief Sodiumから拝借したフェイザー
+class satoh::Phaser : public satoh::EffectorBase
 {
   enum
   {
     LEVEL = 0, ///< レベル
-    GAIN,      ///< ゲイン
-    TREBLE,    ///< トレブル
-    BASS,      ///< ベース
+    RATE,      ///< 周期
+    STAGE,     ///< ステージ
     COUNT,     ///< パラメータ総数
   };
 
   EffectParameter<float> ui_[COUNT]; ///< UIから設定するパラメータ
   signalSw bypass;                   ///< ポップノイズ対策
-  hpf hpfFixed;                      ///< 出力ローカット
-  hpf hpfBass;                       ///< 入力BASS調整
-  lpf lpfFixed;                      ///< 入力ハイカット
-  lpf lpfTreble;                     ///< 出力TREBLE調整
-  float level_;                      ///< レベル
-  float gain_;                       ///< ゲイン
+  triangleWave tri;
+  apf apfx[12];
+  float level_; ///< レベル
+  float stage_; ///< ステージ
 
   /// @brief UI表示のパラメータを、エフェクト処理で使用する値へ変換する
   /// @param[in] n 更新対象のパラメータ番号
@@ -44,47 +41,36 @@ class satoh::OverDrive : public satoh::EffectorBase
     switch (n)
     {
     case LEVEL:
-      level_ = logPot(ui_[LEVEL].getValue(), -50.0f, 0.0f); // LEVEL -50～0 dB
+      level_ = logPot(ui_[LEVEL].getValue(), -20.0f, 20.0f); // LEVEL -20～20 dB
       break;
-    case GAIN:
-      gain_ = logPot(ui_[GAIN].getValue(), 20.0f, 60.0f); // GAIN 20～60 dB
-      break;
-    case TREBLE:
+    case RATE:
     {
-      float treble = 10000.0f * logPot(ui_[TREBLE].getValue(), -30.0f, 0.0f); // TREBLE LPF 320～10k Hz
-      lpfTreble.set(treble);
+      float rate = 0.02f * (105.0f - ui_[RATE].getValue()); // RATE 周期 2.1～0.1 秒
+      tri.set(1.0f / rate);                                 // 三角波 周波数設定
       break;
     }
-    case BASS:
-    {
-      float bass = 2000.0f * logPot(ui_[BASS].getValue(), 0.0f, -20.0f); // BASS HPF 200～2000 Hz
-      hpfBass.set(bass);
+    case STAGE:
+      stage_ = 0.1f + ui_[STAGE].getValue() * 2.0f; // STAGE 2～12 後で整数へ変換
       break;
-    }
     }
   }
 
 public:
   /// @brief コンストラクタ
-  OverDrive() //
+  Phaser() //
       : ui_({
-            EffectParameter<float>(1, 100, 1, "LEVEL"),  //
-            EffectParameter<float>(1, 100, 1, "GAIN"),   //
-            EffectParameter<float>(1, 100, 1, "TREBLE"), //
-            EffectParameter<float>(1, 100, 1, "BASS"),   //
-        }),                                              //
-        level_(0),                                       //
-        gain_(0)                                         //
+            EffectParameter<float>(0, 100, 1, "LEVEL"), //
+            EffectParameter<float>(0, 100, 1, "RATE"),  //
+            EffectParameter<float>(1, 6, 1, "STAGE"),   //
+        })                                              //
   {
-    lpfFixed.set(4000.0f); // 入力ハイカット 固定値
-    hpfFixed.set(30.0f);   // 出力ローカット 固定値
     for (uint32_t n = 0; n < COUNT; ++n)
     {
       update(n);
     }
   }
   /// @brief デストラクタ
-  virtual ~OverDrive() {}
+  virtual ~Phaser() {}
   /// @brief エフェクト処理実行
   /// @param[inout] left L音声データ
   /// @param[inout] right R音声データ
@@ -94,13 +80,15 @@ public:
     for (uint32_t i = 0; i < size; ++i)
     {
       float fx = right[i];
-      fx = hpfBass.process(fx);   // 入力ローカット BASS
-      fx = lpfFixed.process(fx);  // 入力ハイカット 固定値
-      fx = gain_ * fx;            // GAIN
-      fx = atanf(fx + 0.5f);      // arctanによるクリッピング、非対称化
-      fx = hpfFixed.process(fx);  // 出力ローカット 固定値 直流カット
-      fx = lpfTreble.process(fx); // 出力ハイカット TREBLE
-      fx = level_ * fx;           // LEVEL
+      float lfo = 20.0f * tri.output();    // LFO 0～20 三角波
+      float freq = 200.0f * dbToGain(lfo); // APF周波数 200～2000Hz 指数的変化
+      for (uint8_t j = 0; j < stage_; j++) // 段数分APF繰り返し
+      {
+        apfx[j].set(freq);        // APF周波数設定
+        fx = apfx[j].process(fx); // APF実行
+      }
+      fx = 0.7f * (right[i] + fx); // 原音ミックス、音量調整
+      fx = level_ * fx;            // LEVEL
       right[i] = bypass.process(right[i], fx, true);
     }
   }
@@ -109,7 +97,7 @@ public:
   /// @return 文字数
   uint32_t getName(char *buf) const noexcept override
   {
-    const char name[] = "OverDrive";
+    const char name[] = "Phaser";
     strcpy(buf, name);
     return sizeof(name);
   }
@@ -169,17 +157,15 @@ public:
     {
     case LEVEL:
       return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[LEVEL].getValue())));
-    case GAIN:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[GAIN].getValue())));
-    case TREBLE:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[TREBLE].getValue())));
-    case BASS:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[BASS].getValue())));
+    case RATE:
+      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[RATE].getValue())));
+    case STAGE:
+      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[STAGE].getValue())));
     default:
       return 0;
     }
   }
   /// @brief LED色を取得
   /// @return LED色
-  RGB getColor() const noexcept override { return RGB{0x20, 0x20, 0x00}; }
+  RGB getColor() const noexcept override { return RGB{0x8, 0x20, 0x00}; }
 };

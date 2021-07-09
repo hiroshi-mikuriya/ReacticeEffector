@@ -5,9 +5,14 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "task/app_task.h"
+#include "effector/bq_filter.hpp"
 #include "effector/chorus.hpp"
+#include "effector/delay.hpp"
 #include "effector/distortion.hpp"
+#include "effector/oscillator.hpp"
 #include "effector/overdrive.hpp"
+#include "effector/phaser.hpp"
+#include "effector/reverb.hpp"
 #include "effector/tremolo.hpp"
 #include "message/msglib.h"
 #include "task/i2c_task.h"
@@ -70,10 +75,15 @@ void appTaskProc(void const *argument)
   satoh::msg::LED_SIMPLE power = {0, false};
   satoh::msg::LED_SIMPLE modulation = {1, false};
   satoh::msg::SOUND_EFFECTOR effector{};
-  std::unique_ptr<satoh::EffectorBase> od(new satoh::OverDrive());
-  std::unique_ptr<satoh::EffectorBase> ds(new satoh::Distortion());
-  std::unique_ptr<satoh::EffectorBase> tr(new satoh::Tremolo());
-  std::unique_ptr<satoh::EffectorBase> ce(new satoh::Chorus());
+  typedef std::unique_ptr<satoh::EffectorBase> EffectPtr;
+  EffectPtr effectList[] = {
+      EffectPtr(new satoh::OverDrive()),  //
+      EffectPtr(new satoh::Distortion()), //
+      EffectPtr(new satoh::Chorus()),     //
+      EffectPtr(new satoh::Tremolo()),    //
+      EffectPtr(new satoh::Phaser()),     //
+      EffectPtr(new satoh::Oscillator()), //
+  };
   {
     satoh::msg::LED_ALL_EFFECT led{};
     satoh::sendMsg(i2cTaskHandle, satoh::msg::LED_ALL_EFFECT_REQ, &led, sizeof(led));
@@ -133,19 +143,18 @@ void appTaskProc(void const *argument)
     case satoh::msg::EFFECT_KEY_CHANGED_NOTIFY:
     {
       auto *param = reinterpret_cast<satoh::msg::EFFECT_KEY const *>(msg->bytes);
-      satoh::EffectorBase *fx[4] = {od.get(), ds.get(), ce.get(), tr.get()};
       for (int i = 0; i < 4; ++i)
       {
         if (param->button[i] == satoh::msg::BUTTON_DOWN)
         {
           satoh::msg::LED_ALL_EFFECT led{};
-          if (effector.fx[0] == fx[i])
+          if (effector.fx[0] == effectList[i].get())
           {
             effector.fx[0] = 0;
           }
           else
           {
-            effector.fx[0] = fx[i];
+            effector.fx[0] = effectList[i].get();
             led.rgb[i] = effector.fx[0]->getColor();
           }
           satoh::sendMsg(soundTaskHandle, satoh::msg::SOUND_CHANGE_EFFECTOR_REQ, &effector, sizeof(effector));

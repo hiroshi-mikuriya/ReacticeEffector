@@ -27,37 +27,40 @@ class satoh::Distortion : public satoh::EffectorBase
     COUNT,     ///< パラメータ総数
   };
 
-  EffectParameter<float> params_[COUNT]; ///< パラメータ
-  signalSw bypass;                       ///< ポップノイズ対策
-  hpf hpf1;                              ///< ローカット1
-  hpf hpf2;                              ///< ローカット2
-  hpf hpfTone;                           ///< ローカットトーン調整用
-  lpf lpf1;                              ///< ハイカット1
-  lpf lpf2;                              ///< ハイカット2
-  lpf lpfTone;                           ///< ハイカットトーン調整用
-  float level_;                          ///< レベル
-  float gain_;                           ///< ゲイン
-  float tone_;                           ///< トーン
-  /// @brief レベル更新
-  void updateLevel() noexcept
+  EffectParameter<float> ui_[COUNT]; ///< UIから設定するパラメータ
+  signalSw bypass;                   ///< ポップノイズ対策
+  hpf hpf1;                          ///< ローカット1
+  hpf hpf2;                          ///< ローカット2
+  hpf hpfTone;                       ///< ローカットトーン調整用
+  lpf lpf1;                          ///< ハイカット1
+  lpf lpf2;                          ///< ハイカット2
+  lpf lpfTone;                       ///< ハイカットトーン調整用
+  float level_;                      ///< レベル
+  float gain_;                       ///< ゲイン
+  float tone_;                       ///< トーン
+
+  /// @brief UI表示のパラメータを、エフェクト処理で使用する値へ変換する
+  /// @param[in] n 更新対象のパラメータ番号
+  void update(uint32_t n)
   {
-    level_ = logPot(params_[LEVEL].getValue(), -50.0f, 0.0f); // LEVEL -50...0 dB
-  }
-  /// @brief ゲイン更新
-  void updateGain() noexcept
-  {
-    gain_ = logPot(params_[GAIN].getValue(), 5.0f, 45.0f); // GAIN 5...+45 dB
-  }
-  /// @brief トーン更新
-  void updateTone() noexcept
-  {
-    tone_ = mixPot(params_[TONE].getValue(), -20.0f); // TONE 0～1 LPF側とHPF側をミックス
+    switch (n)
+    {
+    case LEVEL:
+      level_ = logPot(ui_[LEVEL].getValue(), -50.0f, 0.0f); // LEVEL -50...0 dB
+      break;
+    case GAIN:
+      gain_ = logPot(ui_[GAIN].getValue(), 5.0f, 45.0f); // GAIN 5...+45 dB
+      break;
+    case TONE:
+      tone_ = mixPot(ui_[TONE].getValue(), -20.0f); // TONE 0～1 LPF側とHPF側をミックス
+      break;
+    }
   }
 
 public:
   /// @brief コンストラクタ
   Distortion() //
-      : params_({
+      : ui_({
             EffectParameter<float>(1, 100, 1, "LEVEL"), //
             EffectParameter<float>(1, 100, 1, "GAIN"),  //
             EffectParameter<float>(1, 100, 1, "TONE"),  //
@@ -65,26 +68,28 @@ public:
         level_(0),                                      //
         gain_(0)                                        //
   {
-    updateLevel();
-    updateGain();
-    updateTone();
     lpf1.set(5000.0f);    // ハイカット1 固定値
     lpf2.set(4000.0f);    // ハイカット2 固定値
     lpfTone.set(240.0f);  // TONE用ハイカット 固定値
     hpf1.set(40.0f);      // ローカット1 固定値
     hpf2.set(30.0f);      // ローカット2 固定値
     hpfTone.set(1000.0f); // TONE用ローカット 固定値
+    for (uint32_t n = 0; n < COUNT; ++n)
+    {
+      update(n);
+    }
   }
   /// @brief デストラクタ
   virtual ~Distortion() {}
   /// @brief エフェクト処理実行
-  /// @param[inout] v 音声データ
+  /// @param[inout] left L音声データ
+  /// @param[inout] right R音声データ
   /// @param[in] size 音声データ数
-  void effect(float *v, uint32_t size) noexcept override
+  void effect(float *left, float *right, uint32_t size) noexcept override
   {
     for (uint32_t i = 0; i < size; ++i)
     {
-      float fx = v[i];
+      float fx = right[i];
       fx = hpf1.process(fx); // ローカット1
       fx = lpf1.process(fx); // ハイカット1
       fx = 10.0f * fx;       // 1段目固定ゲイン
@@ -103,7 +108,7 @@ public:
       fx = tone_ * hpfTone.process(fx)             // TONE
            + (1.0f - tone_) * lpfTone.process(fx); // LPF側とHPF側をミックス
       fx = level_ * fx;                            // LEVEL
-      v[i] = bypass.process(v[i], fx, true);
+      right[i] = bypass.process(right[i], fx, true);
     }
   }
   /// @brief エフェクト名を取得
@@ -122,61 +127,31 @@ public:
   /// @param[in] n 加算対象のパラメータ番号
   void incrementParam(uint32_t n) noexcept override
   {
-    switch (n)
+    if (n < COUNT)
     {
-    case LEVEL:
-      params_[LEVEL].increment();
-      updateLevel();
-      break;
-    case GAIN:
-      params_[GAIN].increment();
-      updateGain();
-      break;
-    case TONE:
-      params_[TONE].increment();
-      updateTone();
-      break;
+      ui_[n].increment();
+      update(n);
     }
   }
   /// @brief パラメータ減算
   /// @param[in] n 減算対象のパラメータ番号
   void decrementParam(uint32_t n) noexcept override
   {
-    switch (n)
+    if (n < COUNT)
     {
-    case LEVEL:
-      params_[LEVEL].decrement();
-      updateLevel();
-      break;
-    case GAIN:
-      params_[GAIN].decrement();
-      updateGain();
-      break;
-    case TONE:
-      params_[TONE].decrement();
-      updateTone();
-      break;
+      ui_[n].decrement();
+      update(n);
     }
   }
   /// @brief パラメータ設定
-  /// @param[in] n 減算対象のパラメータ番号
+  /// @param[in] n 設定対象のパラメータ番号
   /// @param[in] ratio 比率（0.0f 〜 1.0f）
-  virtual void setParam(uint32_t n, float ratio) noexcept override
+  void setParam(uint32_t n, float ratio) noexcept override
   {
-    switch (n)
+    if (n < COUNT)
     {
-    case LEVEL:
-      params_[LEVEL].setValue(ratio);
-      updateLevel();
-      break;
-    case GAIN:
-      params_[GAIN].setValue(ratio);
-      updateGain();
-      break;
-    case TONE:
-      params_[TONE].setValue(ratio);
-      updateTone();
-      break;
+      ui_[n].setValue(ratio);
+      update(n);
     }
   }
   /// @brief パラメータ名文字列取得
@@ -187,7 +162,7 @@ public:
   {
     if (n < COUNT)
     {
-      return params_[n].getName(buf);
+      return ui_[n].getName(buf);
     }
     return 0;
   }
@@ -200,11 +175,11 @@ public:
     switch (n)
     {
     case LEVEL:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(params_[LEVEL].getValue())));
+      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[LEVEL].getValue())));
     case GAIN:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(params_[GAIN].getValue())));
+      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[GAIN].getValue())));
     case TONE:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(params_[TONE].getValue())));
+      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[TONE].getValue())));
     default:
       return 0;
     }

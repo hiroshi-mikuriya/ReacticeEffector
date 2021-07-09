@@ -58,8 +58,7 @@ void soundProc(satoh::msg::SOUND_EFFECTOR &effector, int32_t const *src, int32_t
   {
     if (effector.fx[i])
     {
-      effector.fx[i]->effect(right, size);
-      // effector.fx[i]->effect(left, size);
+      effector.fx[i]->effect(left, right, size);
     }
   }
   toInt32(left, right, dst, size);

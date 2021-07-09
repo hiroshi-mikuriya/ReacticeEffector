@@ -1,4 +1,4 @@
-/// @file      effector/overdrive.hpp
+/// @file      effector/bq_filter.hpp
 /// @author    SATOH GADGET
 /// @copyright Copyright© 2021 SATOH GADGET
 ///
@@ -13,29 +13,30 @@
 
 namespace satoh
 {
-class OverDrive;
+class BqFilter;
 }
 
-/// @brief Sodiumから拝借したオーバードライブ
-class satoh::OverDrive : public satoh::EffectorBase
+/// @brief Sodiumから拝借したBQフィルター
+class satoh::BqFilter : public satoh::EffectorBase
 {
   enum
   {
-    LEVEL = 0, ///< レベル
-    GAIN,      ///< ゲイン
-    TREBLE,    ///< トレブル
-    BASS,      ///< ベース
-    COUNT,     ///< パラメータ総数
+    LEVEL = 0,
+    TYPE,
+    FREQ,
+    Q,
+    GAIN,
+    COUNT, ///< パラメータ総数
   };
 
   EffectParameter<float> ui_[COUNT]; ///< UIから設定するパラメータ
-  signalSw bypass;                   ///< ポップノイズ対策
-  hpf hpfFixed;                      ///< 出力ローカット
-  hpf hpfBass;                       ///< 入力BASS調整
-  lpf lpfFixed;                      ///< 入力ハイカット
-  lpf lpfTreble;                     ///< 出力TREBLE調整
-  float level_;                      ///< レベル
-  float gain_;                       ///< ゲイン
+  signalSw bypass;
+  biquadFilter bqf1;
+  float level_;
+  int type_;
+  float freq_;
+  float q_;
+  float gain_;
 
   /// @brief UI表示のパラメータを、エフェクト処理で使用する値へ変換する
   /// @param[in] n 更新対象のパラメータ番号
@@ -44,47 +45,50 @@ class satoh::OverDrive : public satoh::EffectorBase
     switch (n)
     {
     case LEVEL:
-      level_ = logPot(ui_[LEVEL].getValue(), -50.0f, 0.0f); // LEVEL -50～0 dB
+      level_ = dbToGain(ui_[LEVEL].getValue()); // LEVEL -20...+20 dB
+      break;
+    case TYPE:
+      type_ = static_cast<int>(ui_[TYPE].getValue()); // フィルタタイプ
+      bqf1.setCoef(type_, freq_, q_, gain_);          // フィルタ 係数設定
+      break;
+    case FREQ:
+      freq_ = ui_[FREQ].getValue() * 10.0f;  // フィルタ 周波数 20...9990 Hz
+      bqf1.setCoef(type_, freq_, q_, gain_); // フィルタ 係数設定
+      break;
+    case Q:
+      q_ = ui_[Q].getValue() * 0.1f;         // フィルタ Q 0.1...9.9
+      bqf1.setCoef(type_, freq_, q_, gain_); // フィルタ 係数設定
       break;
     case GAIN:
-      gain_ = logPot(ui_[GAIN].getValue(), 20.0f, 60.0f); // GAIN 20～60 dB
+      gain_ = ui_[GAIN].getValue();          // フィルタ GAIN -15...+15 dB
+      bqf1.setCoef(type_, freq_, q_, gain_); // フィルタ 係数設定
       break;
-    case TREBLE:
-    {
-      float treble = 10000.0f * logPot(ui_[TREBLE].getValue(), -30.0f, 0.0f); // TREBLE LPF 320～10k Hz
-      lpfTreble.set(treble);
-      break;
-    }
-    case BASS:
-    {
-      float bass = 2000.0f * logPot(ui_[BASS].getValue(), 0.0f, -20.0f); // BASS HPF 200～2000 Hz
-      hpfBass.set(bass);
-      break;
-    }
     }
   }
 
 public:
   /// @brief コンストラクタ
-  OverDrive() //
+  BqFilter() //
       : ui_({
-            EffectParameter<float>(1, 100, 1, "LEVEL"),  //
-            EffectParameter<float>(1, 100, 1, "GAIN"),   //
-            EffectParameter<float>(1, 100, 1, "TREBLE"), //
-            EffectParameter<float>(1, 100, 1, "BASS"),   //
-        }),                                              //
-        level_(0),                                       //
-        gain_(0)                                         //
+            EffectParameter<float>(-20, 20, 1, "LV"), //
+            EffectParameter<float>(0, 8, 1, "TYPE"),  //
+            EffectParameter<float>(2, 999, 10, "Fc"), //
+            EffectParameter<float>(1, 99, 1, "Q"),    //
+            EffectParameter<float>(-15, 15, 1, "dB"), //
+        }),                                           //
+        level_(0),                                    //
+        type_(0),                                     //
+        freq_(0),                                     //
+        q_(0),                                        //
+        gain_(0)                                      //
   {
-    lpfFixed.set(4000.0f); // 入力ハイカット 固定値
-    hpfFixed.set(30.0f);   // 出力ローカット 固定値
     for (uint32_t n = 0; n < COUNT; ++n)
     {
       update(n);
     }
   }
   /// @brief デストラクタ
-  virtual ~OverDrive() {}
+  virtual ~BqFilter() {}
   /// @brief エフェクト処理実行
   /// @param[inout] left L音声データ
   /// @param[inout] right R音声データ
@@ -94,13 +98,8 @@ public:
     for (uint32_t i = 0; i < size; ++i)
     {
       float fx = right[i];
-      fx = hpfBass.process(fx);   // 入力ローカット BASS
-      fx = lpfFixed.process(fx);  // 入力ハイカット 固定値
-      fx = gain_ * fx;            // GAIN
-      fx = atanf(fx + 0.5f);      // arctanによるクリッピング、非対称化
-      fx = hpfFixed.process(fx);  // 出力ローカット 固定値 直流カット
-      fx = lpfTreble.process(fx); // 出力ハイカット TREBLE
-      fx = level_ * fx;           // LEVEL
+      fx = bqf1.process(fx); // フィルタ実行
+      fx = level_ * fx;      // LEVEL
       right[i] = bypass.process(right[i], fx, true);
     }
   }
@@ -109,7 +108,7 @@ public:
   /// @return 文字数
   uint32_t getName(char *buf) const noexcept override
   {
-    const char name[] = "OverDrive";
+    const char name[] = "FX Template";
     strcpy(buf, name);
     return sizeof(name);
   }
@@ -168,18 +167,35 @@ public:
     switch (n)
     {
     case LEVEL:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[LEVEL].getValue())));
     case GAIN:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[GAIN].getValue())));
-    case TREBLE:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[TREBLE].getValue())));
-    case BASS:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[BASS].getValue())));
+    {
+      int v = static_cast<int>(ui_[n].getValue());
+      if (v <= 0)
+      {
+        return static_cast<uint32_t>(sprintf(buf, "%d", v));
+      }
+      else
+      {
+        return static_cast<uint32_t>(sprintf(buf, "+%d", v));
+      }
+    }
+    case TYPE:
+    {
+      char const *const typeName[] = {"OFF", "PF", "LSF", "HSF", "LPF", "HPF", "BPF", "NF", "APF"};
+      char const *dst = typeName[type_];
+      strcpy(buf, dst);
+      return strlen(dst);
+    }
+    case FREQ:
+      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(10 * ui_[FREQ].getValue())));
+      break;
+    case Q:
+      return sprintf(buf, "%f", ui_[Q].getValue() / 10.0f);
     default:
       return 0;
     }
   }
   /// @brief LED色を取得
   /// @return LED色
-  RGB getColor() const noexcept override { return RGB{0x20, 0x20, 0x00}; }
+  RGB getColor() const noexcept override { return RGB{0x00, 0x20, 0x20}; }
 };

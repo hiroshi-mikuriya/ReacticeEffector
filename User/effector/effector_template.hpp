@@ -1,4 +1,4 @@
-/// @file      effector/tremolo.hpp
+/// @file      effector/effector_template.hpp
 /// @author    SATOH GADGET
 /// @copyright Copyright© 2021 SATOH GADGET
 ///
@@ -7,33 +7,28 @@
 #pragma once
 
 #include "effector_base.h"
-#include "lib_calc.hpp"
-#include "lib_osc.hpp"
 #include <cstdio> // sprintf
 
 namespace satoh
 {
-class Tremolo;
+class EffectorTemplate;
 }
 
-/// @brief Sodiumから拝借したトレモロ
-class satoh::Tremolo : public satoh::EffectorBase
+/// @brief エフェクタークラスの実装参考用テンプレート
+class satoh::EffectorTemplate : public satoh::EffectorBase
 {
   enum
   {
-    LEVEL = 0, ///< レベル
-    RATE,      ///< 周期
-    DEPTH,     ///< 深さ
-    WAVE,      ///< 波形
-    COUNT,     ///< パラメータ総数
+    PARAM0 = 0, ///< パラメータ0
+    PARAM1,     ///< パラメータ1
+    PARAM2,     ///< パラメータ2
+    COUNT,      ///< パラメータ総数
   };
 
   EffectParameter<float> ui_[COUNT]; ///< UIから設定するパラメータ
-  signalSw bypass;                   ///< ポップノイズ対策
-  float level_;                      ///< レベル
-  float wave_;                       ///< 波形
-  float depth_;                      ///< 深さ
-  triangleWave tri;                  ///< 周期
+  float param0_;                     ///< エフェクト処理で使用するパラメータ0
+  float param1_;                     ///< エフェクト処理で使用するパラメータ1
+  float param2_;                     ///< エフェクト処理で使用するパラメータ2
 
   /// @brief UI表示のパラメータを、エフェクト処理で使用する値へ変換する
   /// @param[in] n 更新対象のパラメータ番号
@@ -41,36 +36,29 @@ class satoh::Tremolo : public satoh::EffectorBase
   {
     switch (n)
     {
-    case LEVEL:
-      level_ = logPot(ui_[LEVEL].getValue(), -20.0f, 20.0f); // LEVEL -20～20 dB
+    case PARAM0:
+      param0_ = ui_[PARAM0].getValue(); // TODO 加工して代入する
       break;
-    case RATE:
-    {
-      float rate = 0.01f * (105.0f - ui_[RATE].getValue()); // RATE 周期 1.05～0.05 秒
-      tri.set(1.0f / rate);                                 // 三角波 周波数設定
+    case PARAM1:
+      param1_ = ui_[PARAM1].getValue(); // TODO 加工して代入する
       break;
-    }
-    case DEPTH:
-      depth_ = ui_[DEPTH].getValue() * 0.1f; // DEPTH -10～10 dB
-      break;
-    case WAVE:
-      wave_ = logPot(ui_[WAVE].getValue(), 0.0f, 50.0f); // WAVE 三角波～矩形波変形
+    case PARAM2:
+      param2_ = ui_[PARAM2].getValue(); // TODO 加工して代入する
       break;
     }
   }
 
 public:
   /// @brief コンストラクタ
-  Tremolo() //
+  EffectorTemplate() //
       : ui_({
-            EffectParameter<float>(1, 100, 1, "LEVEL"), //
-            EffectParameter<float>(1, 100, 1, "RATE"),  //
-            EffectParameter<float>(1, 100, 1, "DEPTH"), //
-            EffectParameter<float>(1, 100, 1, "WAVE"),  //
-        }),                                             //
-        level_(0),                                      //
-        wave_(0),                                       //
-        depth_(0)                                       //
+            EffectParameter<float>(1, 100, 40, 1, "P0"), // 最小値1, 最大値100, 初期値40, ステップ1, 表示文字
+            EffectParameter<float>(1, 100, 1, "P1"),     // 最小値1, 最大値100, 初期値省略（最大最小の中間値）, ステップ1, 表示文字
+            EffectParameter<float>(1, 100, 60, 1, "P2"), // 最小値1, 最大値100, 初期値60, ステップ1, 表示文字
+        }),                                              //
+        param0_(0),                                      //
+        param1_(0),                                      //
+        param2_(0)                                       //
   {
     for (uint32_t n = 0; n < COUNT; ++n)
     {
@@ -78,7 +66,7 @@ public:
     }
   }
   /// @brief デストラクタ
-  virtual ~Tremolo() {}
+  virtual ~EffectorTemplate() {}
   /// @brief エフェクト処理実行
   /// @param[inout] left L音声データ
   /// @param[inout] right R音声データ
@@ -87,14 +75,7 @@ public:
   {
     for (uint32_t i = 0; i < size; ++i)
     {
-      float fx = right[i];
-      float gain = 2.0f * tri.output() - 1.0f; // LFO -1～1 三角波
-      gain = wave_ * gain;                     // 三角波を増幅
-      satoh::compress(-1.0f, gain, 1.0f);      // クリッピング（矩形波に近い形へ）
-      gain = depth_ * gain;                    // DEPTH -10～10 dB
-      fx = dbToGain(gain) * fx;                // 音量を揺らす
-      fx = level_ * fx;                        // LEVEL
-      right[i] = bypass.process(right[i], fx, true);
+      // TODO エフェクト処理
     }
   }
   /// @brief エフェクト名を取得
@@ -102,7 +83,7 @@ public:
   /// @return 文字数
   uint32_t getName(char *buf) const noexcept override
   {
-    const char name[] = "Tremolo";
+    const char name[] = "FX Template";
     strcpy(buf, name);
     return sizeof(name);
   }
@@ -160,19 +141,17 @@ public:
   {
     switch (n)
     {
-    case LEVEL:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[LEVEL].getValue())));
-    case RATE:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[RATE].getValue())));
-    case WAVE:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[WAVE].getValue())));
-    case DEPTH:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[DEPTH].getValue())));
+    case PARAM0:
+      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[PARAM0].getValue())));
+    case PARAM1:
+      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[PARAM1].getValue())));
+    case PARAM2:
+      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[PARAM2].getValue())));
     default:
       return 0;
     }
   }
   /// @brief LED色を取得
   /// @return LED色
-  RGB getColor() const noexcept override { return RGB{0x00, 0x20, 0x00}; }
+  RGB getColor() const noexcept override { return RGB{0x20, 0x20, 0x20}; }
 };

@@ -50,7 +50,7 @@ uint8_t getLevel(uint16_t v)
 {
   for (uint8_t i = 0; i < 7; ++i)
   {
-    uint16_t th = 1 << (i + 7);
+    uint16_t th = 0b11111 << i;
     if (v < th)
     {
       return i;
