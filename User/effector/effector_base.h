@@ -15,6 +15,7 @@ namespace satoh
 class EffectorBase;
 template <typename T>
 class EffectParameter;
+typedef EffectParameter<float> EffectParameterF;
 
 /// @brief データ圧縮
 /// @param[in] min 最小値
@@ -51,16 +52,23 @@ public:
   /// @brief パラメータ数を取得
   /// @return パラメータ数
   virtual uint32_t getParamCount() const noexcept = 0;
+  /// @brief パラメータ取得
+  /// @param[in] n 取得対象のパラメータ番号
+  virtual float getParam(uint32_t n) const noexcept = 0;
+  /// @brief パラメータ設定
+  /// @param[in] n 設定対象のパラメータ番号
+  /// @param[in] v 値
+  virtual void setParam(uint32_t n, float v) noexcept = 0;
   /// @brief パラメータ加算
   /// @param[in] n 加算対象のパラメータ番号
   virtual void incrementParam(uint32_t n) noexcept = 0;
   /// @brief パラメータ減算
   /// @param[in] n 減算対象のパラメータ番号
   virtual void decrementParam(uint32_t n) noexcept = 0;
-  /// @brief パラメータ設定
+  /// @brief パラメータ比率設定
   /// @param[in] n 設定対象のパラメータ番号
-  /// @param[in] ratio 比率（0.0f 〜 1.0f）
-  virtual void setParam(uint32_t n, float ratio) noexcept = 0;
+  /// @param[in] ratio 比率（最小値 0.0f 〜 1.0f 最大値）
+  virtual void setParamRatio(uint32_t n, float ratio) noexcept = 0;
   /// @brief パラメータ名文字列取得
   /// @param[in] n パラメータ番号
   /// @param[out] buf 文字列格納先
@@ -145,8 +153,15 @@ public:
     compress();
   }
   /// @brief 値を設定する
-  /// @param[in] ratio 比率（0.0f 〜 1.0f）
-  void setValue(float ratio) noexcept
+  /// @param[in] v 値
+  void setValue(T v) noexcept
+  {
+    v_ = v;
+    compress();
+  }
+  /// @brief 値を比率で設定する
+  /// @param[in] ratio 比率（最小値 0.0f 〜 1.0f 最大値）
+  void setValueRatio(float ratio) noexcept
   {
     v_ = (max_ - min_) * ratio + min_;
     compress();

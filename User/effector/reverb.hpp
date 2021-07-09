@@ -34,7 +34,7 @@ class satoh::Reverb : public satoh::EffectorBase
   // ディレイタイム配列
   const float dt[10] = {43.5337, 25.796, 19.392, 16.364, 7.645, 4.2546, 58.6435, 69.4325, 74.5234, 86.1244};
 
-  EffectParameter<float> ui_[COUNT]; ///< UIから設定するパラメータ
+  EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
   signalSw bypassIn;
   signalSw bypassOutL;
   signalSw bypassOutR;
@@ -48,8 +48,8 @@ class satoh::Reverb : public satoh::EffectorBase
   float fback_;
 
   /// @brief UI表示のパラメータを、エフェクト処理で使用する値へ変換する
-  /// @param[in] n 更新対象のパラメータ番号
-  void update(uint32_t n)
+  /// @param[in] n 変換対象のパラメータ番号
+  void convUiToFx(uint32_t n)
   {
     switch (n)
     {
@@ -91,20 +91,20 @@ public:
   /// @brief コンストラクタ
   Reverb() //
       : ui_({
-            EffectParameter<float>(0, 100, 1, "LEVEL"),  //
-            EffectParameter<float>(0, 100, 1, "MIX"),    //
-            EffectParameter<float>(0, 99, 1, "F.BACK"),  //
-            EffectParameter<float>(0, 100, 1, "HiCUT"),  //
-            EffectParameter<float>(0, 100, 1, "LoCUT"),  //
-            EffectParameter<float>(0, 100, 1, "HiDUMP"), //
-        }),                                              //
-        level_(0),                                       //
-        mix_(0),                                         //
-        fback_(0)                                        //
+            EffectParameterF(0, 100, 1, "LEVEL"),  //
+            EffectParameterF(0, 100, 1, "MIX"),    //
+            EffectParameterF(0, 99, 1, "F.BACK"),  //
+            EffectParameterF(0, 100, 1, "HiCUT"),  //
+            EffectParameterF(0, 100, 1, "LoCUT"),  //
+            EffectParameterF(0, 100, 1, "HiDUMP"), //
+        }),                                        //
+        level_(0),                                 //
+        mix_(0),                                   //
+        fback_(0)                                  //
   {
     for (uint32_t n = 0; n < COUNT; ++n)
     {
-      update(n);
+      convUiToFx(n);
     }
     for (int i = 0; i < 10; i++)
     {
@@ -188,6 +188,13 @@ public:
   /// @brief パラメータ数を取得
   /// @return パラメータ数
   uint32_t getParamCount() const noexcept override { return COUNT; }
+  /// @brief パラメータ取得
+  /// @param[in] n 取得対象のパラメータ番号
+  float getParam(uint32_t n) const noexcept override { return ui_[n].getValue(); }
+  /// @brief パラメータ設定
+  /// @param[in] n 設定対象のパラメータ番号
+  /// @param[in] v 値
+  void setParam(uint32_t n, float v) noexcept { ui_[n].setValue(v); }
   /// @brief パラメータ加算
   /// @param[in] n 加算対象のパラメータ番号
   void incrementParam(uint32_t n) noexcept override
@@ -195,7 +202,7 @@ public:
     if (n < COUNT)
     {
       ui_[n].increment();
-      update(n);
+      convUiToFx(n);
     }
   }
   /// @brief パラメータ減算
@@ -205,18 +212,18 @@ public:
     if (n < COUNT)
     {
       ui_[n].decrement();
-      update(n);
+      convUiToFx(n);
     }
   }
   /// @brief パラメータ設定
   /// @param[in] n 設定対象のパラメータ番号
   /// @param[in] ratio 比率（0.0f 〜 1.0f）
-  void setParam(uint32_t n, float ratio) noexcept override
+  void setParamRatio(uint32_t n, float ratio) noexcept override
   {
     if (n < COUNT)
     {
       ui_[n].setValue(ratio);
-      update(n);
+      convUiToFx(n);
     }
   }
   /// @brief パラメータ名文字列取得

@@ -25,14 +25,14 @@ class satoh::EffectorTemplate : public satoh::EffectorBase
     COUNT,      ///< パラメータ総数
   };
 
-  EffectParameter<float> ui_[COUNT]; ///< UIから設定するパラメータ
-  float param0_;                     ///< エフェクト処理で使用するパラメータ0
-  float param1_;                     ///< エフェクト処理で使用するパラメータ1
-  float param2_;                     ///< エフェクト処理で使用するパラメータ2
+  EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
+  float param0_;               ///< エフェクト処理で使用するパラメータ0
+  float param1_;               ///< エフェクト処理で使用するパラメータ1
+  float param2_;               ///< エフェクト処理で使用するパラメータ2
 
   /// @brief UI表示のパラメータを、エフェクト処理で使用する値へ変換する
-  /// @param[in] n 更新対象のパラメータ番号
-  void update(uint32_t n)
+  /// @param[in] n 変換対象のパラメータ番号
+  void convUiToFx(uint32_t n)
   {
     switch (n)
     {
@@ -52,17 +52,17 @@ public:
   /// @brief コンストラクタ
   EffectorTemplate() //
       : ui_({
-            EffectParameter<float>(1, 100, 40, 1, "P0"), // 最小値1, 最大値100, 初期値40, ステップ1, 表示文字
-            EffectParameter<float>(1, 100, 1, "P1"),     // 最小値1, 最大値100, 初期値省略（最大最小の中間値）, ステップ1, 表示文字
-            EffectParameter<float>(1, 100, 60, 1, "P2"), // 最小値1, 最大値100, 初期値60, ステップ1, 表示文字
-        }),                                              //
-        param0_(0),                                      //
-        param1_(0),                                      //
-        param2_(0)                                       //
+            EffectParameterF(1, 100, 40, 1, "P0"), // 最小値1, 最大値100, 初期値40, ステップ1, 表示文字
+            EffectParameterF(1, 100, 1, "P1"),     // 最小値1, 最大値100, 初期値省略（最大最小の中間値）, ステップ1, 表示文字
+            EffectParameterF(1, 100, 60, 1, "P2"), // 最小値1, 最大値100, 初期値60, ステップ1, 表示文字
+        }),                                        //
+        param0_(0),                                //
+        param1_(0),                                //
+        param2_(0)                                 //
   {
     for (uint32_t n = 0; n < COUNT; ++n)
     {
-      update(n);
+      convUiToFx(n);
     }
   }
   /// @brief デストラクタ
@@ -90,6 +90,13 @@ public:
   /// @brief パラメータ数を取得
   /// @return パラメータ数
   uint32_t getParamCount() const noexcept override { return COUNT; }
+  /// @brief パラメータ取得
+  /// @param[in] n 取得対象のパラメータ番号
+  float getParam(uint32_t n) const noexcept override { return ui_[n].getValue(); }
+  /// @brief パラメータ設定
+  /// @param[in] n 設定対象のパラメータ番号
+  /// @param[in] v 値
+  void setParam(uint32_t n, float v) noexcept { ui_[n].setValue(v); }
   /// @brief パラメータ加算
   /// @param[in] n 加算対象のパラメータ番号
   void incrementParam(uint32_t n) noexcept override
@@ -97,7 +104,7 @@ public:
     if (n < COUNT)
     {
       ui_[n].increment();
-      update(n);
+      convUiToFx(n);
     }
   }
   /// @brief パラメータ減算
@@ -107,18 +114,18 @@ public:
     if (n < COUNT)
     {
       ui_[n].decrement();
-      update(n);
+      convUiToFx(n);
     }
   }
   /// @brief パラメータ設定
   /// @param[in] n 設定対象のパラメータ番号
   /// @param[in] ratio 比率（0.0f 〜 1.0f）
-  void setParam(uint32_t n, float ratio) noexcept override
+  void setParamRatio(uint32_t n, float ratio) noexcept override
   {
     if (n < COUNT)
     {
       ui_[n].setValue(ratio);
-      update(n);
+      convUiToFx(n);
     }
   }
   /// @brief パラメータ名文字列取得

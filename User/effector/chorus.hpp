@@ -32,8 +32,8 @@ class satoh::Chorus : public satoh::EffectorBase
     COUNT,     ///< パラメータ総数
   };
 
-  EffectParameter<float> ui_[COUNT]; ///< UIから設定するパラメータ
-  signalSw bypass;                   ///< ポップノイズ対策
+  EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
+  signalSw bypass;             ///< ポップノイズ対策
   sineWave sin1;
   delayBufF del1;
   hpf hpf1;
@@ -45,8 +45,8 @@ class satoh::Chorus : public satoh::EffectorBase
   float depth_;
 
   /// @brief UI表示のパラメータを、エフェクト処理で使用する値へ変換する
-  /// @param[in] n 更新対象のパラメータ番号
-  void update(uint32_t n)
+  /// @param[in] n 変換対象のパラメータ番号
+  void convUiToFx(uint32_t n)
   {
     switch (n)
     {
@@ -82,23 +82,23 @@ public:
   /// @brief コンストラクタ
   Chorus() //
       : ui_({
-            EffectParameter<float>(1, 100, 1, "LEVEL"), //
-            EffectParameter<float>(1, 100, 1, "MIX"),   //
-            EffectParameter<float>(1, 99, 1, "F.BACK"), //
-            EffectParameter<float>(1, 100, 1, "RATE"),  //
-            EffectParameter<float>(1, 100, 1, "DEPTH"), //
-            EffectParameter<float>(1, 100, 1, "TONE"),  //
-        }),                                             //
-        level_(0),                                      //
-        mix_(0),                                        //
-        fback_(0),                                      //
-        depth_(0)                                       //
+            EffectParameterF(1, 100, 1, "LEVEL"), //
+            EffectParameterF(1, 100, 1, "MIX"),   //
+            EffectParameterF(1, 99, 1, "F.BACK"), //
+            EffectParameterF(1, 100, 1, "RATE"),  //
+            EffectParameterF(1, 100, 1, "DEPTH"), //
+            EffectParameterF(1, 100, 1, "TONE"),  //
+        }),                                       //
+        level_(0),                                //
+        mix_(0),                                  //
+        fback_(0),                                //
+        depth_(0)                                 //
   {
     del1.set(20.0f);  // 最大ディレイタイム設定
     hpf1.set(100.0f); // ディレイ音のローカット設定
     for (uint32_t n = 0; n < COUNT; ++n)
     {
-      update(n);
+      convUiToFx(n);
     }
   }
   /// @brief デストラクタ
@@ -134,6 +134,13 @@ public:
   /// @brief パラメータ数を取得
   /// @return パラメータ数
   uint32_t getParamCount() const noexcept override { return COUNT; }
+  /// @brief パラメータ取得
+  /// @param[in] n 取得対象のパラメータ番号
+  float getParam(uint32_t n) const noexcept override { return ui_[n].getValue(); }
+  /// @brief パラメータ設定
+  /// @param[in] n 設定対象のパラメータ番号
+  /// @param[in] v 値
+  void setParam(uint32_t n, float v) noexcept { ui_[n].setValue(v); }
   /// @brief パラメータ加算
   /// @param[in] n 加算対象のパラメータ番号
   void incrementParam(uint32_t n) noexcept override
@@ -141,7 +148,7 @@ public:
     if (n < COUNT)
     {
       ui_[n].increment();
-      update(n);
+      convUiToFx(n);
     }
   }
   /// @brief パラメータ減算
@@ -151,18 +158,18 @@ public:
     if (n < COUNT)
     {
       ui_[n].decrement();
-      update(n);
+      convUiToFx(n);
     }
   }
   /// @brief パラメータ設定
   /// @param[in] n 設定対象のパラメータ番号
   /// @param[in] ratio 比率（0.0f 〜 1.0f）
-  void setParam(uint32_t n, float ratio) noexcept override
+  void setParamRatio(uint32_t n, float ratio) noexcept override
   {
     if (n < COUNT)
     {
       ui_[n].setValue(ratio);
-      update(n);
+      convUiToFx(n);
     }
   }
   /// @brief パラメータ名文字列取得

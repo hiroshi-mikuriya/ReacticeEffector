@@ -27,21 +27,21 @@ class satoh::Distortion : public satoh::EffectorBase
     COUNT,     ///< パラメータ総数
   };
 
-  EffectParameter<float> ui_[COUNT]; ///< UIから設定するパラメータ
-  signalSw bypass;                   ///< ポップノイズ対策
-  hpf hpf1;                          ///< ローカット1
-  hpf hpf2;                          ///< ローカット2
-  hpf hpfTone;                       ///< ローカットトーン調整用
-  lpf lpf1;                          ///< ハイカット1
-  lpf lpf2;                          ///< ハイカット2
-  lpf lpfTone;                       ///< ハイカットトーン調整用
-  float level_;                      ///< レベル
-  float gain_;                       ///< ゲイン
-  float tone_;                       ///< トーン
+  EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
+  signalSw bypass;             ///< ポップノイズ対策
+  hpf hpf1;                    ///< ローカット1
+  hpf hpf2;                    ///< ローカット2
+  hpf hpfTone;                 ///< ローカットトーン調整用
+  lpf lpf1;                    ///< ハイカット1
+  lpf lpf2;                    ///< ハイカット2
+  lpf lpfTone;                 ///< ハイカットトーン調整用
+  float level_;                ///< レベル
+  float gain_;                 ///< ゲイン
+  float tone_;                 ///< トーン
 
   /// @brief UI表示のパラメータを、エフェクト処理で使用する値へ変換する
-  /// @param[in] n 更新対象のパラメータ番号
-  void update(uint32_t n)
+  /// @param[in] n 変換対象のパラメータ番号
+  void convUiToFx(uint32_t n)
   {
     switch (n)
     {
@@ -61,12 +61,12 @@ public:
   /// @brief コンストラクタ
   Distortion() //
       : ui_({
-            EffectParameter<float>(1, 100, 1, "LEVEL"), //
-            EffectParameter<float>(1, 100, 1, "GAIN"),  //
-            EffectParameter<float>(1, 100, 1, "TONE"),  //
-        }),                                             //
-        level_(0),                                      //
-        gain_(0)                                        //
+            EffectParameterF(1, 100, 1, "LEVEL"), //
+            EffectParameterF(1, 100, 1, "GAIN"),  //
+            EffectParameterF(1, 100, 1, "TONE"),  //
+        }),                                       //
+        level_(0),                                //
+        gain_(0)                                  //
   {
     lpf1.set(5000.0f);    // ハイカット1 固定値
     lpf2.set(4000.0f);    // ハイカット2 固定値
@@ -76,7 +76,7 @@ public:
     hpfTone.set(1000.0f); // TONE用ローカット 固定値
     for (uint32_t n = 0; n < COUNT; ++n)
     {
-      update(n);
+      convUiToFx(n);
     }
   }
   /// @brief デストラクタ
@@ -123,6 +123,13 @@ public:
   /// @brief パラメータ数を取得
   /// @return パラメータ数
   uint32_t getParamCount() const noexcept override { return COUNT; }
+  /// @brief パラメータ取得
+  /// @param[in] n 取得対象のパラメータ番号
+  float getParam(uint32_t n) const noexcept override { return ui_[n].getValue(); }
+  /// @brief パラメータ設定
+  /// @param[in] n 設定対象のパラメータ番号
+  /// @param[in] v 値
+  void setParam(uint32_t n, float v) noexcept { ui_[n].setValue(v); }
   /// @brief パラメータ加算
   /// @param[in] n 加算対象のパラメータ番号
   void incrementParam(uint32_t n) noexcept override
@@ -130,7 +137,7 @@ public:
     if (n < COUNT)
     {
       ui_[n].increment();
-      update(n);
+      convUiToFx(n);
     }
   }
   /// @brief パラメータ減算
@@ -140,18 +147,18 @@ public:
     if (n < COUNT)
     {
       ui_[n].decrement();
-      update(n);
+      convUiToFx(n);
     }
   }
   /// @brief パラメータ設定
   /// @param[in] n 設定対象のパラメータ番号
   /// @param[in] ratio 比率（0.0f 〜 1.0f）
-  void setParam(uint32_t n, float ratio) noexcept override
+  void setParamRatio(uint32_t n, float ratio) noexcept override
   {
     if (n < COUNT)
     {
       ui_[n].setValue(ratio);
-      update(n);
+      convUiToFx(n);
     }
   }
   /// @brief パラメータ名文字列取得

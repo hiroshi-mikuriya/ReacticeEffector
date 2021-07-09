@@ -27,16 +27,16 @@ class satoh::Phaser : public satoh::EffectorBase
     COUNT,     ///< パラメータ総数
   };
 
-  EffectParameter<float> ui_[COUNT]; ///< UIから設定するパラメータ
-  signalSw bypass;                   ///< ポップノイズ対策
+  EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
+  signalSw bypass;             ///< ポップノイズ対策
   triangleWave tri;
   apf apfx[12];
   float level_; ///< レベル
   float stage_; ///< ステージ
 
   /// @brief UI表示のパラメータを、エフェクト処理で使用する値へ変換する
-  /// @param[in] n 更新対象のパラメータ番号
-  void update(uint32_t n)
+  /// @param[in] n 変換対象のパラメータ番号
+  void convUiToFx(uint32_t n)
   {
     switch (n)
     {
@@ -59,14 +59,14 @@ public:
   /// @brief コンストラクタ
   Phaser() //
       : ui_({
-            EffectParameter<float>(0, 100, 1, "LEVEL"), //
-            EffectParameter<float>(0, 100, 1, "RATE"),  //
-            EffectParameter<float>(1, 6, 1, "STAGE"),   //
-        })                                              //
+            EffectParameterF(0, 100, 1, "LEVEL"), //
+            EffectParameterF(0, 100, 1, "RATE"),  //
+            EffectParameterF(1, 6, 1, "STAGE"),   //
+        })                                        //
   {
     for (uint32_t n = 0; n < COUNT; ++n)
     {
-      update(n);
+      convUiToFx(n);
     }
   }
   /// @brief デストラクタ
@@ -104,6 +104,13 @@ public:
   /// @brief パラメータ数を取得
   /// @return パラメータ数
   uint32_t getParamCount() const noexcept override { return COUNT; }
+  /// @brief パラメータ取得
+  /// @param[in] n 取得対象のパラメータ番号
+  float getParam(uint32_t n) const noexcept override { return ui_[n].getValue(); }
+  /// @brief パラメータ設定
+  /// @param[in] n 設定対象のパラメータ番号
+  /// @param[in] v 値
+  void setParam(uint32_t n, float v) noexcept { ui_[n].setValue(v); }
   /// @brief パラメータ加算
   /// @param[in] n 加算対象のパラメータ番号
   void incrementParam(uint32_t n) noexcept override
@@ -111,7 +118,7 @@ public:
     if (n < COUNT)
     {
       ui_[n].increment();
-      update(n);
+      convUiToFx(n);
     }
   }
   /// @brief パラメータ減算
@@ -121,18 +128,18 @@ public:
     if (n < COUNT)
     {
       ui_[n].decrement();
-      update(n);
+      convUiToFx(n);
     }
   }
   /// @brief パラメータ設定
   /// @param[in] n 設定対象のパラメータ番号
   /// @param[in] ratio 比率（0.0f 〜 1.0f）
-  void setParam(uint32_t n, float ratio) noexcept override
+  void setParamRatio(uint32_t n, float ratio) noexcept override
   {
     if (n < COUNT)
     {
       ui_[n].setValue(ratio);
-      update(n);
+      convUiToFx(n);
     }
   }
   /// @brief パラメータ名文字列取得
