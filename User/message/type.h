@@ -170,12 +170,16 @@ struct satoh::msg::OLED_DISP_EFFECTOR
 {
   /// 表示するエフェクター
   EffectorBase *fx;
+  /// パッチ番号
+  uint8_t patch;
+  /// ON/OFF
+  bool active;
 };
 /// OLED - エフェクターパラメータ一選択表示依頼型
 struct satoh::msg::OLED_SELECT_PARAM
 {
-  /// 選択するパラメータ番号
-  uint32_t paramNum;
+  /// 選択中のパラメータ番号
+  uint8_t paramNum;
 };
 /// NeoPixel - 点灯パターン指定型
 struct satoh::msg::NEO_PIXEL_PATTERN

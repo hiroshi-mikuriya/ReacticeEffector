@@ -168,27 +168,29 @@ void satoh::SSD1306::drawEffectPage() noexcept
     return;
   }
   char txt[16] = {0};
-  effector_->getName(txt);
-  drawString(txt, titleFont, false, 0, 0, disp);
+  {
+    // タイトル表示
+    sprintf(txt, "P%d ", patch_);
+    drawString(txt, paramFont, false, 0, 0, disp);
+    effector_->getName(txt);
+    drawString(txt, titleFont, active_, paramFont.width * 3, 0, disp);
+  }
   uint32_t n = 0;
   for (uint8_t col = 0; col < 2; ++col)
   {
-    for (uint8_t row = 0; row < 3; ++row, ++n)
+    for (uint8_t row = 0; row < 3 && n < effector_->getParamCount(); ++row, ++n)
     {
-      if (n < effector_->getParamCount())
+      uint8_t y = titleFont.height + 6 + row * (paramFont.height + 5);
+      uint8_t cx = col * WIDTH / 2;
+      effector_->getParamName(n, txt);
+      drawString(txt, paramFont, n == selectedParam_, cx, y, disp);
+      uint32_t len = effector_->getValueTxt(n, txt);
+      uint8_t px = cx + 43;
+      if (2 < len)
       {
-        uint8_t y = titleFont.height + 6 + row * (paramFont.height + 5);
-        uint8_t cx = col * WIDTH / 2;
-        effector_->getParamName(n, txt);
-        drawString(txt, paramFont, n == selectedParam_, cx, y, disp);
-        uint32_t len = effector_->getValueTxt(n, txt);
-        uint8_t px = cx + 43;
-        if (2 < len)
-        {
-          px -= paramFont.width * (len - 2); // 3ケタ以上の数値を左にずらして全体が表示されるようにする
-        }
-        drawString(txt, paramFont, false, px, y, disp);
+        px -= paramFont.width * (len - 2); // 3ケタ以上の数値を左にずらして全体が表示されるようにする
       }
+      drawString(txt, paramFont, false, px, y, disp);
     }
   }
 }
@@ -199,7 +201,9 @@ satoh::SSD1306::SSD1306(I2C *i2c) noexcept //
       txbuf_(new uint8_t[WIDTH + 32]),     //
       ok_(init()),                         //
       effector_(0),                        //
-      selectedParam_(0)                    //
+      patch_(0),                           //
+      selectedParam_(0),                   //
+      active_(false)                       //
 {
   if (ok_)
   {
@@ -215,22 +219,30 @@ bool satoh::SSD1306::ok() const noexcept
   return ok_;
 }
 
-bool satoh::SSD1306::setEffector(EffectorBase const *effector) noexcept
+bool satoh::SSD1306::setEffector(EffectorBase const *effector, uint8_t patch, bool active) noexcept
 {
   effector_ = effector;
+  patch_ = patch;
+  active_ = active;
   selectedParam_ = 0;
   drawEffectPage();
   return sendBufferToDevice();
 }
-bool satoh::SSD1306::setParamCursor(uint32_t n) noexcept
+bool satoh::SSD1306::setParamCursor(uint8_t n) noexcept
 {
   selectedParam_ = n;
   drawEffectPage();
-  return sendBufferToDevice();
+  // 変更箇所のページだけ表示を更新することでI2Cの通信量を削減
+  for (uint8_t page = 0; page < 5; ++page)
+  {
+    sendBufferToDevice(page);
+  }
+  return true;
 }
 bool satoh::SSD1306::updateParam() noexcept
 {
   drawEffectPage();
+  // 変更箇所のページだけ表示を更新することでI2Cの通信量を削減
   switch (selectedParam_ % 3)
   {
   case 0:

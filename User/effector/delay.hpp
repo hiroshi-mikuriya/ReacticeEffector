@@ -77,15 +77,6 @@ class satoh::Delay : public satoh::EffectorBase
       break;
     case TAPDIV:
     {
-      float tap = ui_[TAPDIV].getValue();
-      if (tap < 1)
-      {
-        ui_[TAPDIV].increment();
-      }
-      if (4 < tap)
-      {
-        ui_[TAPDIV].decrement();
-      }
       tapDiv_ = static_cast<int>(ui_[TAPDIV].getValue());
       constexpr float tapDivFloat[6] = {1.0f, 1.0f, 0.5f, 0.333333f, 0.75f, 1.0f};
       divTapTime_ = tapTime_ * tapDivFloat[tapDiv_]; // DIV計算済タップ時間
@@ -98,20 +89,21 @@ public:
   /// @brief コンストラクタ
   Delay() //
       : ui_({
-            EffectParameterF(10, 1500, 10, "TIM"), //
-            EffectParameterF(0, 100, 1, "E.LV"),   //
-            EffectParameterF(0, 99, 1, "F.BACK"),  //
-            EffectParameterF(0, 100, 1, "TONE"),   //
-            EffectParameterF(0, 1, 1, "TRAIL"),    //
-            EffectParameterF(0, 5, 1, "DIV"),      //
-        }),                                        //
-        dtime_(0),                                 //
-        fback_(0),                                 //
-        elevel_(0),                                //
-        trail_(0),                                 //
-        divTapTime_(0),                            //
-        tapTime_(0),                               //
-        tapDiv_(0)                                 //
+            EffectParameterF(10, 100, 5, "TIME"), //
+            EffectParameterF(0, 100, 1, "E.LV"),  //
+            EffectParameterF(0, 99, 1, "F.BACK"), //
+            EffectParameterF(0, 100, 1, "TONE"),  //
+            EffectParameterF(0, 1, 1, "TRAIL"),   //
+            EffectParameterF(1, 4, 1, "DIV"),     //
+        }),
+        del1(ui_[DTIME].getMax()), //
+        dtime_(0),                 //
+        fback_(0),                 //
+        elevel_(0),                //
+        trail_(0),                 //
+        divTapTime_(0),            //
+        tapTime_(0),               //
+        tapDiv_(0)                 //
   {
     for (uint32_t n = 0; n < COUNT; ++n)
     {
@@ -236,15 +228,15 @@ public:
     case TRAIL:
       if (ui_[TRAIL].getValue() == 0)
       {
-        constexpr char const *OFF = "OFF";
+        constexpr char const OFF[] = "OFF";
         strcpy(buf, OFF);
-        return sizeof(OFF);
+        return sizeof(OFF) - 1;
       }
       else
       {
-        constexpr char const *ON = "ON";
+        constexpr char const ON[] = "ON";
         strcpy(buf, ON);
-        return sizeof(ON);
+        return sizeof(ON) - 1;
       }
       break;
     case TAPDIV:

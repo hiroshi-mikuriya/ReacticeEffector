@@ -26,8 +26,12 @@ class satoh::SSD1306 : public satoh::I2CDeviceBase
   const bool ok_;
   /// 表示対象エフェクター
   EffectorBase const *effector_;
+  /// パッチ番号
+  uint8_t patch_;
+  /// エフェクターON/OFF
+  bool active_;
   /// 選択中のパラメータ番号
-  uint32_t selectedParam_;
+  uint8_t selectedParam_;
   /// @brief LCD初期化
   /// @retval true 書き込み成功
   /// @retval false 書き込み失敗
@@ -37,7 +41,7 @@ class satoh::SSD1306 : public satoh::I2CDeviceBase
   /// @retval true 書き込み成功
   /// @retval false 書き込み失敗
   bool sendBufferToDevice(uint8_t page) noexcept;
-  /// @brief バッファをOLEDに書き込む
+  /// @brief 全ページ分のバッファをOLEDに書き込む
   /// @retval true 書き込み成功
   /// @retval false 書き込み失敗
   bool sendBufferToDevice() noexcept;
@@ -60,14 +64,16 @@ public:
   /// @param[in] effector
   ///   @arg 0 エフェクターなし
   ///   @arg 0以外 エフェクターのポインタ
+  /// @param[in] patch パッチ番号
+  /// @param[in] active エフェクターON/OFF
   /// @retval true 通信成功
   /// @retval false 通信失敗
-  bool setEffector(EffectorBase const *effector) noexcept;
+  bool setEffector(EffectorBase const *effector, uint8_t patch, bool active) noexcept;
   /// @brief 選択中のエフェクトパラメータのカーソルを指定する
   /// @param[in] n 選択中のエフェクトパラメータ番号
   /// @retval true 通信成功
   /// @retval false 通信失敗
-  bool setParamCursor(uint32_t n) noexcept;
+  bool setParamCursor(uint8_t n) noexcept;
   /// @brief エフェクトパラメータの表示更新（setParamCursorで指定したパラメータのみ更新する）
   /// @retval true 通信成功
   /// @retval false 通信失敗

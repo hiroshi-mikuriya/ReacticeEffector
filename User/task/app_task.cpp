@@ -80,10 +80,10 @@ void appTaskProc(void const *argument)
   typedef std::unique_ptr<satoh::EffectorBase> EffectPtr;
   EffectPtr effectList[] = {
       EffectPtr(new satoh::OverDrive()),  //
-      EffectPtr(new satoh::Distortion()), //
       EffectPtr(new satoh::Chorus()),     //
-      EffectPtr(new satoh::Tremolo()),    //
       EffectPtr(new satoh::Phaser()),     //
+      EffectPtr(new satoh::Tremolo()),    //
+      EffectPtr(new satoh::Distortion()), //
       EffectPtr(new satoh::Oscillator()), //
   };
   {
@@ -145,7 +145,7 @@ void appTaskProc(void const *argument)
     case satoh::msg::EFFECT_KEY_CHANGED_NOTIFY:
     {
       auto *param = reinterpret_cast<satoh::msg::EFFECT_KEY const *>(msg->bytes);
-      for (int i = 0; i < 4; ++i)
+      for (uint8_t i = 0; i < 4; ++i)
       {
         if (param->button[i] == satoh::msg::BUTTON_DOWN)
         {
@@ -160,6 +160,8 @@ void appTaskProc(void const *argument)
             led.rgb[i] = effector.fx[0]->getColor();
           }
           oledEffector.fx = effector.fx[0];
+          oledEffector.patch = i + 1;
+          oledEffector.active = true;
           oledSelect.paramNum = 0;
           satoh::sendMsg(soundTaskHandle, satoh::msg::SOUND_CHANGE_EFFECTOR_REQ, &effector, sizeof(effector));
           satoh::sendMsg(i2cTaskHandle, satoh::msg::LED_ALL_EFFECT_REQ, &led, sizeof(led));
