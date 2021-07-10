@@ -21,16 +21,21 @@ typedef EffectParameter<float> EffectParameterF;
 /// @param[in] min 最小値
 /// @param[inout] v 圧縮対象データ
 /// @param[in] max 最大値
-inline void compress(float min, float &v, float max) noexcept
+/// @retval true 圧縮した
+/// @retval false 圧縮しなかった
+inline bool compress(float min, float &v, float max) noexcept
 {
   if (v < min)
   {
     v = min;
+    return true;
   }
   if (max < v)
   {
     v = max;
+    return true;
   }
+  return false;
 }
 } // namespace satoh
 
@@ -54,21 +59,30 @@ public:
   virtual uint32_t getParamCount() const noexcept = 0;
   /// @brief パラメータ取得
   /// @param[in] n 取得対象のパラメータ番号
+  /// @return パラメータ
   virtual float getParam(uint32_t n) const noexcept = 0;
   /// @brief パラメータ設定
   /// @param[in] n 設定対象のパラメータ番号
   /// @param[in] v 値
-  virtual void setParam(uint32_t n, float v) noexcept = 0;
+  /// @retval true 設定された
+  /// @retval false 元々の値と同じだったため設定されなかった
+  virtual bool setParam(uint32_t n, float v) noexcept = 0;
   /// @brief パラメータ加算
   /// @param[in] n 加算対象のパラメータ番号
-  virtual void incrementParam(uint32_t n) noexcept = 0;
+  /// @retval true 加算した
+  /// @retval false 最大値に到達しているため加算しなかった
+  virtual bool incrementParam(uint32_t n) noexcept = 0;
   /// @brief パラメータ減算
   /// @param[in] n 減算対象のパラメータ番号
-  virtual void decrementParam(uint32_t n) noexcept = 0;
+  /// @retval true 減算した
+  /// @retval false 最小値に到達しているため減算しなかった
+  virtual bool decrementParam(uint32_t n) noexcept = 0;
   /// @brief パラメータ比率設定
   /// @param[in] n 設定対象のパラメータ番号
   /// @param[in] ratio 比率（最小値 0.0f 〜 1.0f 最大値）
-  virtual void setParamRatio(uint32_t n, float ratio) noexcept = 0;
+  /// @retval true 設定された
+  /// @retval false 元々の値と同じだったため設定されなかった
+  virtual bool setParamRatio(uint32_t n, float ratio) noexcept = 0;
   /// @brief パラメータ名文字列取得
   /// @param[in] n パラメータ番号
   /// @param[out] buf 文字列格納先
@@ -97,7 +111,9 @@ class satoh::EffectParameter
   const uint32_t nameLength_; ///< パラメータ文字列長
 
   /// @brief データ圧縮
-  void compress() noexcept { satoh::compress(min_, v_, max_); }
+  /// @retval true 圧縮した
+  /// @retval false 圧縮しなかった
+  bool compress() noexcept { return satoh::compress(min_, v_, max_); }
 
 public:
   /// @brief コンストラクタ
@@ -141,29 +157,54 @@ public:
     return nameLength_;
   }
   /// @brief 加算する
-  void increment() noexcept
+  /// @retval true 加算された
+  /// @retval false 最大値に到達しているため加算されなかった
+  bool increment() noexcept
   {
+    if (v_ == max_)
+    {
+      return false;
+    }
     v_ += step_;
     compress();
+    return true;
   }
   /// @brief 減算する
-  void decrement() noexcept
+  /// @retval true 減算された
+  /// @retval false 最小値に到達しているため減算されなかった
+  bool decrement() noexcept
   {
+    if (v_ == min_)
+    {
+      return false;
+    }
     v_ -= step_;
     compress();
+    return true;
   }
   /// @brief 値を設定する
   /// @param[in] v 値
-  void setValue(T v) noexcept
+  /// @retval true 設定された
+  /// @retval false 元々の値と同じだったため設定されなかった
+  bool setValue(T v) noexcept
   {
+    satoh::compress(min_, v, max_);
+    if (v_ == v)
+    {
+      return false;
+    }
     v_ = v;
     compress();
+    return true;
   }
   /// @brief 値を比率で設定する
   /// @param[in] ratio 比率（最小値 0.0f 〜 1.0f 最大値）
-  void setValueRatio(float ratio) noexcept
+  /// @retval true 設定された
+  /// @retval false 元々の値と同じだったため設定されなかった
+  bool setValueRatio(float ratio) noexcept
   {
-    v_ = (max_ - min_) * ratio + min_;
-    compress();
+    satoh::compress(0.0f, ratio, 1.0f);
+    float v = (max_ - min_) * ratio + min_;
+    return setValue(v);
   }
 };

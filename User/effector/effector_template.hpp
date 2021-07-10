@@ -92,41 +92,62 @@ public:
   uint32_t getParamCount() const noexcept override { return COUNT; }
   /// @brief パラメータ取得
   /// @param[in] n 取得対象のパラメータ番号
+  /// @return パラメータ
   float getParam(uint32_t n) const noexcept override { return ui_[n].getValue(); }
   /// @brief パラメータ設定
   /// @param[in] n 設定対象のパラメータ番号
   /// @param[in] v 値
-  void setParam(uint32_t n, float v) noexcept { ui_[n].setValue(v); }
+  /// @retval true 設定された
+  /// @retval false 元々の値と同じだったため設定されなかった
+  bool setParam(uint32_t n, float v) noexcept { return ui_[n].setValue(v); }
   /// @brief パラメータ加算
   /// @param[in] n 加算対象のパラメータ番号
-  void incrementParam(uint32_t n) noexcept override
+  /// @retval true 加算した
+  /// @retval false 最大値に到達しているため加算しなかった
+  bool incrementParam(uint32_t n) noexcept override
   {
     if (n < COUNT)
     {
-      ui_[n].increment();
-      convUiToFx(n);
+      if (ui_[n].increment())
+      {
+        convUiToFx(n);
+        return true;
+      }
     }
+    return false;
   }
   /// @brief パラメータ減算
   /// @param[in] n 減算対象のパラメータ番号
-  void decrementParam(uint32_t n) noexcept override
+  /// @retval true 減算した
+  /// @retval false 最小値に到達しているため減算しなかった
+  bool decrementParam(uint32_t n) noexcept override
   {
     if (n < COUNT)
     {
-      ui_[n].decrement();
-      convUiToFx(n);
+      if (ui_[n].decrement())
+      {
+        convUiToFx(n);
+        return true;
+      }
     }
+    return false;
   }
-  /// @brief パラメータ設定
+  /// @brief パラメータ比率設定
   /// @param[in] n 設定対象のパラメータ番号
-  /// @param[in] ratio 比率（0.0f 〜 1.0f）
-  void setParamRatio(uint32_t n, float ratio) noexcept override
+  /// @param[in] ratio 比率（最小値 0.0f 〜 1.0f 最大値）
+  /// @retval true 設定された
+  /// @retval false 元々の値と同じだったため設定されなかった
+  bool setParamRatio(uint32_t n, float ratio) noexcept override
   {
     if (n < COUNT)
     {
-      ui_[n].setValue(ratio);
-      convUiToFx(n);
+      if (ui_[n].setValueRatio(ratio))
+      {
+        convUiToFx(n);
+        return true;
+      }
     }
+    return false;
   }
   /// @brief パラメータ名文字列取得
   /// @param[in] n パラメータ番号
