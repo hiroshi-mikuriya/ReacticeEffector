@@ -172,7 +172,7 @@ void oledUpdateEffectorParam(satoh::SSD1306 &oled)
 
 void i2cTaskProc(void const *argument)
 {
-  if (satoh::addMsgTarget(8) != osOK)
+  if (satoh::addMsgTarget(12) != osOK)
   {
     return;
   }

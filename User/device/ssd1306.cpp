@@ -77,44 +77,6 @@ void drawString(char const *str, satoh::FontDef const &font, bool invert, uint8_
     x += font.width;
   }
 }
-/// @brief エフェクトページを書き込む
-/// @param[in] effector エフェクター
-/// @param[in] selectedParam 選択中のパラメータ番号
-/// @param[out] dst 書き込み先
-void drawEffectPage(satoh::EffectorBase const *effector, uint32_t selectedParam, uint8_t *dst) noexcept
-{
-  satoh::FontDef const &titleFont = satoh::Font_11x18;
-  satoh::FontDef const &paramFont = satoh::Font_7x10;
-  if (!effector)
-  {
-    drawString("Bypass", titleFont, false, 0, 0, dst);
-    return;
-  }
-  char txt[16] = {0};
-  effector->getName(txt);
-  drawString(txt, titleFont, false, 0, 0, dst);
-  uint32_t n = 0;
-  for (uint8_t col = 0; col < 2; ++col)
-  {
-    for (uint8_t row = 0; row < 3; ++row, ++n)
-    {
-      if (n < effector->getParamCount())
-      {
-        uint8_t y = titleFont.height + 6 + row * (paramFont.height + 5);
-        uint8_t cx = col * WIDTH / 2;
-        effector->getParamName(n, txt);
-        drawString(txt, paramFont, n == selectedParam, cx, y, dst);
-        uint32_t len = effector->getValueTxt(n, txt);
-        uint8_t px = cx + 43;
-        if (4 < len)
-        {
-          px -= paramFont.width;
-        }
-        drawString(txt, paramFont, false, px, y, dst);
-      }
-    }
-  }
-}
 } // namespace
 
 bool satoh::SSD1306::init() const noexcept
@@ -167,34 +129,68 @@ bool satoh::SSD1306::init() const noexcept
   return write(v, sizeof(v));
 }
 
-bool satoh::SSD1306::updateScreen() noexcept
+bool satoh::SSD1306::sendBufferToDevice(uint8_t page) noexcept
+{
+  uint8_t addr = static_cast<uint8_t>(0xB0 | page);
+  uint8_t v[] = {
+      CTRL_10,   // control byte, Co bit = 1, D/C# = 0 (command)
+      addr,      // set page start address(B0～B7)
+      CTRL_00,   // control byte, Co bit = 0, D/C# = 0 (command)
+      0x21,      // set Column Address
+      0,         // Column Start Address(0-127)
+      WIDTH - 1, // Column Stop Address(0-127)
+  };
+  write(v, sizeof(v), false);
+  uint8_t *tx = txbuf_.get();
+  tx[0] = CTRL_01;
+  memcpy(&tx[1], dispbuf_.get() + page * WIDTH, WIDTH);
+  return write(tx, WIDTH + 1, true);
+}
+
+bool satoh::SSD1306::sendBufferToDevice() noexcept
 {
   for (uint8_t page = 0; page < PAGE; ++page)
   {
-    uint8_t addr = static_cast<uint8_t>(0xB0 | page);
-    uint8_t v[] = {
-        CTRL_10,   // control byte, Co bit = 1, D/C# = 0 (command)
-        addr,      // set page start address(B0～B7)
-        CTRL_00,   // control byte, Co bit = 0, D/C# = 0 (command)
-        0x21,      // set Column Address
-        0,         // Column Start Address(0-127)
-        WIDTH - 1, // Column Stop Address(0-127)
-    };
-    write(v, sizeof(v), false);
-    uint8_t *tx = txbuf_.get();
-    tx[0] = CTRL_01;
-    memcpy(&tx[1], dispbuf_.get() + page * WIDTH, WIDTH);
-    write(tx, WIDTH + 1, true);
+    sendBufferToDevice(page);
   }
-  return true; // TODO ちゃんと確認しろ
+  return true;
 }
 
-bool satoh::SSD1306::showEffectPage() noexcept
+void satoh::SSD1306::drawEffectPage() noexcept
 {
   uint8_t *disp = dispbuf_.get();
   memset(disp, 0, BUF_SIZE);
-  drawEffectPage(effector_, selectedParam_, disp);
-  return updateScreen();
+  satoh::FontDef const &titleFont = satoh::Font_11x18;
+  satoh::FontDef const &paramFont = satoh::Font_7x10;
+  if (!effector_)
+  {
+    drawString("Bypass", titleFont, false, 0, 0, disp);
+    return;
+  }
+  char txt[16] = {0};
+  effector_->getName(txt);
+  drawString(txt, titleFont, false, 0, 0, disp);
+  uint32_t n = 0;
+  for (uint8_t col = 0; col < 2; ++col)
+  {
+    for (uint8_t row = 0; row < 3; ++row, ++n)
+    {
+      if (n < effector_->getParamCount())
+      {
+        uint8_t y = titleFont.height + 6 + row * (paramFont.height + 5);
+        uint8_t cx = col * WIDTH / 2;
+        effector_->getParamName(n, txt);
+        drawString(txt, paramFont, n == selectedParam_, cx, y, disp);
+        uint32_t len = effector_->getValueTxt(n, txt);
+        uint8_t px = cx + 43;
+        if (2 < len)
+        {
+          px -= paramFont.width * (len - 2); // 3ケタ以上の数値を左にずらして全体が表示されるようにする
+        }
+        drawString(txt, paramFont, false, px, y, disp);
+      }
+    }
+  }
 }
 
 satoh::SSD1306::SSD1306(I2C *i2c) noexcept //
@@ -207,7 +203,8 @@ satoh::SSD1306::SSD1306(I2C *i2c) noexcept //
 {
   if (ok_)
   {
-    showEffectPage();
+    drawEffectPage();
+    sendBufferToDevice();
   }
 }
 
@@ -222,14 +219,27 @@ bool satoh::SSD1306::setEffector(EffectorBase const *effector) noexcept
 {
   effector_ = effector;
   selectedParam_ = 0;
-  return showEffectPage();
+  drawEffectPage();
+  return sendBufferToDevice();
 }
 bool satoh::SSD1306::setParamCursor(uint32_t n) noexcept
 {
   selectedParam_ = n;
-  return showEffectPage();
+  drawEffectPage();
+  return sendBufferToDevice();
 }
 bool satoh::SSD1306::updateParam() noexcept
 {
-  return showEffectPage();
+  drawEffectPage();
+  switch (selectedParam_ % 3)
+  {
+  case 0:
+    return sendBufferToDevice(4) && sendBufferToDevice(5);
+  case 1:
+    return sendBufferToDevice(2) && sendBufferToDevice(3);
+  case 2:
+    return sendBufferToDevice(0) && sendBufferToDevice(1);
+  default:
+    return false;
+  }
 }

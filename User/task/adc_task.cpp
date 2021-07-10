@@ -48,10 +48,10 @@ public:
 /// @return レベル
 uint8_t getLevel(uint16_t v)
 {
+  constexpr uint16_t th[] = {181, 256, 362, 512, 724, 1024, 1448, 2048};
   for (uint8_t i = 0; i < 7; ++i)
   {
-    uint16_t th = 0b11111 << i;
-    if (v < th)
+    if (v < th[i])
     {
       return i;
     }

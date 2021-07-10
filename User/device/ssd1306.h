@@ -32,14 +32,17 @@ class satoh::SSD1306 : public satoh::I2CDeviceBase
   /// @retval true 書き込み成功
   /// @retval false 書き込み失敗
   bool init() const noexcept;
+  /// @brief ページ分のバッファをOLEDに書き込む
+  /// @param[in] page ページ番号（0〜7）
+  /// @retval true 書き込み成功
+  /// @retval false 書き込み失敗
+  bool sendBufferToDevice(uint8_t page) noexcept;
   /// @brief バッファをOLEDに書き込む
   /// @retval true 書き込み成功
   /// @retval false 書き込み失敗
-  bool updateScreen() noexcept;
-  /// @brief エフェクトページ表示
-  /// @retval true 書き込み成功
-  /// @retval false 書き込み失敗
-  bool showEffectPage() noexcept;
+  bool sendBufferToDevice() noexcept;
+  /// @brief エフェクトページをバッファに書き込む
+  void drawEffectPage() noexcept;
 
 public:
   /// @brief コンストラクタ
