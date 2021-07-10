@@ -5,6 +5,7 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "ssd1306.h"
+#include "fonts.h"
 #include <cstring> // memset
 
 namespace
@@ -17,6 +18,103 @@ constexpr uint8_t WIDTH = 128;
 constexpr uint8_t HEIGHT = 64;
 constexpr uint8_t PAGE = 8;
 constexpr uint32_t BUF_SIZE = WIDTH * HEIGHT / 8;
+/// @brief １ピクセル書き込む
+/// @param[in] color 色
+/// @param[in] x X位置
+/// @param[in] y Y位置
+/// @param[out] dst 書き込み先
+void drawPixel(uint8_t color, uint8_t x, uint8_t y, uint8_t *dst) noexcept
+{
+  if (x < WIDTH && y < HEIGHT)
+  {
+    uint8_t xx = WIDTH - x - 1;
+    uint8_t yy = HEIGHT - y - 1;
+    if (color)
+    {
+      dst[xx + (yy / 8) * WIDTH] |= 1 << (yy % 8);
+    }
+    else
+    {
+      dst[xx + (yy / 8) * WIDTH] &= ~(1 << (yy % 8));
+    }
+  }
+}
+/// @brief １文字書き込む
+/// @param[in] ch １文字
+/// @param[in] font フォントデータ
+/// @param[in] invert 反転有無
+/// @param[in] x X位置
+/// @param[in] y Y位置
+/// @param[out] dst 書き込み先
+void drawChar(char ch, satoh::FontDef const &font, bool invert, uint8_t x, uint8_t y, uint8_t *dst) noexcept
+{
+  for (uint8_t dy = 0; dy < font.height; ++dy)
+  {
+    uint16_t b = font.data[(ch - 32) * font.height + dy];
+    for (uint8_t dx = 0; dx < font.width; ++dx)
+    {
+      uint8_t color = (b << dx) & 0x8000 ? 1 : 0;
+      if (invert)
+      {
+        color = !color;
+      }
+      drawPixel(color, x + dx, y + dy, dst);
+    }
+  }
+}
+/// @brief 文字列を書き込む
+/// @param[in] str 文字列
+/// @param[in] font フォントデータ
+/// @param[in] invert 反転有無
+/// @param[in] x X位置
+/// @param[in] y Y位置
+/// @param[out] dst 書き込み先
+void drawString(char const *str, satoh::FontDef const &font, bool invert, uint8_t x, uint8_t y, uint8_t *dst) noexcept
+{
+  for (char const *p = str; *p; ++p)
+  {
+    drawChar(*p, font, invert, x, y, dst);
+    x += font.width;
+  }
+}
+/// @brief エフェクトページを書き込む
+/// @param[in] effector エフェクター
+/// @param[in] selectedParam 選択中のパラメータ番号
+/// @param[out] dst 書き込み先
+void drawEffectPage(satoh::EffectorBase const *effector, uint32_t selectedParam, uint8_t *dst) noexcept
+{
+  satoh::FontDef const &titleFont = satoh::Font_11x18;
+  satoh::FontDef const &paramFont = satoh::Font_7x10;
+  if (!effector)
+  {
+    drawString("Bypass", titleFont, false, 0, 0, dst);
+    return;
+  }
+  char txt[16] = {0};
+  effector->getName(txt);
+  drawString(txt, titleFont, false, 0, 0, dst);
+  uint32_t n = 0;
+  for (uint8_t col = 0; col < 2; ++col)
+  {
+    for (uint8_t row = 0; row < 3; ++row, ++n)
+    {
+      if (n < effector->getParamCount())
+      {
+        uint8_t y = titleFont.height + 6 + row * (paramFont.height + 5);
+        uint8_t cx = col * WIDTH / 2;
+        effector->getParamName(n, txt);
+        drawString(txt, paramFont, n == selectedParam, cx, y, dst);
+        uint32_t len = effector->getValueTxt(n, txt);
+        uint8_t px = cx + 43;
+        if (4 < len)
+        {
+          px -= paramFont.width;
+        }
+        drawString(txt, paramFont, false, px, y, dst);
+      }
+    }
+  }
+}
 } // namespace
 
 bool satoh::SSD1306::init() const noexcept
@@ -69,17 +167,12 @@ bool satoh::SSD1306::init() const noexcept
   return write(v, sizeof(v));
 }
 
-namespace
-{
-constexpr uint8_t DotB1[8] = {0b11111111, 0b00000111, 0b11111111, 0b00000011, 0b00000101, 0b00001001, 0b00010001, 0b00100001};
-}
-
-void satoh::SSD1306::updateScreen()
+bool satoh::SSD1306::updateScreen() noexcept
 {
   for (uint8_t page = 0; page < PAGE; ++page)
   {
     uint8_t addr = static_cast<uint8_t>(0xB0 | page);
-    uint8_t v0[] = {
+    uint8_t v[] = {
         CTRL_10,   // control byte, Co bit = 1, D/C# = 0 (command)
         addr,      // set page start address(B0～B7)
         CTRL_00,   // control byte, Co bit = 0, D/C# = 0 (command)
@@ -87,53 +180,34 @@ void satoh::SSD1306::updateScreen()
         0,         // Column Start Address(0-127)
         WIDTH - 1, // Column Stop Address(0-127)
     };
-    write(v0, sizeof(v0));
-    // column = 8byte x 16
-    for (int col = 0; col < 16; ++col)
-    {
-      uint8_t v1[9] = {
-          CTRL_01, //control byte, Co bit = 0 (continue), D/C# = 1 (data)
-      };
-      write(v1, sizeof(v1));
-    }
+    write(v, sizeof(v), false);
+    uint8_t *tx = txbuf_.get();
+    tx[0] = CTRL_01;
+    memcpy(&tx[1], dispbuf_.get() + page * WIDTH, WIDTH);
+    write(tx, WIDTH + 1, true);
   }
-  // とりあえず図形を表示
-  {
-    uint8_t v[] = {
-        CTRL_10,   // control byte, Co bit = 1, D/C# = 0 (command)
-        0xB0,      // set page start address←垂直開始ページはここで決める(B0～B7)
-        CTRL_00,   // control byte, Co bit = 0, D/C# = 0 (command)
-        0x21,      // set Column Address
-        0,         // Column Start Address←水平開始位置はここで決める(0～127)
-        WIDTH - 1, // Column Stop Address　画面をフルに使う
-    };
-    write(v, sizeof(v));
-  }
-  {
-    uint8_t v[] = {
-        CTRL_01,  // control byte, Co bit = 0 (continue), D/C# = 1 (data)
-        DotB1[0], //
-        DotB1[1], //
-        DotB1[2], //
-        DotB1[3], //
-        DotB1[4], //
-        DotB1[5], //
-        DotB1[6], //
-        DotB1[7], //
-    };
-    write(v, sizeof(v));
-  }
+  return true; // TODO ちゃんと確認しろ
+}
+
+bool satoh::SSD1306::showEffectPage() noexcept
+{
+  uint8_t *disp = dispbuf_.get();
+  memset(disp, 0, BUF_SIZE);
+  drawEffectPage(effector_, selectedParam_, disp);
+  return updateScreen();
 }
 
 satoh::SSD1306::SSD1306(I2C *i2c) noexcept //
     : I2CDeviceBase(i2c, SLAVE_ADDR),      //
-      buf_(new uint8_t[BUF_SIZE]),         //
-      ok_(init())                          //
+      dispbuf_(new uint8_t[BUF_SIZE]),     //
+      txbuf_(new uint8_t[WIDTH + 32]),     //
+      ok_(init()),                         //
+      effector_(0),                        //
+      selectedParam_(0)                    //
 {
   if (ok_)
   {
-    memset(buf_.get(), 0, BUF_SIZE);
-    updateScreen();
+    showEffectPage();
   }
 }
 
@@ -142,4 +216,20 @@ satoh::SSD1306::~SSD1306() {}
 bool satoh::SSD1306::ok() const noexcept
 {
   return ok_;
+}
+
+bool satoh::SSD1306::setEffector(EffectorBase const *effector) noexcept
+{
+  effector_ = effector;
+  selectedParam_ = 0;
+  return showEffectPage();
+}
+bool satoh::SSD1306::setParamCursor(uint32_t n) noexcept
+{
+  selectedParam_ = n;
+  return showEffectPage();
+}
+bool satoh::SSD1306::updateParam() noexcept
+{
+  return showEffectPage();
 }

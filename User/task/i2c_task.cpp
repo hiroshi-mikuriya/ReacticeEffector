@@ -137,21 +137,42 @@ void encoderGetProc(satoh::RotaryEncoder &encoder)
     }
   }
 }
-/// @brief OLED表示更新処理
+/// @brief OLED - エフェクターパラメータ一一覧表示
 /// @param[in] oled OLED通信オブジェクト
 /// @param[in] msg リクエストメッセージ
-void oledGetProc(satoh::SSD1306 &oled, satoh::Message const *msg)
+void oledDispEffector(satoh::SSD1306 &oled, satoh::Message const *msg)
 {
   if (oled.ok())
   {
-    // TODO
+    auto *param = reinterpret_cast<satoh::msg::OLED_DISP_EFFECTOR const *>(msg->bytes);
+    oled.setEffector(param->fx);
+  }
+}
+/// @brief OLED - エフェクターパラメータ一選択表示
+/// @param[in] oled OLED通信オブジェクト
+/// @param[in] msg リクエストメッセージ
+void oledSelectEffecorParam(satoh::SSD1306 &oled, satoh::Message const *msg)
+{
+  if (oled.ok())
+  {
+    auto *param = reinterpret_cast<satoh::msg::OLED_SELECT_PARAM const *>(msg->bytes);
+    oled.setParamCursor(param->paramNum);
+  }
+}
+/// @brief OLED - エフェクターパラメータ一値更新
+/// @param[in] oled OLED通信オブジェクト
+void oledUpdateEffectorParam(satoh::SSD1306 &oled)
+{
+  if (oled.ok())
+  {
+    oled.updateParam();
   }
 }
 } // namespace
 
 void i2cTaskProc(void const *argument)
 {
-  if (satoh::addMsgTarget(4) != osOK)
+  if (satoh::addMsgTarget(8) != osOK)
   {
     return;
   }
@@ -202,8 +223,15 @@ void i2cTaskProc(void const *argument)
       res.reset();
       encoderGetProc(encoder);
       break;
-    case satoh::msg::OLED_UPDATE_REQ:
-      oledGetProc(oled, msg);
+    case satoh::msg::OLED_DISP_EFFECTOR_REQ:
+      oledDispEffector(oled, msg);
+      break;
+    case satoh::msg::OLED_SELECT_PARAM_REQ:
+      oledSelectEffecorParam(oled, msg);
+      break;
+    case satoh::msg::OLED_UPDATE_PARAM_REQ:
+      res.reset();
+      oledUpdateEffectorParam(oled);
       break;
     }
   }

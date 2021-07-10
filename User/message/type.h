@@ -13,58 +13,64 @@ namespace satoh
 {
 namespace msg
 {
+/// @brief メッセージID型
+typedef uint16_t ID;
 /// @brief メッセージカテゴリ定義
 namespace cat
 {
-constexpr uint8_t SHIFT = 4;
-constexpr uint8_t GYRO = 1 << SHIFT;
-constexpr uint8_t LED = 2 << SHIFT;
-constexpr uint8_t ENCODER = 3 << SHIFT;
-constexpr uint8_t KEY = 4 << SHIFT;
-constexpr uint8_t OLED = 5 << SHIFT;
-constexpr uint8_t USB = 6 << SHIFT;
-constexpr uint8_t NEOPIXEL = 7 << SHIFT;
-constexpr uint8_t SOUND = 8 << SHIFT;
+constexpr ID SHIFT = 12;
+constexpr ID GYRO = 1 << SHIFT;
+constexpr ID LED = 2 << SHIFT;
+constexpr ID ENCODER = 3 << SHIFT;
+constexpr ID KEY = 4 << SHIFT;
+constexpr ID OLED = 5 << SHIFT;
+constexpr ID USB = 6 << SHIFT;
+constexpr ID NEOPIXEL = 7 << SHIFT;
+constexpr ID SOUND = 8 << SHIFT;
 } // namespace cat
 
 /// ジャイロ - 取得依頼
-constexpr uint8_t GYRO_GET_REQ = 1 | cat::GYRO;
+constexpr ID GYRO_GET_REQ = 1 | cat::GYRO;
 /// ジャイロ - 加速度・ジャイロ値通知
-constexpr uint8_t GYRO_NOTIFY = 2 | cat::GYRO;
+constexpr ID GYRO_NOTIFY = 2 | cat::GYRO;
 /// LED - レベルメーター（左右）更新依頼
-constexpr uint8_t LED_LEVEL_UPDATE_REQ = 1 | cat::LED;
+constexpr ID LED_LEVEL_UPDATE_REQ = 1 | cat::LED;
 /// LED - Power/Modulation LED点灯状態変更依頼
-constexpr uint8_t LED_SIMPLE_REQ = 2 | cat::LED;
+constexpr ID LED_SIMPLE_REQ = 2 | cat::LED;
 /// LED - EFFECT LED点灯状態変更依頼（LED指定）
-constexpr uint8_t LED_EFFECT_REQ = 3 | cat::LED;
+constexpr ID LED_EFFECT_REQ = 3 | cat::LED;
 /// LED - EFFECT LED点灯状態変更依頼（全LED）
-constexpr uint8_t LED_ALL_EFFECT_REQ = 4 | cat::LED;
+constexpr ID LED_ALL_EFFECT_REQ = 4 | cat::LED;
 /// ENCODER - エンコーダ値取得依頼
-constexpr uint8_t ENCODER_GET_REQ = 1 | cat::ENCODER;
+constexpr ID ENCODER_GET_REQ = 1 | cat::ENCODER;
 /// ENCODER - ロータリーエンコーダ値通知
-constexpr uint8_t ROTARY_ENCODER_NOTIFY = 2 | cat::ENCODER;
+constexpr ID ROTARY_ENCODER_NOTIFY = 2 | cat::ENCODER;
 /// ENCODER - エフェクトキー変化通知
-constexpr uint8_t EFFECT_KEY_CHANGED_NOTIFY = 3 | cat::ENCODER;
+constexpr ID EFFECT_KEY_CHANGED_NOTIFY = 3 | cat::ENCODER;
 /// キー入力 - 取得依頼
-constexpr uint8_t MODE_KEY_GET_REQ = 1 | cat::KEY;
+constexpr ID MODE_KEY_GET_REQ = 1 | cat::KEY;
 /// キー入力 - キー取得値通知
-constexpr uint8_t MODE_KEY_NOTIFY = 2 | cat::KEY;
-/// OLED - 画面更新依頼
-constexpr uint8_t OLED_UPDATE_REQ = 1 | cat::OLED;
+constexpr ID MODE_KEY_NOTIFY = 2 | cat::KEY;
+/// OLED - エフェクターパラメータ一一覧表示依頼
+constexpr ID OLED_DISP_EFFECTOR_REQ = 1 | cat::OLED;
+/// OLED - エフェクターパラメータ一選択表示依頼
+constexpr ID OLED_SELECT_PARAM_REQ = 2 | cat::OLED;
+/// OLED - エフェクターパラメータ一値更新依頼
+constexpr ID OLED_UPDATE_PARAM_REQ = 3 | cat::OLED;
 /// USB - 送信依頼
-constexpr uint8_t USB_TX_REQ = 1 | cat::USB;
+constexpr ID USB_TX_REQ = 1 | cat::USB;
 /// USB - 受信通知
-constexpr uint8_t USB_RX_NOTIFY = 2 | cat::USB;
+constexpr ID USB_RX_NOTIFY = 2 | cat::USB;
 /// NeoPixel - 点灯パターン指定
-constexpr uint8_t NEO_PIXEL_SET_PATTERN = 1 | cat::NEOPIXEL;
+constexpr ID NEO_PIXEL_SET_PATTERN = 1 | cat::NEOPIXEL;
 /// NeoPixel - 点灯スピード指定
-constexpr uint8_t NEO_PIXEL_SET_SPEED = 2 | cat::NEOPIXEL;
+constexpr ID NEO_PIXEL_SET_SPEED = 2 | cat::NEOPIXEL;
 /// Sound - DMA半分受信完了通知
-constexpr uint8_t SOUND_DMA_HALF_NOTIFY = 1 | cat::SOUND;
+constexpr ID SOUND_DMA_HALF_NOTIFY = 1 | cat::SOUND;
 /// Sound - DMA全部受信完了通知
-constexpr uint8_t SOUND_DMA_CPLT_NOTIFY = 2 | cat::SOUND;
+constexpr ID SOUND_DMA_CPLT_NOTIFY = 2 | cat::SOUND;
 /// Sound - エフェクター変更要求
-constexpr uint8_t SOUND_CHANGE_EFFECTOR_REQ = 3 | cat::SOUND;
+constexpr ID SOUND_CHANGE_EFFECTOR_REQ = 3 | cat::SOUND;
 
 struct ACC_GYRO;
 struct LED_LEVEL;
@@ -74,6 +80,8 @@ struct LED_ALL_EFFECT;
 struct ROTARY_ENCODER;
 struct EFFECT_KEY;
 struct MODE_KEY;
+struct OLED_DISP_EFFECTOR;
+struct OLED_SELECT_PARAM;
 struct NEO_PIXEL_PATTERN;
 struct NEO_PIXEL_SPEED;
 struct SOUND_EFFECTOR;
@@ -156,6 +164,18 @@ struct satoh::msg::MODE_KEY
   /// @arg BUTTON_UP ボタン離し中
   /// @arg BUTTON_DOWN ボタン押下中
   uint8_t re1;
+};
+/// OLED - エフェクターパラメータ一一覧表示依頼型
+struct satoh::msg::OLED_DISP_EFFECTOR
+{
+  /// 表示するエフェクター
+  EffectorBase *fx;
+};
+/// OLED - エフェクターパラメータ一選択表示依頼型
+struct satoh::msg::OLED_SELECT_PARAM
+{
+  /// 選択するパラメータ番号
+  uint32_t paramNum;
 };
 /// NeoPixel - 点灯パターン指定型
 struct satoh::msg::NEO_PIXEL_PATTERN

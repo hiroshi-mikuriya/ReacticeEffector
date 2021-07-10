@@ -7,6 +7,7 @@
 #pragma once
 
 #include "i2c_device_base.hpp"
+#include "message/type.h"
 #include <memory>
 
 namespace satoh
@@ -17,16 +18,28 @@ class SSD1306;
 /// @brief SSD1306制御クラス（OLED）
 class satoh::SSD1306 : public satoh::I2CDeviceBase
 {
-  /// バッファ
-  std::unique_ptr<uint8_t> buf_;
+  /// 表示用バッファ
+  std::unique_ptr<uint8_t> dispbuf_;
+  /// 通信用バッファ
+  std::unique_ptr<uint8_t> txbuf_;
   /// 通信可否
   const bool ok_;
+  /// 表示対象エフェクター
+  EffectorBase const *effector_;
+  /// 選択中のパラメータ番号
+  uint32_t selectedParam_;
   /// @brief LCD初期化
   /// @retval true 書き込み成功
   /// @retval false 書き込み失敗
   bool init() const noexcept;
   /// @brief バッファをOLEDに書き込む
-  void updateScreen();
+  /// @retval true 書き込み成功
+  /// @retval false 書き込み失敗
+  bool updateScreen() noexcept;
+  /// @brief エフェクトページ表示
+  /// @retval true 書き込み成功
+  /// @retval false 書き込み失敗
+  bool showEffectPage() noexcept;
 
 public:
   /// @brief コンストラクタ
@@ -38,4 +51,22 @@ public:
   /// @retval true 可
   /// @retval false 不可（デバイス繋がっていない等）
   bool ok() const noexcept override;
+  /// @brief 表示対象のエフェクターを設定する<br>
+  /// 画面全体の表示を全て更新する。<br>
+  /// 選択中のパラメータは0にする。
+  /// @param[in] effector
+  ///   @arg 0 エフェクターなし
+  ///   @arg 0以外 エフェクターのポインタ
+  /// @retval true 通信成功
+  /// @retval false 通信失敗
+  bool setEffector(EffectorBase const *effector) noexcept;
+  /// @brief 選択中のエフェクトパラメータのカーソルを指定する
+  /// @param[in] n 選択中のエフェクトパラメータ番号
+  /// @retval true 通信成功
+  /// @retval false 通信失敗
+  bool setParamCursor(uint32_t n) noexcept;
+  /// @brief エフェクトパラメータの表示更新（setParamCursorで指定したパラメータのみ更新する）
+  /// @retval true 通信成功
+  /// @retval false 通信失敗
+  bool updateParam() noexcept;
 };

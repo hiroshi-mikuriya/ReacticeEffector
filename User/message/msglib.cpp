@@ -61,12 +61,12 @@ osStatus satoh::addMsgTarget(uint32_t msgCount) noexcept
   return info->mailId ? osOK : osErrorResource;
 }
 
-osStatus satoh::sendMsg(osThreadId threadId, uint8_t type) noexcept
+osStatus satoh::sendMsg(osThreadId threadId, msg::ID type) noexcept
 {
   return sendMsg(threadId, type, 0, 0);
 }
 
-osStatus satoh::sendMsg(osThreadId threadId, uint8_t type, void const *bytes, uint16_t size) noexcept
+osStatus satoh::sendMsg(osThreadId threadId, msg::ID type, void const *bytes, uint16_t size) noexcept
 {
   MailInfo *info = find(threadId);
   if (info == 0)

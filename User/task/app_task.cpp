@@ -75,6 +75,8 @@ void appTaskProc(void const *argument)
   satoh::msg::LED_SIMPLE power = {0, false};
   satoh::msg::LED_SIMPLE modulation = {1, false};
   satoh::msg::SOUND_EFFECTOR effector{};
+  satoh::msg::OLED_DISP_EFFECTOR oledEffector{};
+  satoh::msg::OLED_SELECT_PARAM oledSelect{};
   typedef std::unique_ptr<satoh::EffectorBase> EffectPtr;
   EffectPtr effectList[] = {
       EffectPtr(new satoh::OverDrive()),  //
@@ -157,34 +159,46 @@ void appTaskProc(void const *argument)
             effector.fx[0] = effectList[i].get();
             led.rgb[i] = effector.fx[0]->getColor();
           }
+          oledEffector.fx = effector.fx[0];
+          oledSelect.paramNum = 0;
           satoh::sendMsg(soundTaskHandle, satoh::msg::SOUND_CHANGE_EFFECTOR_REQ, &effector, sizeof(effector));
           satoh::sendMsg(i2cTaskHandle, satoh::msg::LED_ALL_EFFECT_REQ, &led, sizeof(led));
+          satoh::sendMsg(i2cTaskHandle, satoh::msg::OLED_DISP_EFFECTOR_REQ, &oledEffector, sizeof(oledEffector));
           break;
         }
       }
       break;
     }
     case satoh::msg::GYRO_NOTIFY:
-      satoh::sendMsg(usbTxTaskHandle, satoh::msg::USB_TX_REQ, msg->bytes, msg->size);
+    {
+      auto *param = reinterpret_cast<satoh::msg::ACC_GYRO const *>(msg->bytes);
+      char c[32] = {0};
+      int n = sprintf(c, "%6d %6d %6d\r\n", param->acc[0], param->acc[1], param->acc[2]);
+      satoh::sendMsg(usbTxTaskHandle, satoh::msg::USB_TX_REQ, c, n);
       break;
+    }
     case satoh::msg::ROTARY_ENCODER_NOTIFY:
     {
-      auto *param = reinterpret_cast<satoh::msg::ROTARY_ENCODER const *>(msg->bytes);
-      for (uint8_t i = 0; i < 4; ++i)
+      auto *fx = effector.fx[0];
+      if (fx)
       {
-        if (0 < param->angleDiff[i])
+        auto *param = reinterpret_cast<satoh::msg::ROTARY_ENCODER const *>(msg->bytes);
+        int8_t selectKnob = param->angleDiff[0];
+        if (selectKnob != 0)
         {
-          if (effector.fx[0])
-          {
-            effector.fx[0]->incrementParam(i);
-          }
+          oledSelect.paramNum = (oledSelect.paramNum + fx->getParamCount() + selectKnob) % fx->getParamCount();
+          satoh::sendMsg(i2cTaskHandle, satoh::msg::OLED_SELECT_PARAM_REQ, &oledSelect, sizeof(oledSelect));
         }
-        if (param->angleDiff[i] < 0)
+        int8_t paramKnob = param->angleDiff[1];
+        if (0 < paramKnob)
         {
-          if (effector.fx[0])
-          {
-            effector.fx[0]->decrementParam(i);
-          }
+          fx->incrementParam(oledSelect.paramNum);
+          satoh::sendMsg(i2cTaskHandle, satoh::msg::OLED_UPDATE_PARAM_REQ);
+        }
+        if (paramKnob < 0)
+        {
+          fx->decrementParam(oledSelect.paramNum);
+          satoh::sendMsg(i2cTaskHandle, satoh::msg::OLED_UPDATE_PARAM_REQ);
         }
       }
       break;

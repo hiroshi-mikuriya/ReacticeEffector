@@ -26,7 +26,7 @@ osStatus addMsgTarget(uint32_t msgCount) noexcept;
 /// @retval osErrorParameter 引数エラー
 /// @retval osEventTimeout タイムアウト
 /// @retval osErrorOS 送信失敗
-osStatus sendMsg(osThreadId threadId, uint8_t type) noexcept;
+osStatus sendMsg(osThreadId threadId, msg::ID type) noexcept;
 /// @brief メッセージ送信
 /// @param[in] threadId 送信先タスクID
 /// @param[in] type メッセージ種別
@@ -36,7 +36,7 @@ osStatus sendMsg(osThreadId threadId, uint8_t type) noexcept;
 /// @retval osErrorParameter 引数エラー
 /// @retval osEventTimeout タイムアウト
 /// @retval osErrorOS 送信失敗
-osStatus sendMsg(osThreadId threadId, uint8_t type, void const *bytes, uint16_t size) noexcept;
+osStatus sendMsg(osThreadId threadId, msg::ID type, void const *bytes, uint16_t size) noexcept;
 /// @brief メッセージ受信
 /// @param[in] millisec タイムアウト時間
 /// @return 受信結果
@@ -46,9 +46,9 @@ Result recvMsg(uint32_t millisec = osWaitForever) noexcept;
 /// @brief メッセージ型
 struct satoh::Message
 {
-  uint8_t type;       ///< メッセージ種別
-  uint16_t size;      ///< データサイズ
-  uint8_t bytes[128]; ///< データ
+  msg::ID type;      ///< メッセージ種別
+  uint16_t size;     ///< データサイズ
+  uint8_t bytes[64]; ///< データ
 };
 
 /// @brief 受信結果型
