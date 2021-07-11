@@ -174,6 +174,13 @@ void appTaskProc(void const *argument)
     case satoh::msg::GYRO_NOTIFY:
     {
       auto *param = reinterpret_cast<satoh::msg::ACC_GYRO const *>(msg->bytes);
+      for (auto *fx : effector.fx)
+      {
+        if (fx)
+        {
+          fx->setGyroParam(param->acc);
+        }
+      }
       char c[32] = {0};
       int n = sprintf(c, "%6d %6d %6d\r\n", param->acc[0], param->acc[1], param->acc[2]);
       satoh::sendMsg(usbTxTaskHandle, satoh::msg::USB_TX_REQ, c, n);
@@ -192,14 +199,25 @@ void appTaskProc(void const *argument)
           satoh::sendMsg(i2cTaskHandle, satoh::msg::OLED_SELECT_PARAM_REQ, &oledSelect, sizeof(oledSelect));
         }
         int8_t paramKnob = param->angleDiff[1];
-        if (0 < paramKnob)
+        if (0 < paramKnob && !fx->getGyro(oledSelect.paramNum))
         {
           fx->incrementParam(oledSelect.paramNum);
           satoh::sendMsg(i2cTaskHandle, satoh::msg::OLED_UPDATE_PARAM_REQ);
         }
-        if (paramKnob < 0)
+        if (paramKnob < 0 && !fx->getGyro(oledSelect.paramNum))
         {
           fx->decrementParam(oledSelect.paramNum);
+          satoh::sendMsg(i2cTaskHandle, satoh::msg::OLED_UPDATE_PARAM_REQ);
+        }
+        int8_t gyroKnob = param->angleDiff[2];
+        if (0 < gyroKnob)
+        {
+          fx->setGyro(oledSelect.paramNum, true);
+          satoh::sendMsg(i2cTaskHandle, satoh::msg::OLED_UPDATE_PARAM_REQ);
+        }
+        if (gyroKnob < 0)
+        {
+          fx->setGyro(oledSelect.paramNum, false);
           satoh::sendMsg(i2cTaskHandle, satoh::msg::OLED_UPDATE_PARAM_REQ);
         }
       }

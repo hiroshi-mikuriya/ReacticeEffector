@@ -33,6 +33,7 @@ class satoh::Chorus : public satoh::EffectorBase
   };
 
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
+  mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
   signalSw bypass;             ///< ポップノイズ対策
   sineWave sin1;
   delayBufF del1;
@@ -46,7 +47,7 @@ class satoh::Chorus : public satoh::EffectorBase
 
   /// @brief UI表示のパラメータを、エフェクト処理で使用する値へ変換する
   /// @param[in] n 変換対象のパラメータ番号
-  void convUiToFx(uint32_t n)
+  void convUiToFx(uint8_t n) noexcept override
   {
     switch (n)
     {
@@ -77,11 +78,31 @@ class satoh::Chorus : public satoh::EffectorBase
     }
     }
   }
+  /// @brief パラメータ値文字列取得
+  /// @param[in] n パラメータ番号
+  /// @return 文字列の長さ
+  const char *getValueTxtImpl(uint8_t n) const noexcept override
+  {
+    switch (n)
+    {
+    case LEVEL:
+    case MIX:
+    case FBACK:
+    case RATE:
+    case DEPTH:
+    case TONE:
+      sprintf(valueTxt_, "%d", static_cast<int>(ui_[n].getValue()));
+      return valueTxt_;
+    default:
+      return 0;
+    }
+  }
 
 public:
   /// @brief コンストラクタ
-  Chorus() //
-      : ui_({
+  Chorus()
+      : EffectorBase("Chorus", "CH", RGB{0x00, 0x10, 0x20}), //
+        ui_({
             EffectParameterF(1, 100, 1, "LEVEL"), //
             EffectParameterF(1, 100, 1, "MIX"),   //
             EffectParameterF(1, 99, 1, "F.BACK"), //
@@ -96,10 +117,7 @@ public:
   {
     del1.set(20.0f);  // 最大ディレイタイム設定
     hpf1.set(100.0f); // ディレイ音のローカット設定
-    for (uint32_t n = 0; n < COUNT; ++n)
-    {
-      convUiToFx(n);
-    }
+    init(ui_, COUNT);
   }
   /// @brief デストラクタ
   virtual ~Chorus() {}
@@ -122,114 +140,4 @@ public:
       right[i] = bypass.process(right[i], fx, true);
     }
   }
-  /// @brief エフェクト名を取得
-  /// @param[out] buf 文字列格納先
-  /// @return 文字数
-  uint32_t getName(char *buf) const noexcept override
-  {
-    const char name[] = "Chorus";
-    strcpy(buf, name);
-    return sizeof(name);
-  }
-  /// @brief パラメータ数を取得
-  /// @return パラメータ数
-  uint32_t getParamCount() const noexcept override { return COUNT; }
-  /// @brief パラメータ取得
-  /// @param[in] n 取得対象のパラメータ番号
-  /// @return パラメータ
-  float getParam(uint32_t n) const noexcept override { return ui_[n].getValue(); }
-  /// @brief パラメータ設定
-  /// @param[in] n 設定対象のパラメータ番号
-  /// @param[in] v 値
-  /// @retval true 設定された
-  /// @retval false 元々の値と同じだったため設定されなかった
-  bool setParam(uint32_t n, float v) noexcept { return ui_[n].setValue(v); }
-  /// @brief パラメータ加算
-  /// @param[in] n 加算対象のパラメータ番号
-  /// @retval true 加算した
-  /// @retval false 最大値に到達しているため加算しなかった
-  bool incrementParam(uint32_t n) noexcept override
-  {
-    if (n < COUNT)
-    {
-      if (ui_[n].increment())
-      {
-        convUiToFx(n);
-        return true;
-      }
-    }
-    return false;
-  }
-  /// @brief パラメータ減算
-  /// @param[in] n 減算対象のパラメータ番号
-  /// @retval true 減算した
-  /// @retval false 最小値に到達しているため減算しなかった
-  bool decrementParam(uint32_t n) noexcept override
-  {
-    if (n < COUNT)
-    {
-      if (ui_[n].decrement())
-      {
-        convUiToFx(n);
-        return true;
-      }
-    }
-    return false;
-  }
-  /// @brief パラメータ比率設定
-  /// @param[in] n 設定対象のパラメータ番号
-  /// @param[in] ratio 比率（最小値 0.0f 〜 1.0f 最大値）
-  /// @retval true 設定された
-  /// @retval false 元々の値と同じだったため設定されなかった
-  bool setParamRatio(uint32_t n, float ratio) noexcept override
-  {
-    if (n < COUNT)
-    {
-      if (ui_[n].setValueRatio(ratio))
-      {
-        convUiToFx(n);
-        return true;
-      }
-    }
-    return false;
-  }
-  /// @brief パラメータ名文字列取得
-  /// @param[in] n パラメータ番号
-  /// @param[out] buf 文字列格納先
-  /// @return 文字列の長さ
-  uint32_t getParamName(uint32_t n, char *buf) const noexcept override
-  {
-    if (n < COUNT)
-    {
-      return ui_[n].getName(buf);
-    }
-    return 0;
-  }
-  /// @brief パラメータ値文字列取得
-  /// @param[in] n パラメータ番号
-  /// @param[out] buf 文字列格納先
-  /// @return 文字列の長さ
-  uint32_t getValueTxt(uint32_t n, char *buf) const noexcept override
-  {
-    switch (n)
-    {
-    case LEVEL:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[LEVEL].getValue())));
-    case MIX:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[MIX].getValue())));
-    case FBACK:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[FBACK].getValue())));
-    case RATE:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[RATE].getValue())));
-    case DEPTH:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[DEPTH].getValue())));
-    case TONE:
-      return static_cast<uint32_t>(sprintf(buf, "%d", static_cast<int>(ui_[TONE].getValue())));
-    default:
-      return 0;
-    }
-  }
-  /// @brief LED色を取得
-  /// @return LED色
-  RGB getColor() const noexcept override { return RGB{0x00, 0x10, 0x20}; }
 };

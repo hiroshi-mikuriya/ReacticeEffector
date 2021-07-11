@@ -172,25 +172,25 @@ void satoh::SSD1306::drawEffectPage() noexcept
     // タイトル表示
     sprintf(txt, "P%d ", patch_);
     drawString(txt, paramFont, false, 0, 0, disp);
-    effector_->getName(txt);
-    drawString(txt, titleFont, active_, paramFont.width * 3, 0, disp);
+    drawString(effector_->getName(), titleFont, active_, paramFont.width * 3, 0, disp);
   }
-  uint32_t n = 0;
+  uint8_t n = 0;
   for (uint8_t col = 0; col < 2; ++col)
   {
     for (uint8_t row = 0; row < 3 && n < effector_->getParamCount(); ++row, ++n)
     {
       uint8_t y = titleFont.height + 6 + row * (paramFont.height + 5);
       uint8_t cx = col * WIDTH / 2;
-      effector_->getParamName(n, txt);
-      drawString(txt, paramFont, n == selectedParam_, cx, y, disp);
-      uint32_t len = effector_->getValueTxt(n, txt);
+      const char *key = effector_->getParamName(n);
+      drawString(key, paramFont, n == selectedParam_, cx, y, disp);
+      const char *value = effector_->getValueTxt(n);
+      size_t len = strlen(value);
       uint8_t px = cx + 43;
       if (2 < len)
       {
         px -= paramFont.width * (len - 2); // 3ケタ以上の数値を左にずらして全体が表示されるようにする
       }
-      drawString(txt, paramFont, false, px, y, disp);
+      drawString(value, paramFont, false, px, y, disp);
     }
   }
 }
@@ -202,8 +202,8 @@ satoh::SSD1306::SSD1306(I2C *i2c) noexcept //
       ok_(init()),                         //
       effector_(0),                        //
       patch_(0),                           //
-      selectedParam_(0),                   //
-      active_(false)                       //
+      active_(false),                      //
+      selectedParam_(0)                    //
 {
   if (ok_)
   {

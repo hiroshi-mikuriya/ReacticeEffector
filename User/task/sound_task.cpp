@@ -54,11 +54,11 @@ void soundProc(satoh::msg::SOUND_EFFECTOR &effector, int32_t const *src, int32_t
 {
   LL_GPIO_SetOutputPin(TP13_GPIO_Port, TP13_Pin);
   toFloat(src, left, right, size);
-  for (int i = 0; i < 4; ++i)
+  for (auto *fx : effector.fx)
   {
-    if (effector.fx[i])
+    if (fx)
     {
-      effector.fx[i]->effect(left, right, size);
+      fx->effect(left, right, size);
     }
   }
   toInt32(left, right, dst, size);
