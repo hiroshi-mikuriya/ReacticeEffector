@@ -36,6 +36,10 @@ class satoh::SSD1306 : public satoh::I2CDeviceBase
   /// @retval true 書き込み成功
   /// @retval false 書き込み失敗
   bool init() const noexcept;
+  /// @brief リセット処理
+  /// @retval true 書き込み成功
+  /// @retval false 書き込み失敗
+  bool reset() const noexcept;
   /// @brief ページ分のバッファをOLEDに書き込む
   /// @param[in] page ページ番号（0〜7）
   /// @retval true 書き込み成功

@@ -11,6 +11,21 @@
 namespace
 {
 constexpr uint8_t SLAVE_ADDR = 0x3C;
+constexpr uint8_t SET_ADDRESSING_MODE = 0x20;
+constexpr uint8_t PAGE_ADDRESSING_MODE = 0x10;
+constexpr uint8_t SET_COLUMN_ADDR = 0x21;
+constexpr uint8_t SET_PAGE_ADDR = 0x22;
+constexpr uint8_t SET_CONTRAST_CTRL = 0x81;
+constexpr uint8_t DISABLE_DISPLAY_ON = 0xA4;
+constexpr uint8_t SET_NORMAL_DISPLAY = 0xA6;
+constexpr uint8_t SET_INVERSE_DISPLAY = 0xA7;
+constexpr uint8_t SET_MULTI_RATIO = 0xA8;
+constexpr uint8_t DISPLAY_OFF = 0xAE;
+constexpr uint8_t DISPLAY_ON = 0xAF;
+constexpr uint8_t SET_PAGE_START_ADDR = 0xB0;
+constexpr uint8_t SET_DISPLAY_OFFSET = 0xD3;
+constexpr uint8_t SET_DISPLAY_CLOCK_DIV = 0xD5;
+
 constexpr uint8_t CTRL_00 = 0b00000000; // control byte, Co bit = 0, D/C# = 0 (command)
 constexpr uint8_t CTRL_01 = 0b01000000; //control byte, Co bit = 0 (continue), D/C# = 1 (data)
 constexpr uint8_t CTRL_10 = 0b10000000; // control byte, Co bit = 1, D/C# = 0 (command)
@@ -27,15 +42,13 @@ void drawPixel(uint8_t color, uint8_t x, uint8_t y, uint8_t *dst) noexcept
 {
   if (x < WIDTH && y < HEIGHT)
   {
-    uint8_t xx = WIDTH - x - 1;
-    uint8_t yy = HEIGHT - y - 1;
     if (color)
     {
-      dst[xx + (yy / 8) * WIDTH] |= 1 << (yy % 8);
+      dst[x + (y / 8) * WIDTH] |= 1 << (y % 8);
     }
     else
     {
-      dst[xx + (yy / 8) * WIDTH] &= ~(1 << (yy % 8));
+      dst[x + (y / 8) * WIDTH] &= ~(1 << (y % 8));
     }
   }
 }
@@ -81,64 +94,68 @@ void drawString(char const *str, satoh::FontDef const &font, bool invert, uint8_
 
 bool satoh::SSD1306::init() const noexcept
 {
+  constexpr uint8_t off[] = {CTRL_10, DISPLAY_OFF};
+  constexpr uint8_t on[] = {CTRL_10, DISPLAY_ON};
+  return write(off, sizeof(off)) && reset() && write(on, sizeof(on));
+}
+
+bool satoh::SSD1306::reset() const noexcept
+{
   uint8_t v[] = {
-      CTRL_10,    // control byte, Co bit = 1, D/C# = 0 (command)
-      0xAE,       // display off
-      CTRL_00,    // control byte, Co bit = 0, D/C# = 0 (command)
-      0xA8,       // Set Multiplex Ratio  0xA8, 0x3F
-      HEIGHT - 1, // 64MUX
-      CTRL_00,    // control byte, Co bit = 0, D/C# = 0 (command)
-      0xD3,       // Set Display Offset 0xD3, 0x00
-      0x00,       //
-      CTRL_10,    // control byte, Co bit = 1, D/C# = 0 (command)
-      0x40,       // Set Display Start Line 0x40
-      CTRL_10,    // control byte, Co bit = 1, D/C# = 0 (command)
-      0xA0,       // Set Segment re-map 0xA0/0xA1
-      CTRL_10,    // control byte, Co bit = 1, D/C# = 0 (command)
-      0xC0,       // Set COM Output Scan Direction 0xC0,/0xC8
-      CTRL_00,    // control byte, Co bit = 0, D/C# = 0 (command)
-      0xDA,       // Set COM Pins hardware configuration 0xDA, 0x02
-      0x12,       //
-      CTRL_00,    // control byte, Co bit = 0, D/C# = 0 (command)
-      0x81,       // Set Contrast Control 0x81, default=0x7F
-      255,        // 0-255
-      CTRL_10,    // control byte, Co bit = 1, D/C# = 0 (command)
-      0xA4,       // Disable Entire Display On
-      CTRL_00,    // control byte, Co bit = 0, D/C# = 0 (command)
-      0xA6,       // Set Normal Display 0xA6, Inverse display 0xA7
-      CTRL_00,    // control byte, Co bit = 0, D/C# = 0 (command)
-      0xD5,       // Set Display Clock Divide Ratio/Oscillator Frequency 0xD5, 0x80
-      0x80,       //
-      CTRL_00,    // control byte, Co bit = 0, D/C# = 0 (command)
-      0x20,       // Set Memory Addressing Mode
-      0x10,       // Page addressing mode
-      CTRL_00,    // control byte, Co bit = 0, D/C# = 0 (command)
-      0x22,       // Set Page Address
-      0,          // Start page set
-      PAGE - 1,   // End page set
-      CTRL_00,    // control byte, Co bit = 0, D/C# = 0 (command)
-      0x21,       // set Column Address
-      0,          // Column Start Address
-      WIDTH - 1,  // Column Stop Address
-      CTRL_00,    // control byte, Co bit = 0, D/C# = 0 (command)
-      0x8D,       // Set Enable charge pump regulator 0x8D, 0x14
-      0x14,       //
-      CTRL_10,    // control byte, Co bit = 1, D/C# = 0 (command)
-      0xAF,       // Display On 0xAF
+      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
+      SET_MULTI_RATIO,       // Set Multiplex Ratio  0xA8, 0x3F
+      HEIGHT - 1,            // 64MUX
+      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
+      SET_DISPLAY_OFFSET,    // Set Display Offset 0xD3, 0x00
+      0x00,                  //
+      CTRL_10,               // control byte, Co bit = 1, D/C# = 0 (command)
+      0x40,                  // Set Display Start Line 0x40
+      CTRL_10,               // control byte, Co bit = 1, D/C# = 0 (command)
+      0xA0,                  // Set Segment re-map 0xA0/0xA1
+      CTRL_10,               // control byte, Co bit = 1, D/C# = 0 (command)
+      0xA1,                  // 始点を左上にする
+      0xC8,                  //
+      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
+      0xDA,                  // Set COM Pins hardware configuration 0xDA, 0x02
+      0x12,                  //
+      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
+      SET_CONTRAST_CTRL,     // Set Contrast Control 0x81, default=0x7F
+      255,                   // 0-255
+      CTRL_10,               // control byte, Co bit = 1, D/C# = 0 (command)
+      DISABLE_DISPLAY_ON,    // Disable Entire Display On
+      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
+      SET_NORMAL_DISPLAY,    // Set Normal Display 0xA6, Inverse display 0xA7
+      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
+      SET_DISPLAY_CLOCK_DIV, // Set Display Clock Divide Ratio/Oscillator Frequency 0xD5, 0x80
+      0x80,                  //
+      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
+      SET_ADDRESSING_MODE,   // Set Memory Addressing Mode
+      PAGE_ADDRESSING_MODE,  // Page addressing mode
+      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
+      SET_PAGE_ADDR,         // Set Page Address
+      0,                     // Start page set
+      PAGE - 1,              // End page set
+      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
+      SET_COLUMN_ADDR,       // set Column Address
+      0,                     // Column Start Address
+      WIDTH - 1,             // Column Stop Address
+      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
+      0x8D,                  // Set Enable charge pump regulator 0x8D, 0x14
+      0x14,                  //
   };
   return write(v, sizeof(v));
 }
 
 bool satoh::SSD1306::sendBufferToDevice(uint8_t page) noexcept
 {
-  uint8_t addr = static_cast<uint8_t>(0xB0 | page);
+  uint8_t addr = static_cast<uint8_t>(SET_PAGE_START_ADDR + page);
   uint8_t v[] = {
-      CTRL_10,   // control byte, Co bit = 1, D/C# = 0 (command)
-      addr,      // set page start address(B0～B7)
-      CTRL_00,   // control byte, Co bit = 0, D/C# = 0 (command)
-      0x21,      // set Column Address
-      0,         // Column Start Address(0-127)
-      WIDTH - 1, // Column Stop Address(0-127)
+      CTRL_10,         // control byte, Co bit = 1, D/C# = 0 (command)
+      addr,            // set page start address(B0～B7)
+      CTRL_00,         // control byte, Co bit = 0, D/C# = 0 (command)
+      SET_COLUMN_ADDR, //
+      0,               // Column Start Address(0-127)
+      WIDTH - 1,       // Column Stop Address(0-127)
   };
   write(v, sizeof(v), false);
   uint8_t *tx = txbuf_.get();
@@ -149,6 +166,7 @@ bool satoh::SSD1306::sendBufferToDevice(uint8_t page) noexcept
 
 bool satoh::SSD1306::sendBufferToDevice() noexcept
 {
+  reset();
   for (uint8_t page = 0; page < PAGE; ++page)
   {
     sendBufferToDevice(page);
@@ -224,34 +242,15 @@ bool satoh::SSD1306::setEffector(EffectorBase const *effector, uint8_t patch, bo
   effector_ = effector;
   patch_ = patch;
   active_ = active;
-  selectedParam_ = 0;
-  drawEffectPage();
-  return sendBufferToDevice();
+  return setParamCursor(0);
 }
 bool satoh::SSD1306::setParamCursor(uint8_t n) noexcept
 {
   selectedParam_ = n;
-  drawEffectPage();
-  // 変更箇所のページだけ表示を更新することでI2Cの通信量を削減
-  for (uint8_t page = 0; page < 5; ++page)
-  {
-    sendBufferToDevice(page);
-  }
-  return true;
+  return updateParam();
 }
 bool satoh::SSD1306::updateParam() noexcept
 {
   drawEffectPage();
-  // 変更箇所のページだけ表示を更新することでI2Cの通信量を削減
-  switch (selectedParam_ % 3)
-  {
-  case 0:
-    return sendBufferToDevice(4) && sendBufferToDevice(5);
-  case 1:
-    return sendBufferToDevice(2) && sendBufferToDevice(3);
-  case 2:
-    return sendBufferToDevice(0) && sendBufferToDevice(1);
-  default:
-    return false;
-  }
+  return sendBufferToDevice();
 }

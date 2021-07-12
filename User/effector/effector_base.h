@@ -45,12 +45,12 @@ inline bool compress(float min, float &v, float max) noexcept
 template <typename T>
 class satoh::EffectParameter
 {
-  const T min_;      ///< 最小値
-  const T max_;      ///< 最大値
-  T v_;              ///< 値
-  const T step_;     ///< 目盛り
-  const char *name_; ///< パラメータ名
-  bool gyro_;        ///< ジャイロ制御有無
+  const T min_;        ///< 最小値
+  const T max_;        ///< 最大値
+  T v_;                ///< 値
+  const T step_;       ///< 目盛り
+  const char *name_;   ///< パラメータ名
+  bool isGyroEnabled_; ///< ジャイロ制御有無 @arg true 制御あり @arg false 制御なし
 
   /// @brief データ圧縮
   /// @retval true 圧縮した
@@ -65,7 +65,7 @@ public:
   /// @param[in] step 目盛り
   /// @param[in] name パラメータ名
   explicit EffectParameter(T min, T max, T v, T step, const char *name) noexcept //
-      : min_(min), max_(max), v_(v), step_(step), name_(name), gyro_(false)
+      : min_(min), max_(max), v_(v), step_(step), name_(name), isGyroEnabled_(false)
   {
   }
   /// @brief コンストラクタ（初期値は最大と最小の中間値にする）
@@ -95,29 +95,11 @@ public:
   /// @brief 加算する
   /// @retval true 加算された
   /// @retval false 最大値に到達しているため加算されなかった
-  bool increment() noexcept
-  {
-    if (v_ == max_)
-    {
-      return false;
-    }
-    v_ += step_;
-    compress();
-    return true;
-  }
+  bool increment() noexcept { return setValue(v_ + step_); }
   /// @brief 減算する
   /// @retval true 減算された
   /// @retval false 最小値に到達しているため減算されなかった
-  bool decrement() noexcept
-  {
-    if (v_ == min_)
-    {
-      return false;
-    }
-    v_ -= step_;
-    compress();
-    return true;
-  }
+  bool decrement() noexcept { return setValue(v_ - step_); }
   /// @brief 値を設定する
   /// @param[in] v 値
   /// @retval true 設定された
@@ -136,19 +118,14 @@ public:
   /// @param[in] ratio 比率（最小値 0.0f 〜 1.0f 最大値）
   /// @retval true 設定された
   /// @retval false 元々の値と同じだったため設定されなかった
-  bool setValueRatio(float ratio) noexcept
-  {
-    satoh::compress(0.0f, ratio, 1.0f);
-    float v = (max_ - min_) * ratio + min_;
-    return setValue(v);
-  }
+  bool setValueRatio(float ratio) noexcept { return setValue((max_ - min_) * ratio + min_); }
   /// @brief ジャイロ制御有無を設定する
-  /// @param[in] gyro ジャイロ制御有無
-  void setGyro(bool gyro) noexcept { gyro_ = gyro; }
+  /// @param[in] enable ジャイロ制御有無
+  void setGyroEnable(bool enable) noexcept { isGyroEnabled_ = enable; }
   /// @brief ジャイロ制御有無を取得する
   /// @retval true ジャイロ制御あり
   /// @retval false ジャイロ制御なし
-  bool getGyro() const noexcept { return gyro_; }
+  bool isGyroEnabled() const noexcept { return isGyroEnabled_; }
 };
 
 /// @brief エフェクター基底クラス
@@ -241,35 +218,35 @@ public:
   /// @param[in] n パラメータ番号
   /// @retval true ジャイロ連携あり
   /// @retval false ジャイロ連携なし
-  bool getGyro(uint8_t n) const noexcept
+  bool isGyroEnabled(uint8_t n) const noexcept
   {
     if (n < paramCount_)
     {
-      return uiParam_[n].getGyro();
+      return uiParam_[n].isGyroEnabled();
     }
     return false;
   }
   /// @brief ジャイロ連携設定
   /// @param[in] n パラメータ番号
-  /// @param[in] gyro
+  /// @param[in] enable
   ///    @arg true ジャイロ連携あり
   ///    @arg false ジャイロ連携なし
-  void setGyro(uint8_t n, bool gyro) noexcept
+  void setGyroEnable(uint8_t n, bool enable) noexcept
   {
     if (n < paramCount_)
     {
-      uiParam_[n].setGyro(gyro);
+      uiParam_[n].setGyroEnable(enable);
     }
   }
   /// @brief ジャイロセンサーの加速度値からパラメータを設定する
   /// @param[in] acc 加速度値
-  /// @note setGyro(true)にした値のみが設定される
+  /// @note setGyroEnable(true)にした値のみが設定される
   void setGyroParam(int16_t const (&acc)[3]) noexcept
   {
     float ratio = (acc[1] + 0x8000) / 65536.0f; // TODO 暫定
     for (uint8_t n = 0; n < paramCount_; ++n)
     {
-      if (uiParam_[n].getGyro())
+      if (uiParam_[n].isGyroEnabled())
       {
         setParamRatio(n, ratio);
       }
@@ -342,7 +319,7 @@ public:
   {
     if (n < paramCount_)
     {
-      if (uiParam_[n].getGyro())
+      if (uiParam_[n].isGyroEnabled())
       {
         return "GY";
       }

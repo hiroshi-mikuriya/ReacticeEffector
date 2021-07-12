@@ -84,7 +84,7 @@ bool satoh::Gyro::getAccel(int16_t (&acc)[3]) const noexcept
   }
   return res;
 }
-bool satoh::Gyro::getGyro(int16_t (&gyro)[3]) const noexcept
+bool satoh::Gyro::isGyroEnabled(int16_t (&gyro)[3]) const noexcept
 {
   uint8_t buf[6] = {0};
   bool res = read(GYRO_XOUT_H, buf, sizeof(buf), false);

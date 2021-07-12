@@ -46,7 +46,7 @@ public:
   /// @param[out] gyro ジャイロ値格納先
   /// @retval true 取得成功
   /// @retval false 取得失敗
-  bool getGyro(int16_t (&gyro)[3]) const noexcept;
+  bool isGyroEnabled(int16_t (&gyro)[3]) const noexcept;
   /// @brief 加速度値とジャイロ値取得
   /// @param[out] acc 加速度値格納先
   /// @param[out] gyro ジャイロ値格納先
