@@ -61,7 +61,7 @@ class satoh::Tremolo : public satoh::EffectorBase
   }
   /// @brief パラメータ値文字列取得
   /// @param[in] n パラメータ番号
-  /// @return 文字列の長さ
+  /// @return 文字列のポインタ
   const char *getValueTxtImpl(uint8_t n) const noexcept override
   {
     switch (n)

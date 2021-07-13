@@ -142,6 +142,14 @@ class satoh::EffectorBase
   /// LED色
   const RGB ledColor_;
 
+  /// @brief UI表示のパラメータを、エフェクト処理で使用する値へ変換する
+  /// @param[in] n 変換対象のパラメータ番号
+  virtual void convUiToFx(uint8_t n) noexcept = 0;
+  /// @brief パラメータ値文字列取得
+  /// @param[in] n パラメータ番号
+  /// @return 文字列のポインタ
+  virtual const char *getValueTxtImpl(uint8_t n) const noexcept = 0;
+
 protected:
   /// @brief 属性初期化
   /// @param[in] uiParam UIパラメータ
@@ -156,13 +164,6 @@ protected:
       convUiToFx(n);
     }
   }
-  /// @brief UI表示のパラメータを、エフェクト処理で使用する値へ変換する
-  /// @param[in] n 変換対象のパラメータ番号
-  virtual void convUiToFx(uint8_t n) noexcept = 0;
-  /// @brief パラメータ値文字列取得
-  /// @param[in] n パラメータ番号
-  /// @return 文字列のポインタ
-  virtual const char *getValueTxtImpl(uint8_t n) const noexcept = 0;
 
 public:
   /// @brief コンストラクタ
@@ -179,17 +180,17 @@ public:
   virtual void effect(float *left, float *right, uint32_t size) noexcept = 0;
   /// @brief エフェクト名を取得
   /// @return 文字列のポインタ
-  const char *getName() const noexcept { return name_; }
+  virtual const char *getName() const noexcept { return name_; }
   /// @brief 短縮したエフェクト名を取得
   /// @return 文字列のポインタ
-  const char *getShortName() const noexcept { return shortName_; }
+  virtual const char *getShortName() const noexcept { return shortName_; }
   /// @brief パラメータ数を取得
   /// @return パラメータ数
-  uint8_t getParamCount() const noexcept { return paramCount_; }
+  virtual uint8_t getParamCount() const noexcept { return paramCount_; }
   /// @brief パラメータ取得
   /// @param[in] n 取得対象のパラメータ番号
   /// @return パラメータ
-  float getParam(uint8_t n) const noexcept
+  virtual float getParam(uint8_t n) const noexcept
   {
     if (n < paramCount_)
     {
@@ -202,7 +203,7 @@ public:
   /// @param[in] v 値
   /// @retval true 設定された
   /// @retval false 元々の値と同じだったため設定されなかった
-  bool setParam(uint8_t n, float v) noexcept
+  virtual bool setParam(uint8_t n, float v) noexcept
   {
     if (n < paramCount_)
     {
@@ -218,7 +219,7 @@ public:
   /// @param[in] n パラメータ番号
   /// @retval true ジャイロ連携あり
   /// @retval false ジャイロ連携なし
-  bool isGyroEnabled(uint8_t n) const noexcept
+  virtual bool isGyroEnabled(uint8_t n) const noexcept
   {
     if (n < paramCount_)
     {
@@ -231,7 +232,7 @@ public:
   /// @param[in] enable
   ///    @arg true ジャイロ連携あり
   ///    @arg false ジャイロ連携なし
-  void setGyroEnable(uint8_t n, bool enable) noexcept
+  virtual void setGyroEnable(uint8_t n, bool enable) noexcept
   {
     if (n < paramCount_)
     {
@@ -241,7 +242,7 @@ public:
   /// @brief ジャイロセンサーの加速度値からパラメータを設定する
   /// @param[in] acc 加速度値
   /// @note setGyroEnable(true)にした値のみが設定される
-  void setGyroParam(int16_t const (&acc)[3]) noexcept
+  virtual void setGyroParam(int16_t const (&acc)[3]) noexcept
   {
     float ratio = (acc[1] + 0x8000) / 65536.0f; // TODO 暫定
     for (uint8_t n = 0; n < paramCount_; ++n)
@@ -256,7 +257,7 @@ public:
   /// @param[in] n 加算対象のパラメータ番号
   /// @retval true 加算した
   /// @retval false 最大値に到達しているため加算しなかった
-  bool incrementParam(uint8_t n) noexcept
+  virtual bool incrementParam(uint8_t n) noexcept
   {
     if (n < paramCount_)
     {
@@ -272,7 +273,7 @@ public:
   /// @param[in] n 減算対象のパラメータ番号
   /// @retval true 減算した
   /// @retval false 最小値に到達しているため減算しなかった
-  bool decrementParam(uint8_t n) noexcept
+  virtual bool decrementParam(uint8_t n) noexcept
   {
     if (n < paramCount_)
     {
@@ -289,7 +290,7 @@ public:
   /// @param[in] ratio 比率（最小値 0.0f 〜 1.0f 最大値）
   /// @retval true 設定された
   /// @retval false 元々の値と同じだったため設定されなかった
-  bool setParamRatio(uint8_t n, float ratio) noexcept
+  virtual bool setParamRatio(uint8_t n, float ratio) noexcept
   {
     if (n < paramCount_)
     {
@@ -304,7 +305,7 @@ public:
   /// @brief パラメータ名文字列取得
   /// @param[in] n パラメータ番号
   /// @return 文字列のポインタ
-  const char *getParamName(uint8_t n) const noexcept
+  virtual const char *getParamName(uint8_t n) const noexcept
   {
     if (n < paramCount_)
     {
@@ -315,7 +316,7 @@ public:
   /// @brief パラメータ値文字列取得
   /// @param[in] n パラメータ番号
   /// @return 文字列のポインタ
-  const char *getValueTxt(uint8_t n) const noexcept
+  virtual const char *getValueTxt(uint8_t n) const noexcept
   {
     if (n < paramCount_)
     {
@@ -329,5 +330,5 @@ public:
   }
   /// @brief LED色を取得
   /// @return LED色
-  RGB getColor() const noexcept { return ledColor_; }
+  virtual RGB getColor() const noexcept { return ledColor_; }
 };

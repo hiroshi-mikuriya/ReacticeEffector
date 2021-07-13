@@ -6,7 +6,7 @@ cd $HERE
 
 for sample in "${TARGETS[@]}"
 do
-  files=`find ${sample} -type f -name *.c -or -name *.cpp -or -name *.h -or -name *.hpp`
+  files=`find ${sample} -type f -name "*.c" -or -name "*.cpp" -or -name "*.h" -or -name "*.hpp"`
   for f in $files
   do
     if [ ! "`echo $f | grep 'CMakeFiles'`" ]; then
