@@ -92,6 +92,7 @@ file(GLOB SRCS
 	${CORE}/Startup/*.s
 	${USER}/*.cpp
 	${USER}/**/*.cpp
+	${USER}/**/**/*.cpp
 	${DRIVER}/Src/*.c
 	${RTOS}/*.c
 	${RTOS}/CMSIS_RTOS/*.c

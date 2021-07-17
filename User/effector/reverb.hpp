@@ -111,8 +111,8 @@ class satoh::Reverb : public satoh::EffectorBase
 
 public:
   /// @brief コンストラクタ
-  Reverb()                                                   //
-      : EffectorBase("Reverb", "RV", RGB{0x20, 0x20, 0x20}), //
+  Reverb()                                                               //
+      : EffectorBase(fx::REVERB, "Reverb", "RV", RGB{0x20, 0x20, 0x20}), //
         ui_({
             EffectParameterF(0, 100, 1, "LEVEL"),  //
             EffectParameterF(0, 100, 1, "MIX"),    //

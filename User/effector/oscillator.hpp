@@ -29,7 +29,6 @@ class satoh::Oscillator : public satoh::EffectorBase
 
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
   mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
-  signalSw bypass;
   sawWave saw;
   sineWave sin;
   triangleWave tri;
@@ -81,8 +80,8 @@ class satoh::Oscillator : public satoh::EffectorBase
 
 public:
   /// @brief コンストラクタ
-  Oscillator()                                                   //
-      : EffectorBase("Oscillator", "OS", RGB{0x00, 0x08, 0x20}), //
+  Oscillator()                                                                   //
+      : EffectorBase(fx::OSCILLATOR, "Oscillator", "OS", RGB{0x00, 0x08, 0x20}), //
         ui_({
             EffectParameterF(0, 100, 1, "LEVEL"), //
             EffectParameterF(2, 200, 2, "FREQ"),  //
@@ -116,8 +115,8 @@ public:
         fx = sin.output();
         break;
       }
-      fx = level_ * fx; // LEVEL
-      right[i] = bypass.process(right[i], fx, isActive());
+      fx *= level_; // LEVEL
+      right[i] = fx;
     }
   }
 };

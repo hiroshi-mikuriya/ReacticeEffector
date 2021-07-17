@@ -5,11 +5,14 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "ssd1306.h"
+#include "common/utils.h"
 #include "fonts.h"
 #include <cstring> // memset
 
 namespace
 {
+constexpr char const *BYPASS_NAME = "Bypass";
+
 constexpr uint8_t SLAVE_ADDR = 0x3C;
 constexpr uint8_t SET_ADDRESSING_MODE = 0x20;
 constexpr uint8_t PAGE_ADDRESSING_MODE = 0x10;
@@ -182,15 +185,15 @@ void satoh::SSD1306::drawEffectPage() noexcept
   satoh::FontDef const &paramFont = satoh::Font_7x10;
   if (!effector_)
   {
-    drawString("Bypass", titleFont, false, 0, 0, disp);
+    drawString(BYPASS_NAME, titleFont, false, 0, 0, disp);
     return;
   }
   char txt[16] = {0};
   {
     // タイトル表示
-    sprintf(txt, "P%d ", patch_);
+    sprintf(txt, "FX%d ", patch_);
     drawString(txt, paramFont, false, 0, 0, disp);
-    drawString(effector_->getName(), titleFont, effector_->isActive(), paramFont.width * 3, 0, disp);
+    drawString(effector_->getName(), titleFont, effector_->isActive(), paramFont.width * 4, 0, disp);
   }
   uint8_t n = 0;
   for (uint8_t col = 0; col < 2; ++col)
@@ -236,19 +239,44 @@ bool satoh::SSD1306::ok() const noexcept
   return ok_;
 }
 
-bool satoh::SSD1306::setEffector(EffectorBase const *effector, uint8_t patch) noexcept
+bool satoh::SSD1306::update(msg::OLED_DISP_EFFECTOR const &src) noexcept
 {
-  effector_ = effector;
-  patch_ = patch;
-  return setParamCursor(0);
+  effector_ = src.fx;
+  patch_ = src.patch;
+  return update(msg::OLED_SELECT_PARAM{0});
 }
-bool satoh::SSD1306::setParamCursor(uint8_t n) noexcept
+bool satoh::SSD1306::update(msg::OLED_SELECT_PARAM const &src) noexcept
 {
-  selectedParam_ = n;
+  selectedParam_ = src.paramNum;
   return updateParam();
 }
 bool satoh::SSD1306::updateParam() noexcept
 {
   drawEffectPage();
+  return sendBufferToDevice();
+}
+bool satoh::SSD1306::update(msg::OLED_DISP_BANK const &src) noexcept
+{
+  uint8_t *disp = dispbuf_.get();
+  memset(disp, 0, BUF_SIZE);
+  satoh::FontDef const &titleFont = satoh::Font_11x18;
+  satoh::FontDef const &paramFont = satoh::Font_7x10;
+  char txt[16] = {0};
+  sprintf(txt, "%d - %d", src.bank, src.patch);
+  drawString(txt, titleFont, false, 10, 0, disp);
+  if (src.editMode)
+  {
+    drawString("EDIT", titleFont, true, titleFont.width * 7, 0, disp);
+  }
+  for (size_t i = 0; i < satoh::countof(src.fx); ++i)
+  {
+    constexpr uint8_t margin = 5;
+    uint8_t y = titleFont.height + margin + (paramFont.height + margin) * i;
+    uint8_t patch = i + 1;
+    int n = sprintf(txt, "FX%d:", i + 1);
+    drawString(txt, paramFont, src.editMode && src.selectedFx == patch, 0, y, disp);
+    const char *name = src.fx[i] ? src.fx[i]->getName() : BYPASS_NAME;
+    drawString(name, paramFont, false, paramFont.width * (n + 1), y, disp);
+  }
   return sendBufferToDevice();
 }

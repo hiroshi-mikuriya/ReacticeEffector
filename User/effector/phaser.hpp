@@ -29,7 +29,6 @@ class satoh::Phaser : public satoh::EffectorBase
 
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
   mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
-  signalSw bypass;             ///< ポップノイズ対策
   triangleWave tri;
   apf apfx[12];
   float level_; ///< レベル
@@ -74,8 +73,8 @@ class satoh::Phaser : public satoh::EffectorBase
 
 public:
   /// @brief コンストラクタ
-  Phaser()                                                  //
-      : EffectorBase("Phaser", "PH", RGB{0x8, 0x20, 0x00}), //
+  Phaser()                                                              //
+      : EffectorBase(fx::PHASER, "Phaser", "PH", RGB{0x8, 0x20, 0x00}), //
         ui_({
             EffectParameterF(0, 100, 1, "LEVEL"), //
             EffectParameterF(0, 100, 1, "RATE"),  //
@@ -103,8 +102,8 @@ public:
         fx = apfx[j].process(fx); // APF実行
       }
       fx = 0.7f * (right[i] + fx); // 原音ミックス、音量調整
-      fx = level_ * fx;            // LEVEL
-      right[i] = bypass.process(right[i], fx, isActive());
+      fx *= level_;                // LEVEL
+      right[i] = fx;
     }
   }
 };

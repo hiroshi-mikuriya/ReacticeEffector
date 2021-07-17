@@ -31,7 +31,6 @@ class satoh::BqFilter : public satoh::EffectorBase
 
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
   mutable char valueTxt_[16];  ///< パラメータ文字列格納バッファ
-  signalSw bypass;
   biquadFilter bqf1;
   float level_;
   int type_;
@@ -105,8 +104,8 @@ class satoh::BqFilter : public satoh::EffectorBase
 
 public:
   /// @brief コンストラクタ
-  BqFilter()                                                    //
-      : EffectorBase("BQ Filter", "BQ", RGB{0x00, 0x20, 0x20}), //
+  BqFilter()                                                                   //
+      : EffectorBase(fx::BQ_FILTER, "BQ Filter", "BQ", RGB{0x00, 0x20, 0x20}), //
         ui_({
             EffectParameterF(-20, 20, 1, "LV"), //
             EffectParameterF(0, 8, 1, "TYPE"),  //
@@ -134,8 +133,8 @@ public:
     {
       float fx = right[i];
       fx = bqf1.process(fx); // フィルタ実行
-      fx = level_ * fx;      // LEVEL
-      right[i] = bypass.process(right[i], fx, isActive());
+      fx *= level_;          // LEVEL
+      right[i] = fx;
     }
   }
 };

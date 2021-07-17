@@ -145,7 +145,7 @@ void oledDispEffector(satoh::SSD1306 &oled, satoh::Message const *msg)
   if (oled.ok())
   {
     auto *param = reinterpret_cast<satoh::msg::OLED_DISP_EFFECTOR const *>(msg->bytes);
-    oled.setEffector(param->fx, param->patch);
+    oled.update(*param);
   }
 }
 /// @brief OLED - エフェクターパラメータ一選択表示
@@ -156,7 +156,18 @@ void oledSelectEffecorParam(satoh::SSD1306 &oled, satoh::Message const *msg)
   if (oled.ok())
   {
     auto *param = reinterpret_cast<satoh::msg::OLED_SELECT_PARAM const *>(msg->bytes);
-    oled.setParamCursor(param->paramNum);
+    oled.update(*param);
+  }
+}
+/// @brief OLED - バンク画面表示
+/// @param[in] oled OLED通信オブジェクト
+/// @param[in] msg リクエストメッセージ
+void oledDispBank(satoh::SSD1306 &oled, satoh::Message const *msg)
+{
+  if (oled.ok())
+  {
+    auto *param = reinterpret_cast<satoh::msg::OLED_DISP_BANK const *>(msg->bytes);
+    oled.update(*param);
   }
 }
 /// @brief OLED - エフェクターパラメータ一値更新
@@ -228,6 +239,9 @@ void i2cTaskProc(void const *argument)
       break;
     case satoh::msg::OLED_SELECT_PARAM_REQ:
       oledSelectEffecorParam(oled, msg);
+      break;
+    case satoh::msg::OLED_DISP_BANK_REQ:
+      oledDispBank(oled, msg);
       break;
     case satoh::msg::OLED_UPDATE_PARAM_REQ:
       res.reset();

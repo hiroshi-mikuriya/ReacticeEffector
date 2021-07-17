@@ -29,7 +29,6 @@ class satoh::Distortion : public satoh::EffectorBase
 
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
   mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
-  signalSw bypass;             ///< ポップノイズ対策
   hpf hpf1;                    ///< ローカット1
   hpf hpf2;                    ///< ローカット2
   hpf hpfTone;                 ///< ローカットトーン調整用
@@ -76,8 +75,8 @@ class satoh::Distortion : public satoh::EffectorBase
 
 public:
   /// @brief コンストラクタ
-  Distortion()                                                   //
-      : EffectorBase("Distortion", "DS", RGB{0x20, 0x00, 0x00}), //
+  Distortion()                                                                   //
+      : EffectorBase(fx::DISTORTION, "Distortion", "DS", RGB{0x20, 0x00, 0x00}), //
         ui_({
             EffectParameterF(1, 100, 1, "LEVEL"), //
             EffectParameterF(1, 100, 1, "GAIN"),  //
@@ -122,8 +121,8 @@ public:
       fx = tanhf(fx);                              // tanhによる対称クリッピング
       fx = tone_ * hpfTone.process(fx)             // TONE
            + (1.0f - tone_) * lpfTone.process(fx); // LPF側とHPF側をミックス
-      fx = level_ * fx;                            // LEVEL
-      right[i] = bypass.process(right[i], fx, isActive());
+      fx *= level_;                                // LEVEL
+      right[i] = fx;
     }
   }
 };

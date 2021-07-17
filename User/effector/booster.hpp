@@ -76,7 +76,7 @@ class satoh::Booster : public satoh::EffectorBase
 public:
   /// @brief コンストラクタ
   Booster()
-      : EffectorBase("Booster", "BT", RGB{0x20, 0x00, 0x00}), //
+      : EffectorBase(fx::BOOSTER, "Booster", "BT", RGB{0x20, 0x00, 0x00}), //
         ui_({
             EffectParameterF(0, 10, 1, "LEVEL"), //
             EffectParameterF(0, 10, 1, "HIGH"),  //

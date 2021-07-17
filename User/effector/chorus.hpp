@@ -34,7 +34,6 @@ class satoh::Chorus : public satoh::EffectorBase
 
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
   mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
-  signalSw bypass;             ///< ポップノイズ対策
   sineWave sin1;
   delayBufF del1;
   hpf hpf1;
@@ -101,7 +100,7 @@ class satoh::Chorus : public satoh::EffectorBase
 public:
   /// @brief コンストラクタ
   Chorus()
-      : EffectorBase("Chorus", "CH", RGB{0x00, 0x10, 0x20}), //
+      : EffectorBase(fx::CHORUS, "Chorus", "CH", RGB{0x00, 0x10, 0x20}), //
         ui_({
             EffectParameterF(1, 100, 1, "LEVEL"), //
             EffectParameterF(1, 100, 1, "MIX"),   //
@@ -136,8 +135,8 @@ public:
       // ディレイ音と原音をディレイバッファに書込、原音はローカットして書込
       del1.write(fback_ * fx + hpf1.process(right[i]));
       fx = (1.0f - mix_) * right[i] + mix_ * fx; // MIX
-      fx = 1.4f * level_ * fx;                   // LEVEL
-      right[i] = bypass.process(right[i], fx, isActive());
+      fx *= 1.4f * level_;                       // LEVEL
+      right[i] = fx;
     }
   }
 };

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "common/rgb.h"
+#include "id.h"
 #include <cstdint>
 #include <cstring> // strlen, memcpy
 
@@ -137,6 +138,8 @@ class satoh::EffectorBase
   EffectParameterF *uiParam_;
   /// パラメータ総数
   uint8_t paramCount_;
+  /// エフェクターID
+  const fx::ID id_;
   /// エフェクター名
   const char *name_;
   /// エフェクター名（短縮）
@@ -169,11 +172,12 @@ protected:
 
 public:
   /// @brief コンストラクタ
+  /// @param[in] id エフェクターID
   /// @param[in] name エフェクター名
   /// @param[in] shortName エフェクター名（短縮）
   /// @param[in] ledColor アクティブ時のLED色
-  explicit EffectorBase(const char *name, const char *shortName, RGB const &ledColor) //
-      : isActive_(false), uiParam_(0), paramCount_(0), name_(name), shortName_(shortName), ledColor_(ledColor)
+  explicit EffectorBase(fx::ID id, const char *name, const char *shortName, RGB const &ledColor) //
+      : isActive_(false), uiParam_(0), paramCount_(0), id_(id), name_(name), shortName_(shortName), ledColor_(ledColor)
   {
   }
   /// @brief デストラクタ
@@ -194,6 +198,9 @@ public:
   virtual void setActive(bool active) noexcept { isActive_ = active; }
   /// @brief ON/OFF設定切替
   virtual void toggleActive() noexcept { isActive_ = !isActive_; }
+  /// @brief エフェクターIDを取得
+  /// @return エフェクターID
+  virtual fx::ID getID() const noexcept { return id_; }
   /// @brief エフェクト名を取得
   /// @return 文字列のポインタ
   virtual const char *getName() const noexcept { return name_; }

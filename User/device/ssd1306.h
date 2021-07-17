@@ -63,20 +63,22 @@ public:
   /// @brief 表示対象のエフェクターを設定する<br>
   /// 画面全体の表示を全て更新する。<br>
   /// 選択中のパラメータは0にする。
-  /// @param[in] effector
-  ///   @arg 0 エフェクターなし
-  ///   @arg 0以外 エフェクターのポインタ
-  /// @param[in] patch パッチ番号
+  /// @param[in] src エフェクター設定
   /// @retval true 通信成功
   /// @retval false 通信失敗
-  bool setEffector(EffectorBase const *effector, uint8_t patch) noexcept;
+  bool update(msg::OLED_DISP_EFFECTOR const &src) noexcept;
   /// @brief 選択中のエフェクトパラメータのカーソルを指定する
-  /// @param[in] n 選択中のエフェクトパラメータ番号
+  /// @param[in] src 選択中のエフェクトパラメータ
   /// @retval true 通信成功
   /// @retval false 通信失敗
-  bool setParamCursor(uint8_t n) noexcept;
+  bool update(msg::OLED_SELECT_PARAM const &src) noexcept;
   /// @brief エフェクトパラメータの表示更新（setParamCursorで指定したパラメータのみ更新する）
   /// @retval true 通信成功
   /// @retval false 通信失敗
   bool updateParam() noexcept;
+  /// @brief バンク表示する
+  /// @param[in] src バンク設定
+  /// @retval true 通信成功
+  /// @retval false 通信失敗
+  bool update(msg::OLED_DISP_BANK const &src);
 };

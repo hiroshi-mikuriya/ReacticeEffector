@@ -61,6 +61,7 @@ void soundProc(satoh::msg::SOUND_EFFECTOR &effector, int32_t const *src, int32_t
       fx->effect(left, right, size);
     }
   }
+  // TODO ポップノイズ対策
   toInt32(left, right, dst, size);
   LL_GPIO_ResetOutputPin(TP13_GPIO_Port, TP13_Pin);
 }

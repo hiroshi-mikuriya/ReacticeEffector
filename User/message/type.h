@@ -7,6 +7,7 @@
 #pragma once
 
 #include "common/rgb.h"
+#include "constant.h"
 #include "effector/effector_base.h"
 
 namespace satoh
@@ -57,6 +58,8 @@ constexpr ID OLED_DISP_EFFECTOR_REQ = 1 | cat::OLED;
 constexpr ID OLED_SELECT_PARAM_REQ = 2 | cat::OLED;
 /// OLED - エフェクターパラメータ一値更新依頼
 constexpr ID OLED_UPDATE_PARAM_REQ = 3 | cat::OLED;
+/// OLED - バンク画面表示依頼
+constexpr ID OLED_DISP_BANK_REQ = 4 | cat::OLED;
 /// USB - 送信依頼
 constexpr ID USB_TX_REQ = 1 | cat::USB;
 /// USB - 受信通知
@@ -82,6 +85,7 @@ struct EFFECT_KEY;
 struct MODE_KEY;
 struct OLED_DISP_EFFECTOR;
 struct OLED_SELECT_PARAM;
+struct OLED_DISP_BANK;
 struct NEO_PIXEL_PATTERN;
 struct NEO_PIXEL_SPEED;
 struct SOUND_EFFECTOR;
@@ -118,7 +122,7 @@ struct satoh::msg::LED_EFFECT
 /// @brief LED - EFFECT LED点灯状態変更依頼型（全LED）
 struct satoh::msg::LED_ALL_EFFECT
 {
-  RGB rgb[4]; ///< 色
+  RGB rgb[EFFECT_LED_COUNT]; ///< 色
 };
 /// @brief ロータリーエンコーダ値通知
 struct satoh::msg::ROTARY_ENCODER
@@ -135,7 +139,7 @@ struct satoh::msg::EFFECT_KEY
   /// キー状態
   /// @arg BUTTON_UP ボタン離し中
   /// @arg BUTTON_DOWN ボタン押下中
-  uint8_t button[4];
+  uint8_t button[EFFECT_BUTTON_COUNT];
 };
 /// @brief モードキー変化通知
 struct satoh::msg::MODE_KEY
@@ -179,6 +183,20 @@ struct satoh::msg::OLED_SELECT_PARAM
   /// 選択中のパラメータ番号
   uint8_t paramNum;
 };
+/// OLED - バンク画面表示依頼型
+struct satoh::msg::OLED_DISP_BANK
+{
+  /// バンク番号
+  uint8_t bank;
+  /// パッチ番号
+  uint8_t patch;
+  /// 表示するエフェクター
+  EffectorBase *fx[MAX_EFFECTOR_COUNT];
+  /// エディットモードフラグ
+  bool editMode;
+  /// 選択中のエフェクト番号（editMode = true のときのみ有効）
+  uint8_t selectedFx;
+};
 /// NeoPixel - 点灯パターン指定型
 struct satoh::msg::NEO_PIXEL_PATTERN
 {
@@ -195,5 +213,5 @@ struct satoh::msg::NEO_PIXEL_SPEED
 struct satoh::msg::SOUND_EFFECTOR
 {
   /// エフェクタークラスのポインタ
-  EffectorBase *fx[4];
+  EffectorBase *fx[MAX_EFFECTOR_COUNT];
 };

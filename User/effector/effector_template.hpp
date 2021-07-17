@@ -68,7 +68,7 @@ class satoh::EffectorTemplate : public satoh::EffectorBase
 public:
   /// @brief コンストラクタ
   EffectorTemplate()
-      : EffectorBase("FX Template", "TM", RGB{0x20, 0x20, 0x20}), // エフェクター名、短縮エフェクター名、LED色
+      : EffectorBase(fx::TEMPLATE, "FX Template", "TM", RGB{0x20, 0x20, 0x20}), // エフェクター名、短縮エフェクター名、LED色
         ui_({
             EffectParameterF(1, 100, 40, 1, "P0"), // 最小値1, 最大値100, 初期値40, ステップ1, 表示文字
             EffectParameterF(1, 100, 1, "P1"),     // 最小値1, 最大値100, 初期値省略（最大最小の中間値）, ステップ1, 表示文字

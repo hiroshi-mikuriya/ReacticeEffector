@@ -30,7 +30,6 @@ class satoh::OverDrive : public satoh::EffectorBase
 
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
   mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
-  signalSw bypass;             ///< ポップノイズ対策
   hpf hpfFixed;                ///< 出力ローカット
   hpf hpfBass;                 ///< 入力BASS調整
   lpf lpfFixed;                ///< 入力ハイカット
@@ -84,8 +83,8 @@ class satoh::OverDrive : public satoh::EffectorBase
 
 public:
   /// @brief コンストラクタ
-  OverDrive()                                                   //
-      : EffectorBase("Overdrive", "OD", RGB{0x20, 0x20, 0x00}), //
+  OverDrive()                                                                  //
+      : EffectorBase(fx::OVERDRIVE, "Overdrive", "OD", RGB{0x20, 0x20, 0x00}), //
         ui_({
             EffectParameterF(1, 100, 1, "LEVEL"),  //
             EffectParameterF(1, 100, 1, "GAIN"),   //
@@ -112,12 +111,12 @@ public:
       float fx = right[i];
       fx = hpfBass.process(fx);   // 入力ローカット BASS
       fx = lpfFixed.process(fx);  // 入力ハイカット 固定値
-      fx = gain_ * fx;            // GAIN
+      fx *= gain_;                // GAIN
       fx = atanf(fx + 0.5f);      // arctanによるクリッピング、非対称化
       fx = hpfFixed.process(fx);  // 出力ローカット 固定値 直流カット
       fx = lpfTreble.process(fx); // 出力ハイカット TREBLE
-      fx = level_ * fx;           // LEVEL
-      right[i] = bypass.process(right[i], fx, isActive());
+      fx *= level_;               // LEVEL
+      right[i] = fx;
     }
   }
 };
