@@ -72,6 +72,7 @@ static void MX_I2C1_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_SAI1_Init(void);
 static void MX_TIM6_Init(void);
+static void MX_TIM10_Init(void);
 void usbTxTaskProc(void const * argument);
 extern void i2cTaskProc(void const * argument);
 extern void neoPixelTaskProc(void const * argument);
@@ -133,6 +134,7 @@ int main(void)
   MX_SPI2_Init();
   MX_SAI1_Init();
   MX_TIM6_Init();
+  MX_TIM10_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -185,6 +187,8 @@ int main(void)
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   MX_USB_DEVICE_Init();
+  LL_TIM_EnableCounter(TIM10);
+  LL_TIM_EnableIT_UPDATE(TIM10);
   /* USER CODE END RTOS_THREADS */
 
   /* Start scheduler */
@@ -862,6 +866,42 @@ static void MX_TIM6_Init(void)
   LL_TIM_EnableCounter(TIM6);
   LL_TIM_EnableIT_UPDATE(TIM6);
   /* USER CODE END TIM6_Init 2 */
+
+}
+
+/**
+  * @brief TIM10 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM10_Init(void)
+{
+
+  /* USER CODE BEGIN TIM10_Init 0 */
+
+  /* USER CODE END TIM10_Init 0 */
+
+  LL_TIM_InitTypeDef TIM_InitStruct = {0};
+
+  /* Peripheral clock enable */
+  LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM10);
+
+  /* TIM10 interrupt Init */
+  NVIC_SetPriority(TIM1_UP_TIM10_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),5, 0));
+  NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
+
+  /* USER CODE BEGIN TIM10_Init 1 */
+
+  /* USER CODE END TIM10_Init 1 */
+  TIM_InitStruct.Prescaler = 10799;
+  TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
+  TIM_InitStruct.Autoreload = 999;
+  TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV2;
+  LL_TIM_Init(TIM10, &TIM_InitStruct);
+  LL_TIM_DisableARRPreload(TIM10);
+  /* USER CODE BEGIN TIM10_Init 2 */
+
+  /* USER CODE END TIM10_Init 2 */
 
 }
 

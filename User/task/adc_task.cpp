@@ -58,11 +58,6 @@ uint8_t getLevel(uint16_t v)
   }
   return 7;
 }
-/// @brief サンプリング結果からレベル値を計算する通知
-void notifySamplingEnd(void const *arg)
-{
-  osSignalSet(adcTaskHandle, SIG_TIMER);
-}
 } // namespace
 
 void adcTaskProc(void const *argument)
@@ -82,11 +77,6 @@ void adcTaskProc(void const *argument)
   LL_DMA_EnableStream(dma, stream);
   LL_ADC_Enable(adc);
   LL_ADC_REG_StartConversionSWStart(adc);
-  constexpr uint32_t FREQ = 50;
-  constexpr uint32_t INTERVAL = 1000 / FREQ;
-  osTimerDef(timer, notifySamplingEnd);
-  osTimerId tid = osTimerCreate(osTimer(timer), osTimerPeriodic, 0);
-  osTimerStart(tid, INTERVAL);
   RangeMeter left, right;
   for (;;)
   {
@@ -116,4 +106,9 @@ void adc1CpltIRQ(void)
 void adc1ErrorIRQ(void)
 {
   osSignalSet(adcTaskHandle, SIG_DMAERR);
+}
+
+void adc1TimIRQ(void)
+{
+  osSignalSet(adcTaskHandle, SIG_TIMER);
 }

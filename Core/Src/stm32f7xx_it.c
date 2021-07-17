@@ -309,6 +309,24 @@ void EXTI9_5_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles TIM1 update interrupt and TIM10 global interrupt.
+  */
+void TIM1_UP_TIM10_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM1_UP_TIM10_IRQn 0 */
+  if (LL_TIM_IsActiveFlag_UPDATE(TIM10))
+  {
+    LL_TIM_ClearFlag_UPDATE(TIM10);
+    adc1TimIRQ();
+  }
+  /* USER CODE END TIM1_UP_TIM10_IRQn 0 */
+
+  /* USER CODE BEGIN TIM1_UP_TIM10_IRQn 1 */
+
+  /* USER CODE END TIM1_UP_TIM10_IRQn 1 */
+}
+
+/**
   * @brief This function handles I2C1 event interrupt.
   */
 void I2C1_EV_IRQHandler(void)

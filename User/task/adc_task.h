@@ -26,6 +26,9 @@ extern "C"
   /// @brief ADC変換エラーDMA割り込み
   void adc1ErrorIRQ(void);
 
+  /// @brief ADC TIM割り込み
+  void adc1TimIRQ(void);
+
 #ifdef __cplusplus
 }
 #endif
