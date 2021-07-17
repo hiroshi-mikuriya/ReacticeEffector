@@ -146,9 +146,9 @@ public:
       float fx = del1.read(dtime_); // ディレイ音読込
       fx = lpf2ndTone.process(fx);  // ディレイ音のTONE（ハイカット）
       // ディレイ音と原音をディレイバッファに書込、原音はエフェクトオン時のみ書込
-      del1.write(fback_ * fx + bypassIn.process(0.0f, right[i], true));
-      fx *= elevel_;                                                  // ディレイ音レベル
-      right[i] = right[i] + bypassOut.process(trail_ * fx, fx, true); // TRAIL ON時ディレイ音残す
+      del1.write(fback_ * fx + bypassIn.process(0.0f, right[i], isActive()));
+      fx *= elevel_;                                                        // ディレイ音レベル
+      right[i] = right[i] + bypassOut.process(trail_ * fx, fx, isActive()); // TRAIL ON時ディレイ音残す
     }
   }
 };

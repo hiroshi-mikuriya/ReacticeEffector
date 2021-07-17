@@ -104,7 +104,7 @@ public:
       }
       fx = 0.7f * (right[i] + fx); // 原音ミックス、音量調整
       fx = level_ * fx;            // LEVEL
-      right[i] = bypass.process(right[i], fx, true);
+      right[i] = bypass.process(right[i], fx, isActive());
     }
   }
 };

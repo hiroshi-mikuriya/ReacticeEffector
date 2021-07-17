@@ -17,7 +17,7 @@ satoh::SpiMaster *s_spi = 0;
 
 void neoPixelTaskProc(void const *argument)
 {
-  if (satoh::addMsgTarget(2) != osOK)
+  if (satoh::registerMsgTarget(2) != osOK)
   {
     return;
   }

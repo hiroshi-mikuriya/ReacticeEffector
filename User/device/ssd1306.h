@@ -28,8 +28,6 @@ class satoh::SSD1306 : public satoh::I2CDeviceBase
   EffectorBase const *effector_;
   /// パッチ番号
   uint8_t patch_;
-  /// エフェクターON/OFF
-  bool active_;
   /// 選択中のパラメータ番号
   uint8_t selectedParam_;
   /// @brief LCD初期化
@@ -69,10 +67,9 @@ public:
   ///   @arg 0 エフェクターなし
   ///   @arg 0以外 エフェクターのポインタ
   /// @param[in] patch パッチ番号
-  /// @param[in] active エフェクターON/OFF
   /// @retval true 通信成功
   /// @retval false 通信失敗
-  bool setEffector(EffectorBase const *effector, uint8_t patch, bool active) noexcept;
+  bool setEffector(EffectorBase const *effector, uint8_t patch) noexcept;
   /// @brief 選択中のエフェクトパラメータのカーソルを指定する
   /// @param[in] n 選択中のエフェクトパラメータ番号
   /// @retval true 通信成功

@@ -190,7 +190,7 @@ void satoh::SSD1306::drawEffectPage() noexcept
     // タイトル表示
     sprintf(txt, "P%d ", patch_);
     drawString(txt, paramFont, false, 0, 0, disp);
-    drawString(effector_->getName(), titleFont, active_, paramFont.width * 3, 0, disp);
+    drawString(effector_->getName(), titleFont, effector_->isActive(), paramFont.width * 3, 0, disp);
   }
   uint8_t n = 0;
   for (uint8_t col = 0; col < 2; ++col)
@@ -220,7 +220,6 @@ satoh::SSD1306::SSD1306(I2C *i2c) noexcept //
       ok_(init()),                         //
       effector_(0),                        //
       patch_(0),                           //
-      active_(false),                      //
       selectedParam_(0)                    //
 {
   if (ok_)
@@ -237,11 +236,10 @@ bool satoh::SSD1306::ok() const noexcept
   return ok_;
 }
 
-bool satoh::SSD1306::setEffector(EffectorBase const *effector, uint8_t patch, bool active) noexcept
+bool satoh::SSD1306::setEffector(EffectorBase const *effector, uint8_t patch) noexcept
 {
   effector_ = effector;
   patch_ = patch;
-  active_ = active;
   return setParamCursor(0);
 }
 bool satoh::SSD1306::setParamCursor(uint8_t n) noexcept

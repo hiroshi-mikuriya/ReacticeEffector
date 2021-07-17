@@ -67,7 +67,7 @@ constexpr satoh::msg::NEO_PIXEL_PATTERN RED_PTN = {{
 
 void appTaskProc(void const *argument)
 {
-  if (satoh::addMsgTarget(4) != osOK)
+  if (satoh::registerMsgTarget(4) != osOK)
   {
     return;
   }
@@ -157,11 +157,11 @@ void appTaskProc(void const *argument)
           else
           {
             effector.fx[0] = effectList[i].get();
+            effector.fx[0]->setActive(true);
             led.rgb[i] = effector.fx[0]->getColor();
           }
           oledEffector.fx = effector.fx[0];
           oledEffector.patch = i + 1;
-          oledEffector.active = true;
           oledSelect.paramNum = 0;
           satoh::sendMsg(soundTaskHandle, satoh::msg::SOUND_CHANGE_EFFECTOR_REQ, &effector, sizeof(effector));
           satoh::sendMsg(i2cTaskHandle, satoh::msg::LED_ALL_EFFECT_REQ, &led, sizeof(led));

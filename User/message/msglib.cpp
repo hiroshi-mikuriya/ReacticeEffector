@@ -16,7 +16,7 @@ struct MailInfo
   osMailQId mailId;    ///< メールID
 };
 /// 最大メール数
-constexpr uint32_t MAX_MAIL_INFO_COUNT = 8;
+constexpr uint32_t MAX_MAIL_INFO_COUNT = 16;
 /// メール情報実態
 MailInfo s_mails[MAX_MAIL_INFO_COUNT] = {};
 /// @brief 指定したタスクIDと一致するメール情報取得
@@ -37,7 +37,7 @@ MailInfo *find(osThreadId threadId)
 }
 } // namespace
 
-osStatus satoh::addMsgTarget(uint32_t msgCount) noexcept
+osStatus satoh::registerMsgTarget(uint32_t msgCount) noexcept
 {
   osThreadId threadId = osThreadGetId();
   if (threadId == 0)

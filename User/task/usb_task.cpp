@@ -16,7 +16,7 @@ constexpr int32_t SIG_USBTXEND = 1 << 0;
 
 void usbTxTaskProc(void const *argument)
 {
-  if (satoh::addMsgTarget(2) != osOK)
+  if (satoh::registerMsgTarget(2) != osOK)
   {
     return;
   }

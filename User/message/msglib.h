@@ -14,11 +14,11 @@ namespace satoh
 struct Message;
 class Result;
 
-/// @brief 自タスクをメッセージ送信先に追加
+/// @brief 自タスクをメッセージ送信先に登録
 /// @param[in] msgCount 格納できる最大メッセージ数
 /// @retval osOK 成功
 /// @retval それ以外 失敗理由
-osStatus addMsgTarget(uint32_t msgCount) noexcept;
+osStatus registerMsgTarget(uint32_t msgCount) noexcept;
 /// @brief メッセージ送信
 /// @param[in] threadId 送信先タスクID
 /// @param[in] type メッセージ種別

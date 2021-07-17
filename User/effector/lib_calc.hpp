@@ -40,44 +40,42 @@ inline float mixPot(uint16_t pot, float dBmin)
 /* ポップノイズ対策のため、0.01ずつ音量変更しスイッチ操作する（エフェクトバイパス等）--------------*/
 class signalSw
 {
-public:
-  float process(float x, float fx, bool sw)
-  {
-    static uint8_t count = 0;
+  uint8_t count_ = 0;
 
-    if (sw) // エフェクトON
+public:
+  /// @brief エフェクト前後の音をミックスして返す
+  /// @param[in] x エフェクト前
+  /// @param[in] fx エフェクト後
+  /// @param[in] active エフェクトON/OFF
+  float process(float x, float fx, bool active)
+  {
+    if (active) // エフェクトON
     {
-      if (count < 100) // バイパス音量ダウン
+      if (count_ < 100) // バイパス音量ダウン
       {
-        count++;
-        return (1.0f - (float)count * 0.01f) * x; // (count: 1～100)
+        count_++;
+        return (1.0f - count_ * 0.01f) * x; // (count: 1～100)
       }
-      else if (count < 200) // エフェクト音量アップ
+      if (count_ < 200) // エフェクト音量アップ
       {
-        count++;
-        return ((float)count * 0.01f - 1.0f) * fx; // (count: 101～200)
+        count_++;
+        return (count_ * 0.01f - 1.0f) * fx; // (count: 101～200)
       }
-      else // count終了 (count: 200)
-      {
-        return fx;
-      }
+      return fx;
     }
     else // エフェクトOFF
     {
-      if (count > 100) // エフェクト音量ダウン
+      if (count_ > 100) // エフェクト音量ダウン
       {
-        count--;
-        return ((float)count * 0.01f - 1.0f) * fx; // (count: 199～100)
+        count_--;
+        return (count_ * 0.01f - 1.0f) * fx; // (count: 199～100)
       }
-      else if (count > 0) // バイパス音量アップ
+      if (count_ > 0) // バイパス音量アップ
       {
-        count--;
-        return (1.0f - (float)count * 0.01f) * x; // (count: 99～0)
+        count_--;
+        return (1.0f - count_ * 0.01f) * x; // (count: 99～0)
       }
-      else // count終了 (count: 0)
-      {
-        return x;
-      }
+      return x;
     }
   }
 };

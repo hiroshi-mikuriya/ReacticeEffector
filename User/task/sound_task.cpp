@@ -82,7 +82,7 @@ void initPCM3060(satoh::I2C *i2c)
 void soundTaskProc(void const *argument)
 {
   osSignalWait(SIG_INITADC, osWaitForever);
-  if (satoh::addMsgTarget(4) != osOK)
+  if (satoh::registerMsgTarget(4) != osOK)
   {
     return;
   }

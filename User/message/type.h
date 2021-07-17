@@ -172,8 +172,6 @@ struct satoh::msg::OLED_DISP_EFFECTOR
   EffectorBase *fx;
   /// パッチ番号
   uint8_t patch;
-  /// ON/OFF
-  bool active;
 };
 /// OLED - エフェクターパラメータ一選択表示依頼型
 struct satoh::msg::OLED_SELECT_PARAM

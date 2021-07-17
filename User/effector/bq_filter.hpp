@@ -30,7 +30,7 @@ class satoh::BqFilter : public satoh::EffectorBase
   };
 
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
-  mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
+  mutable char valueTxt_[16];  ///< パラメータ文字列格納バッファ
   signalSw bypass;
   biquadFilter bqf1;
   float level_;
@@ -95,7 +95,6 @@ class satoh::BqFilter : public satoh::EffectorBase
     case FREQ:
       sprintf(valueTxt_, "%d", static_cast<int>(10 * ui_[FREQ].getValue()));
       return valueTxt_;
-      break;
     case Q:
       sprintf(valueTxt_, "%f", ui_[Q].getValue() / 10.0f);
       return valueTxt_;
@@ -136,7 +135,7 @@ public:
       float fx = right[i];
       fx = bqf1.process(fx); // フィルタ実行
       fx = level_ * fx;      // LEVEL
-      right[i] = bypass.process(right[i], fx, true);
+      right[i] = bypass.process(right[i], fx, isActive());
     }
   }
 };

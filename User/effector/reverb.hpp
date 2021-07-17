@@ -141,7 +141,7 @@ public:
   {
     for (uint32_t i = 0; i < size; ++i)
     {
-      float fxR = bypassIn.process(0.0f, right[i], true);
+      float fxR = bypassIn.process(0.0f, right[i], isActive());
       fxR = 0.25f * lpfIn.process(fxR);
 
       // Early Reflection
@@ -192,8 +192,8 @@ public:
       fxR = (1.0f - mix_) * right[i] + mix_ * hpfOutR.process(outR);
       float fxL = (1.0f - mix_) * left[i] + mix_ * hpfOutL.process(outL);
 
-      left[i] = bypassOutL.process(left[i], level_ * fxL, true);
-      right[i] = bypassOutR.process(right[i], level_ * fxR, true);
+      left[i] = bypassOutL.process(left[i], level_ * fxL, isActive());
+      right[i] = bypassOutR.process(right[i], level_ * fxR, isActive());
     }
   }
 };

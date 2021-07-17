@@ -117,7 +117,7 @@ public:
       fx = hpfFixed.process(fx);  // 出力ローカット 固定値 直流カット
       fx = lpfTreble.process(fx); // 出力ハイカット TREBLE
       fx = level_ * fx;           // LEVEL
-      right[i] = bypass.process(right[i], fx, true);
+      right[i] = bypass.process(right[i], fx, isActive());
     }
   }
 };

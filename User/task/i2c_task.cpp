@@ -145,7 +145,7 @@ void oledDispEffector(satoh::SSD1306 &oled, satoh::Message const *msg)
   if (oled.ok())
   {
     auto *param = reinterpret_cast<satoh::msg::OLED_DISP_EFFECTOR const *>(msg->bytes);
-    oled.setEffector(param->fx, param->patch, param->active);
+    oled.setEffector(param->fx, param->patch);
   }
 }
 /// @brief OLED - エフェクターパラメータ一選択表示
@@ -172,7 +172,7 @@ void oledUpdateEffectorParam(satoh::SSD1306 &oled)
 
 void i2cTaskProc(void const *argument)
 {
-  if (satoh::addMsgTarget(12) != osOK)
+  if (satoh::registerMsgTarget(12) != osOK)
   {
     return;
   }

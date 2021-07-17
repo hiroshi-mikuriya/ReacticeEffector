@@ -117,7 +117,7 @@ public:
         break;
       }
       fx = level_ * fx; // LEVEL
-      right[i] = bypass.process(right[i], fx, true);
+      right[i] = bypass.process(right[i], fx, isActive());
     }
   }
 };

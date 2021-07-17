@@ -110,7 +110,7 @@ public:
       gain = depth_ * gain;                    // DEPTH -10～10 dB
       fx = dbToGain(gain) * fx;                // 音量を揺らす
       fx = level_ * fx;                        // LEVEL
-      right[i] = bypass.process(right[i], fx, true);
+      right[i] = bypass.process(right[i], fx, isActive());
     }
   }
 };

@@ -137,7 +137,7 @@ public:
       del1.write(fback_ * fx + hpf1.process(right[i]));
       fx = (1.0f - mix_) * right[i] + mix_ * fx; // MIX
       fx = 1.4f * level_ * fx;                   // LEVEL
-      right[i] = bypass.process(right[i], fx, true);
+      right[i] = bypass.process(right[i], fx, isActive());
     }
   }
 };

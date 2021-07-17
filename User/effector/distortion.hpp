@@ -123,7 +123,7 @@ public:
       fx = tone_ * hpfTone.process(fx)             // TONE
            + (1.0f - tone_) * lpfTone.process(fx); // LPF側とHPF側をミックス
       fx = level_ * fx;                            // LEVEL
-      right[i] = bypass.process(right[i], fx, true);
+      right[i] = bypass.process(right[i], fx, isActive());
     }
   }
 };
