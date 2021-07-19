@@ -8,22 +8,23 @@
 #include "common/utils.h"
 #include "user.h"
 
-satoh::state::ID satoh::state::EffectEdit::run(msg::MODE_KEY const *src, Property &prop) noexcept
+satoh::state::ID satoh::state::EffectEdit::run(msg::MODE_KEY const *src) noexcept
 {
   if (src->ok == satoh::msg::BUTTON_DOWN)
   {
   }
   if (src->rtn == satoh::msg::BUTTON_DOWN)
   {
+    m_.getCurrectPatch().dump();
     return PATCH_EDIT;
   }
   if (src->up == satoh::msg::BUTTON_DOWN)
   {
-    modSelectedParam(false, prop);
+    modSelectedParam(false);
   }
   if (src->down == satoh::msg::BUTTON_DOWN)
   {
-    modSelectedParam(true, prop);
+    modSelectedParam(true);
   }
   if (src->tap == satoh::msg::BUTTON_DOWN)
   {
@@ -33,41 +34,38 @@ satoh::state::ID satoh::state::EffectEdit::run(msg::MODE_KEY const *src, Propert
   }
   return EFFECT_EDIT;
 }
-satoh::state::ID satoh::state::EffectEdit::run(msg::EFFECT_KEY const *src, Property &prop) noexcept
+satoh::state::ID satoh::state::EffectEdit::run(msg::EFFECT_KEY const *src) noexcept
 {
   for (uint8_t i = 0; i < satoh::countof(src->button); ++i)
   {
     if (src->button[i] == msg::BUTTON_DOWN)
     {
-      prop.patchNum = i;
+      m_.getCurrectPatch().dump();
+      m_.patchNum = i;
       return PLAYING;
     }
   }
   return EFFECT_EDIT;
 }
-satoh::state::ID satoh::state::EffectEdit::run(msg::ACC_GYRO const *src, Property &prop) noexcept
+satoh::state::ID satoh::state::EffectEdit::run(msg::ACC_GYRO const *src) noexcept
 {
-  auto &pch = prop.getCurrectPatch();
-  for (auto *fx : pch.fx)
+  for (auto *fx : m_.getCurrectPatch().fx)
   {
-    if (fx)
-    {
-      fx->setGyroParam(src->acc);
-    }
+    fx->setGyroParam(src->acc);
   }
   return EFFECT_EDIT;
 }
-satoh::state::ID satoh::state::EffectEdit::run(msg::ROTARY_ENCODER const *src, Property &prop) noexcept
+satoh::state::ID satoh::state::EffectEdit::run(msg::ROTARY_ENCODER const *src) noexcept
 {
-  auto *fx = prop.getCurrectPatch().fx[prop.editSelectedFxNum];
+  auto *fx = m_.getCurrectPatch().fx[m_.editSelectedFxNum];
   int8_t selectKnob = src->angleDiff[0];
   if (0 < selectKnob)
   {
-    modSelectedParam(true, prop);
+    modSelectedParam(true);
   }
   if (selectKnob < 0)
   {
-    modSelectedParam(false, prop);
+    modSelectedParam(false);
   }
   int8_t paramKnob = src->angleDiff[1];
   if (0 < paramKnob && !fx->isGyroEnabled(selectedParamNum_))
@@ -93,24 +91,24 @@ satoh::state::ID satoh::state::EffectEdit::run(msg::ROTARY_ENCODER const *src, P
   }
   return EFFECT_EDIT;
 }
-void satoh::state::EffectEdit::modSelectedParam(bool up, Property &prop)
+void satoh::state::EffectEdit::modSelectedParam(bool up)
 {
-  auto *fx = prop.getCurrectPatch().fx[prop.editSelectedFxNum];
+  auto *fx = m_.getCurrectPatch().fx[m_.editSelectedFxNum];
   int8_t d = up ? 1 : -1;
   selectedParamNum_ = (selectedParamNum_ + fx->getParamCount() + d) % fx->getParamCount();
   msg::OLED_SELECT_PARAM cmd{selectedParamNum_};
   sendMsg(i2cTaskHandle, msg::OLED_SELECT_PARAM_REQ, &cmd, sizeof(cmd));
 }
-void satoh::state::EffectEdit::init(Property &prop) noexcept
+void satoh::state::EffectEdit::init() noexcept
 {
   selectedParamNum_ = 0;
-  auto *fx = prop.getCurrectPatch().fx[prop.editSelectedFxNum];
+  auto *fx = m_.getCurrectPatch().fx[m_.editSelectedFxNum];
   msg::OLED_DISP_EFFECTOR cmd{};
   cmd.fx = fx;
-  cmd.patch = prop.editSelectedFxNum + 1;
+  cmd.patch = m_.editSelectedFxNum + 1;
   sendMsg(i2cTaskHandle, msg::OLED_DISP_EFFECTOR_REQ, &cmd, sizeof(cmd));
 }
-void satoh::state::EffectEdit::deinit(Property &prop) noexcept
+void satoh::state::EffectEdit::deinit() noexcept
 {
   // TODO
 }

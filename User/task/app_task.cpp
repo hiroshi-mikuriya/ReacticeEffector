@@ -22,10 +22,10 @@ void appTaskProc(void const *argument)
   {
     return;
   }
-  satoh::state::PatchEdit stPE;
-  satoh::state::EffectEdit stEE;
-  satoh::state::Playing stPL;
-  satoh::state::Error stER;
+  satoh::state::PatchEdit stPE(s_prop);
+  satoh::state::EffectEdit stEE(s_prop);
+  satoh::state::Playing stPL(s_prop);
+  satoh::state::Error stER(s_prop);
   satoh::state::Base *states[] = {&stPL, &stPE, &stEE, &stER};
   satoh::state::ID stID = satoh::state::PLAYING;
   // TODO 暫定的にパッチに初期値を入れておく
@@ -46,7 +46,7 @@ void appTaskProc(void const *argument)
   s_prop.patches[2][2].fx[1] = s_prop.effectors[0].list[3];
   s_prop.patches[2][3].fx[0] = s_prop.effectors[0].list[3];
   s_prop.patches[2][3].fx[1] = s_prop.effectors[0].list[4];
-  states[stID]->init(s_prop);
+  states[stID]->init();
   for (;;)
   {
     auto res = satoh::recvMsg();
@@ -55,12 +55,12 @@ void appTaskProc(void const *argument)
     {
       continue;
     }
-    auto next = states[stID]->run(msg, s_prop);
+    auto next = states[stID]->run(msg);
     if (stID != next)
     {
-      states[stID]->deinit(s_prop);
+      states[stID]->deinit();
       stID = next;
-      states[stID]->init(s_prop);
+      states[stID]->init();
     }
   }
 }

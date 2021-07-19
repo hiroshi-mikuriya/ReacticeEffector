@@ -19,43 +19,45 @@ class PatchEdit;
 /// @brief パッチエディット状態
 class satoh::state::PatchEdit : public satoh::state::Base
 {
+  /// プロパティ
+  Property &m_;
   /// @brief MODE_KEYを処理する
   /// @param[in] src MODE_KEY
-  /// @param[in] prop プロパティ
   /// @return 次の状態ID
-  ID run(msg::MODE_KEY const *src, Property &prop) noexcept override;
+  ID run(msg::MODE_KEY const *src) noexcept override;
   /// @brief EFFECT_KEYを処理する
   /// @param[in] src EFFECT_KEY
-  /// @param[in] prop プロパティ
   /// @return 次の状態ID
-  ID run(msg::EFFECT_KEY const *src, Property &prop) noexcept override;
+  ID run(msg::EFFECT_KEY const *src) noexcept override;
   /// @brief ACC_GYROを処理する
   /// @param[in] src ACC_GYRO
-  /// @param[in] prop プロパティ
   /// @return 次の状態ID
-  ID run(msg::ACC_GYRO const *src, Property &prop) noexcept override;
+  ID run(msg::ACC_GYRO const *src) noexcept override;
   /// @brief ROTARY_ENCODERを処理する
   /// @param[in] src ROTARY_ENCODER
-  /// @param[in] prop プロパティ
   /// @return 次の状態ID
-  ID run(msg::ROTARY_ENCODER const *src, Property &prop) noexcept override;
-  /// @brief バンク更新
-  /// @param[in] prop プロパティ
-  void modBank(Property &prop) noexcept;
+  ID run(msg::ROTARY_ENCODER const *src) noexcept override;
+  /// @brief 表示更新
+  void updateDisplay() noexcept;
   /// @brief 選択中のFX番号更新
   /// @param[in] up
   ///   @arg true カウントアップ
   ///   @arg false カウントダウン
-  /// @param[in] prop プロパティ
-  void modSelectedFx(bool up, Property &prop) noexcept;
+  void modSelectedFxNum(bool up) noexcept;
+  /// @brief 選択中のFX番号のFXを変更
+  /// @param[in] next
+  ///   @arg true 1つ次へ
+  ///   @arg false 1つ前へ
+  void modFxList(bool next) noexcept;
 
 public:
+  /// @brief コンストラクタ
+  /// @param[in] prop プロパティ
+  explicit PatchEdit(Property &prop) : m_(prop) {}
   /// @brief デストラクタ
   ~PatchEdit() {}
   /// @brief この状態に遷移したときに行う初期化処理
-  /// @param[in] prop プロパティ
-  void init(Property &prop) noexcept override;
+  void init() noexcept override;
   /// @brief この状態が終了するときに行う終了処理
-  /// @param[in] prop プロパティ
-  void deinit(Property &prop) noexcept override;
+  void deinit() noexcept override;
 };

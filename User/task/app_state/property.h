@@ -24,7 +24,7 @@ namespace satoh
 {
 namespace state
 {
-struct Effectors;
+class Effectors;
 struct EffectParam;
 struct Patch;
 struct Property;
@@ -34,6 +34,9 @@ struct Property;
 /// @brief エフェクター一覧型
 class satoh::state::Effectors
 {
+  /// @brief デフォルトコンストラクタ削除
+  Effectors() = delete;
+
   Bypass bypass_;
   Booster booster_;
   OverDrive overDrive_;
@@ -50,8 +53,10 @@ public:
   /// 使用可能なエフェクター一覧
   EffectorBase *list[9];
   /// @brief コンストラクタ
-  Effectors()
+  /// @param[in] n FX番号（0, 1, 2）
+  explicit Effectors(uint8_t n)
   {
+    // TODO n はDelayで使う気がするのでとっておく
     auto **p = list;
     *(p++) = &bypass_;
     *(p++) = &booster_;
@@ -62,6 +67,43 @@ public:
     *(p++) = &tremolo_;
     *(p++) = &oscillator_;
     *(p++) = &bqFilter_;
+  }
+  /// @brief エフェクター一覧から検索してインデックスを返す
+  /// @param[in] fx 検索対象のエフェクター
+  /// @retval 0以上 インデックス
+  /// @retval -1 見つからない
+  /// @retval -2 引数がNULL
+  int getIndex(EffectorBase const *fx)
+  {
+    if (fx == 0)
+    {
+      return -2;
+    }
+    for (size_t i = 0; i < satoh::countof(list); ++i)
+    {
+      if (list[i] == fx)
+      {
+        return static_cast<int>(i);
+      }
+    }
+    return -1;
+  }
+  /// @brief 次のエフェクターを取得
+  /// @param[in] cur 現在選択中のエフェクター
+  /// @param[in] next
+  ///   @arg true 次のエフェクターを検索
+  ///   @arg false 前のエフェクターを検索
+  /// @return 次 or 前のエフェクター
+  EffectorBase *get(EffectorBase const *cur, bool next)
+  {
+    int ix = getIndex(cur);
+    if (ix < 0)
+    {
+      return list[0];
+    }
+    int d = next ? 1 : -1;
+    ix = (ix + d + satoh::countof(list)) % satoh::countof(list);
+    return list[ix];
   }
 };
 
@@ -76,8 +118,43 @@ struct satoh::state::EffectParam
 /// @brief １つのパッチが持つデータ
 struct satoh::state::Patch
 {
+  /// エフェクター
   EffectorBase *fx[MAX_EFFECTOR_COUNT];
+  /// パラメータ
   EffectParam param[MAX_EFFECTOR_COUNT];
+  /// @brief fx -> param
+  void dump() noexcept
+  {
+    for (size_t i = 0; i < satoh::countof(fx); ++i)
+    {
+      auto const *fx0 = fx[i];
+      auto &param0 = param[i];
+      param0.id = fx0->getID();
+      for (uint8_t n = 0; n < fx0->getParamCount(); ++n)
+      {
+        param0.gyro[n] = fx0->isGyroEnabled(n);
+        param0.value[n] = fx0->getParam(n);
+      }
+    }
+  }
+  /// @brief param -> fx
+  void load() noexcept
+  {
+    for (size_t i = 0; i < satoh::countof(fx); ++i)
+    {
+      auto *fx0 = fx[i];
+      auto const &param0 = param[i];
+      if (param0.id != fx0->getID())
+      {
+        continue;
+      }
+      for (uint8_t n = 0; n < fx0->getParamCount(); ++n)
+      {
+        fx0->setGyroEnable(n, param0.gyro[n]);
+        fx0->setParam(n, param0.value[n]);
+      }
+    }
+  }
 };
 
 /// @brief 状態プロパティ
@@ -94,18 +171,18 @@ struct satoh::state::Property
   /// パッチデータ
   Patch patches[MAX_BANK][MAX_PATCH];
   /// @brief コンストラクタ
-  Property()
+  Property() : effectors({Effectors(0), Effectors(1), Effectors(2)})
   {
-    for (size_t pix = 0; pix < MAX_PATCH; ++pix)
+    for (size_t bix = 0; bix < MAX_BANK; ++bix)
     {
-      for (size_t bix = 0; bix < MAX_BANK; ++bix)
+      for (size_t pix = 0; pix < MAX_PATCH; ++pix)
       {
         auto &pch = patches[bix][pix];
         for (size_t i = 0; i < satoh::countof(pch.fx); ++i)
         {
           pch.fx[i] = effectors[i].list[0];
         }
-        patches[bix][pix] = std::move(pch);
+        pch.dump();
       }
     }
   }

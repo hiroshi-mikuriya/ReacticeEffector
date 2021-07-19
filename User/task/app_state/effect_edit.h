@@ -19,42 +19,40 @@ class EffectEdit;
 /// @brief パッチエディット状態
 class satoh::state::EffectEdit : public satoh::state::Base
 {
+  /// プロパティ
+  Property &m_;
   /// @brief 選択中のパラメータ番号
   uint8_t selectedParamNum_;
   /// @brief MODE_KEYを処理する
   /// @param[in] src MODE_KEY
-  /// @param[in] prop プロパティ
   /// @return 次の状態ID
-  ID run(msg::MODE_KEY const *src, Property &prop) noexcept override;
+  ID run(msg::MODE_KEY const *src) noexcept override;
   /// @brief EFFECT_KEYを処理する
   /// @param[in] src EFFECT_KEY
-  /// @param[in] prop プロパティ
   /// @return 次の状態ID
-  ID run(msg::EFFECT_KEY const *src, Property &prop) noexcept override;
+  ID run(msg::EFFECT_KEY const *src) noexcept override;
   /// @brief ACC_GYROを処理する
   /// @param[in] src ACC_GYRO
-  /// @param[in] prop プロパティ
   /// @return 次の状態ID
-  ID run(msg::ACC_GYRO const *src, Property &prop) noexcept override;
+  ID run(msg::ACC_GYRO const *src) noexcept override;
   /// @brief ROTARY_ENCODERを処理する
   /// @param[in] src ROTARY_ENCODER
-  /// @param[in] prop プロパティ
   /// @return 次の状態ID
-  ID run(msg::ROTARY_ENCODER const *src, Property &prop) noexcept override;
+  ID run(msg::ROTARY_ENCODER const *src) noexcept override;
   /// @brief 選択中のパラメータを変更
   /// @param[in] up
   ///   @arg true アップ
   ///   @arg false ダウン
-  /// @param[in] prop プロパティ
-  void modSelectedParam(bool up, Property &prop) noexcept;
+  void modSelectedParam(bool up) noexcept;
 
 public:
+  /// @brief コンストラクタ
+  /// @param[in] prop プロパティ
+  explicit EffectEdit(Property &prop) : m_(prop) {}
   /// @brief デストラクタ
   ~EffectEdit() {}
   /// @brief この状態に遷移したときに行う初期化処理
-  /// @param[in] prop プロパティ
-  void init(Property &prop) noexcept override;
+  void init() noexcept override;
   /// @brief この状態が終了するときに行う終了処理
-  /// @param[in] prop プロパティ
-  void deinit(Property &prop) noexcept override;
+  void deinit() noexcept override;
 };
