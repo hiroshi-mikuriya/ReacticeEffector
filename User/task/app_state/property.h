@@ -48,16 +48,16 @@ class satoh::state::Effectors
   // Reverb reverb_;
   Oscillator oscillator_;
   BqFilter bqFilter_;
+  /// エフェクター一覧
+  EffectorBase *list_[9];
 
 public:
-  /// 使用可能なエフェクター一覧
-  EffectorBase *list[9];
   /// @brief コンストラクタ
   /// @param[in] n FX番号（0, 1, 2）
   explicit Effectors(uint8_t n)
   {
     // TODO n はDelayで使う気がするのでとっておく
-    auto **p = list;
+    auto **p = list_;
     *(p++) = &bypass_;
     *(p++) = &booster_;
     *(p++) = &overDrive_;
@@ -68,20 +68,31 @@ public:
     *(p++) = &oscillator_;
     *(p++) = &bqFilter_;
   }
+  /// @brief エフェクター取得
+  /// @param[in] i インデックス
+  /// @return エフェクター
+  EffectorBase *getFx(size_t i) noexcept { return list_[i]; }
+  /// @brief エフェクター取得
+  /// @param[in] i インデックス
+  /// @return エフェクター
+  EffectorBase const *getFx(size_t i) const noexcept { return list_[i]; }
+  /// @brief エフェクター数を取得
+  /// @return エフェクター数
+  size_t count() const noexcept { return satoh::countof(list_); }
   /// @brief エフェクター一覧から検索してインデックスを返す
   /// @param[in] fx 検索対象のエフェクター
   /// @retval 0以上 インデックス
   /// @retval -1 見つからない
   /// @retval -2 引数がNULL
-  int getIndex(EffectorBase const *fx)
+  int find(EffectorBase const *fx)
   {
     if (fx == 0)
     {
       return -2;
     }
-    for (size_t i = 0; i < satoh::countof(list); ++i)
+    for (size_t i = 0; i < count(); ++i)
     {
-      if (list[i] == fx)
+      if (getFx(i) == fx)
       {
         return static_cast<int>(i);
       }
@@ -94,16 +105,16 @@ public:
   ///   @arg true 次のエフェクターを検索
   ///   @arg false 前のエフェクターを検索
   /// @return 次 or 前のエフェクター
-  EffectorBase *get(EffectorBase const *cur, bool next)
+  EffectorBase *getNext(EffectorBase const *cur, bool next) noexcept
   {
-    int ix = getIndex(cur);
+    int ix = find(cur);
     if (ix < 0)
     {
-      return list[0];
+      return getFx(0);
     }
     int d = next ? 1 : -1;
-    ix = (ix + d + satoh::countof(list)) % satoh::countof(list);
-    return list[ix];
+    ix = (ix + d + count()) % count();
+    return getFx(ix);
   }
 };
 
@@ -180,7 +191,7 @@ struct satoh::state::Property
         auto &pch = patches[bix][pix];
         for (size_t i = 0; i < satoh::countof(pch.fx); ++i)
         {
-          pch.fx[i] = effectors[i].list[0];
+          pch.fx[i] = effectors[i].getFx(0);
         }
         pch.dump();
       }

@@ -32,6 +32,10 @@ satoh::state::ID satoh::state::Playing::run(msg::MODE_KEY const *src) noexcept
   }
   if (src->tap == satoh::msg::BUTTON_DOWN)
   {
+    for (auto *fx : m_.getCurrectPatch().fx)
+    {
+      fx->tap();
+    }
   }
   if (src->re1 == satoh::msg::BUTTON_DOWN)
   {
@@ -82,21 +86,13 @@ void satoh::state::Playing::modBank() noexcept
   }
   sendMsg(soundTaskHandle, msg::SOUND_CHANGE_EFFECTOR_REQ, &sound, sizeof(sound));
   msg::LED_ALL_EFFECT led{};
-  switch (m_.patchNum)
-  {
-  case 0:
-    led.rgb[0] = satoh::RGB{0x20, 0x00, 0x00};
-    break;
-  case 1:
-    led.rgb[1] = satoh::RGB{0x00, 0x20, 0x00};
-    break;
-  case 2:
-    led.rgb[2] = satoh::RGB{0x00, 0x00, 0x20};
-    break;
-  case 3:
-    led.rgb[3] = satoh::RGB{0x20, 0x20, 0x00};
-    break;
-  }
+  constexpr satoh::RGB colorList[] = {
+      satoh::RGB{0x20, 0x00, 0x00}, //
+      satoh::RGB{0x00, 0x20, 0x00}, //
+      satoh::RGB{0x00, 0x00, 0x20}, //
+      satoh::RGB{0x20, 0x20, 0x00}, //
+  };
+  led.rgb[m_.patchNum] = colorList[m_.patchNum];
   sendMsg(i2cTaskHandle, msg::LED_ALL_EFFECT_REQ, &led, sizeof(led));
 }
 void satoh::state::Playing::init() noexcept

@@ -111,7 +111,7 @@ void satoh::state::PatchEdit::modFxList(bool next) noexcept
 {
   auto &pch = m_.getCurrectPatch();
   auto *cur = pch.fx[m_.editSelectedFxNum];
-  auto *fx = m_.effectors->get(cur, next);
+  auto *fx = m_.effectors[m_.editSelectedFxNum].getNext(cur, next);
   pch.fx[m_.editSelectedFxNum] = fx;
   updateDisplay();
   msg::SOUND_EFFECTOR sound{};

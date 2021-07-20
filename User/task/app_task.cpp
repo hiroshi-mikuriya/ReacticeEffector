@@ -29,23 +29,23 @@ void appTaskProc(void const *argument)
   satoh::state::Base *states[] = {&stPL, &stPE, &stEE, &stER};
   satoh::state::ID stID = satoh::state::PLAYING;
   // TODO 暫定的にパッチに初期値を入れておく
-  s_prop.patches[0][0].fx[0] = s_prop.effectors[0].list[0];
-  s_prop.patches[0][1].fx[0] = s_prop.effectors[0].list[1];
-  s_prop.patches[0][2].fx[0] = s_prop.effectors[0].list[2];
-  s_prop.patches[0][3].fx[0] = s_prop.effectors[0].list[3];
+  s_prop.patches[0][0].fx[0] = s_prop.effectors[0].getFx(0);
+  s_prop.patches[0][1].fx[0] = s_prop.effectors[0].getFx(1);
+  s_prop.patches[0][2].fx[0] = s_prop.effectors[0].getFx(2);
+  s_prop.patches[0][3].fx[0] = s_prop.effectors[0].getFx(3);
 
-  s_prop.patches[1][0].fx[0] = s_prop.effectors[0].list[4];
-  s_prop.patches[1][1].fx[0] = s_prop.effectors[0].list[5];
-  s_prop.patches[1][2].fx[0] = s_prop.effectors[0].list[6];
-  s_prop.patches[1][3].fx[0] = s_prop.effectors[0].list[7];
+  s_prop.patches[1][0].fx[0] = s_prop.effectors[0].getFx(4);
+  s_prop.patches[1][1].fx[0] = s_prop.effectors[0].getFx(5);
+  s_prop.patches[1][2].fx[0] = s_prop.effectors[0].getFx(6);
+  s_prop.patches[1][3].fx[0] = s_prop.effectors[0].getFx(7);
 
-  s_prop.patches[2][0].fx[0] = s_prop.effectors[0].list[8];
-  s_prop.patches[2][1].fx[0] = s_prop.effectors[0].list[1];
-  s_prop.patches[2][1].fx[1] = s_prop.effectors[0].list[2];
-  s_prop.patches[2][2].fx[0] = s_prop.effectors[0].list[1];
-  s_prop.patches[2][2].fx[1] = s_prop.effectors[0].list[3];
-  s_prop.patches[2][3].fx[0] = s_prop.effectors[0].list[3];
-  s_prop.patches[2][3].fx[1] = s_prop.effectors[0].list[4];
+  s_prop.patches[2][0].fx[0] = s_prop.effectors[0].getFx(8);
+  s_prop.patches[2][1].fx[0] = s_prop.effectors[0].getFx(1);
+  s_prop.patches[2][1].fx[1] = s_prop.effectors[1].getFx(2);
+  s_prop.patches[2][2].fx[0] = s_prop.effectors[0].getFx(1);
+  s_prop.patches[2][2].fx[1] = s_prop.effectors[1].getFx(3);
+  s_prop.patches[2][3].fx[0] = s_prop.effectors[0].getFx(3);
+  s_prop.patches[2][3].fx[1] = s_prop.effectors[1].getFx(4);
   states[stID]->init();
   for (;;)
   {

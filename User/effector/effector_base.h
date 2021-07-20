@@ -351,6 +351,8 @@ public:
     }
     return 0;
   }
+  /// @brief タップ通知
+  virtual void tap() noexcept {}
   /// @brief LED色を取得
   /// @return LED色
   virtual RGB getColor() const noexcept { return isActive_ ? ledColor_ : RGB{}; }
