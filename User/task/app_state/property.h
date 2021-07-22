@@ -44,12 +44,12 @@ class satoh::state::Effectors
   fx::Chorus chorus_;
   fx::Phaser phaser_;
   fx::Tremolo tremolo_;
-  // fx::Delay delay_;
+  fx::Delay delay_;
   // fx::Reverb reverb_;
   fx::Oscillator oscillator_;
   fx::BqFilter bqFilter_;
   /// エフェクター一覧
-  fx::EffectorBase *list_[9];
+  fx::EffectorBase *list_[10];
 
 public:
   /// @brief コンストラクタ
@@ -65,6 +65,7 @@ public:
     *(p++) = &chorus_;
     *(p++) = &phaser_;
     *(p++) = &tremolo_;
+    *(p++) = &delay_;
     *(p++) = &oscillator_;
     *(p++) = &bqFilter_;
   }
