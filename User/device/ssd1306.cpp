@@ -193,7 +193,7 @@ void satoh::SSD1306::drawEffectPage() noexcept
     // タイトル表示
     sprintf(txt, "FX%d ", patch_);
     drawString(txt, paramFont, false, 0, 0, disp);
-    drawString(effector_->getName(), titleFont, effector_->isActive(), paramFont.width * 4, 0, disp);
+    drawString(effector_->getName(), titleFont, false, paramFont.width * 4, 0, disp);
   }
   uint8_t n = 0;
   for (uint8_t col = 0; col < 2; ++col)

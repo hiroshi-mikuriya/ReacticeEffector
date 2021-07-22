@@ -126,6 +126,10 @@ public:
   delayBuf &operator=(delayBuf &&that) = default;
   /// @brief デストラクタ
   virtual ~delayBuf() {}
+  /// @brief メモリ確保成功・失敗を取得
+  /// @retval true 成功
+  /// @retval false 失敗
+  bool ok() const noexcept { return !!buf_; }
   /// @brief 要素数を取得
   /// @return 要素数
   uint32_t count() const noexcept { return count_; }

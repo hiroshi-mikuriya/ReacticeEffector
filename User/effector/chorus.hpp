@@ -130,6 +130,10 @@ public:
   Chorus &operator=(Chorus &&) = default;
   /// @brief デストラクタ
   virtual ~Chorus() {}
+  /// @brief エフェクターセットアップ成功・失敗
+  /// @retval true 成功
+  /// @retval false 失敗
+  bool ok() const noexcept override { return del1.ok(); }
   /// @brief エフェクト処理実行
   /// @param[inout] left L音声データ
   /// @param[inout] right R音声データ

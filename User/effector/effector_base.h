@@ -135,8 +135,6 @@ public:
 /// @brief エフェクター基底クラス
 class satoh::fx::EffectorBase
 {
-  /// ON/OFF状態
-  bool isActive_;
   /// UIパラメータ
   EffectParameterF *uiParam_;
   /// パラメータ総数
@@ -180,7 +178,7 @@ public:
   /// @param[in] shortName エフェクター名（短縮）
   /// @param[in] ledColor アクティブ時のLED色
   explicit EffectorBase(ID id, const char *name, const char *shortName, RGB const &ledColor) //
-      : isActive_(false), uiParam_(0), paramCount_(0), id_(id), name_(name), shortName_(shortName), ledColor_(ledColor)
+      : uiParam_(0), paramCount_(0), id_(id), name_(name), shortName_(shortName), ledColor_(ledColor)
   {
   }
   /// @brief デストラクタ
@@ -190,17 +188,10 @@ public:
   /// @param[inout] right R音声データ
   /// @param[in] size 音声データ数
   virtual void effect(float *left, float *right, uint32_t size) noexcept = 0;
-  /// @brief ON/OFF状態を取得
-  /// @retval true ON
-  /// @retval false OFF
-  virtual bool isActive() const noexcept { return isActive_; }
-  /// @brief ON/OFF設定
-  /// @param[in] active
-  ///   @arg true ON
-  ///   @arg false OFF
-  virtual void setActive(bool active) noexcept { isActive_ = active; }
-  /// @brief ON/OFF設定切替
-  virtual void toggleActive() noexcept { isActive_ = !isActive_; }
+  /// @brief エフェクターセットアップ成功・失敗
+  /// @retval true 成功
+  /// @retval false 失敗
+  virtual bool ok() const noexcept { return true; }
   /// @brief エフェクターIDを取得
   /// @return エフェクターID
   virtual ID getID() const noexcept { return id_; }
@@ -358,5 +349,5 @@ public:
   virtual void tap() noexcept {}
   /// @brief LED色を取得
   /// @return LED色
-  virtual RGB getColor() const noexcept { return isActive_ ? ledColor_ : RGB{}; }
+  virtual RGB getColor() const noexcept { return ledColor_; }
 };

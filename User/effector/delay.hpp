@@ -34,8 +34,8 @@ class satoh::fx::Delay : public satoh::fx::EffectorBase
 
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
   mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
-  delayBuf<int8_t> del1;
-  lpf2nd lpf2ndTone;
+  delayBuf<int8_t> del1_;
+  lpf2nd lpf2ndTone_;
   float dtime_;
   float fback_;
   float elevel_;
@@ -58,7 +58,7 @@ class satoh::fx::Delay : public satoh::fx::EffectorBase
     case TONE:
     {
       float tone = 800.0f * logPot(ui_[TONE].getValue(), 0.0f, 20.0f); // HI CUT FREQ 800 ～ 8000 Hz
-      lpf2ndTone.set(tone);
+      lpf2ndTone_.set(tone);
       break;
     }
     }
@@ -86,17 +86,20 @@ public:
   Delay()                                                          //
       : EffectorBase(DELAY, "Delay", "DL", RGB{0x20, 0x00, 0x20}), //
         ui_({
-            EffectParameterF(10, 50, 1, "TIME"),  //
-            EffectParameterF(0, 100, 1, "E.LV"),  //
-            EffectParameterF(0, 99, 1, "F.BACK"), //
-            EffectParameterF(0, 100, 1, "TONE"),  //
+            EffectParameterF(10, 50, 50, 2, "TIME"), //
+            EffectParameterF(0, 100, 1, "E.LV"),     //
+            EffectParameterF(0, 99, 1, "F.BACK"),    //
+            EffectParameterF(0, 100, 1, "TONE"),     //
         }),
-        del1(ui_[DTIME].getMax()), //
-        dtime_(0),                 //
-        fback_(0),                 //
-        elevel_(0)                 //
+        del1_(ui_[DTIME].getMax()), //
+        dtime_(0),                  //
+        fback_(0),                  //
+        elevel_(0)                  //
   {
-    init(ui_, COUNT);
+    if (del1_.ok())
+    {
+      init(ui_, COUNT);
+    }
   }
   /// @brief moveコンストラクタ
   /// @param[in] that 移動元
@@ -107,6 +110,10 @@ public:
   Delay &operator=(Delay &&) = default;
   /// @brief デストラクタ
   virtual ~Delay() {}
+  /// @brief エフェクターセットアップ成功・失敗
+  /// @retval true 成功
+  /// @retval false 失敗
+  bool ok() const noexcept override { return del1_.ok(); }
   /// @brief エフェクト処理実行
   /// @param[inout] left L音声データ
   /// @param[inout] right R音声データ
@@ -115,10 +122,10 @@ public:
   {
     for (uint32_t i = 0; i < size; ++i)
     {
-      float fx = del1.read(dtime_); // ディレイ音読込
-      fx = lpf2ndTone.process(fx);  // ディレイ音のTONE（ハイカット）
+      float fx = del1_.read(dtime_); // ディレイ音読込
+      fx = lpf2ndTone_.process(fx);  // ディレイ音のTONE（ハイカット）
       // ディレイ音と原音をディレイバッファに書込、原音はエフェクトオン時のみ書込
-      del1.write(fback_ * fx + right[i]);
+      del1_.write(fback_ * fx + right[i]);
       fx *= elevel_; // ディレイ音レベル
       right[i] = right[i] + fx;
     }

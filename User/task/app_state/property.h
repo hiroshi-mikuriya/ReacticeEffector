@@ -49,25 +49,56 @@ class satoh::state::Effectors
   fx::Oscillator oscillator_;
   fx::BqFilter bqFilter_;
   /// エフェクター一覧
-  fx::EffectorBase *list_[10];
+  fx::EffectorBase *list_[16];
+  /// エフェクター数
+  size_t count_;
 
 public:
   /// @brief コンストラクタ
   /// @param[in] n FX番号（0, 1, 2）
-  explicit Effectors(uint8_t n)
+  explicit Effectors(uint8_t n) : count_(0)
   {
-    // TODO n はDelayで使う気がするのでとっておく
-    auto **p = list_;
-    *(p++) = &bypass_;
-    *(p++) = &booster_;
-    *(p++) = &overDrive_;
-    *(p++) = &distortion_;
-    *(p++) = &chorus_;
-    *(p++) = &phaser_;
-    *(p++) = &tremolo_;
-    *(p++) = &delay_;
-    *(p++) = &oscillator_;
-    *(p++) = &bqFilter_;
+    // TODO n は何か使う可能性がある気がするのでとっておく
+    if (bypass_.ok())
+    {
+      list_[count_++] = &bypass_;
+    }
+    if (booster_.ok())
+    {
+      list_[count_++] = &booster_;
+    }
+    if (overDrive_.ok())
+    {
+      list_[count_++] = &overDrive_;
+    }
+    if (distortion_.ok())
+    {
+      list_[count_++] = &distortion_;
+    }
+    if (chorus_.ok())
+    {
+      list_[count_++] = &chorus_;
+    }
+    if (phaser_.ok())
+    {
+      list_[count_++] = &phaser_;
+    }
+    if (tremolo_.ok())
+    {
+      list_[count_++] = &tremolo_;
+    }
+    if (delay_.ok())
+    {
+      list_[count_++] = &delay_;
+    }
+    if (oscillator_.ok())
+    {
+      list_[count_++] = &oscillator_;
+    }
+    if (bqFilter_.ok())
+    {
+      list_[count_++] = &bqFilter_;
+    }
   }
   /// @brief エフェクター取得
   /// @param[in] i インデックス
@@ -79,7 +110,7 @@ public:
   fx::EffectorBase const *getFx(size_t i) const noexcept { return list_[i % count()]; }
   /// @brief エフェクター数を取得
   /// @return エフェクター数
-  size_t count() const noexcept { return satoh::countof(list_); }
+  size_t count() const noexcept { return count_; }
   /// @brief エフェクター一覧から検索してインデックスを返す
   /// @param[in] fx 検索対象のエフェクター
   /// @retval 0以上 インデックス
