@@ -173,7 +173,7 @@ struct satoh::msg::MODE_KEY
 struct satoh::msg::OLED_DISP_EFFECTOR
 {
   /// 表示するエフェクター
-  EffectorBase *fx;
+  fx::EffectorBase *fx;
   /// パッチ番号
   uint8_t patch;
 };
@@ -191,7 +191,7 @@ struct satoh::msg::OLED_DISP_BANK
   /// パッチ番号
   uint8_t patch;
   /// 表示するエフェクター
-  EffectorBase *fx[MAX_EFFECTOR_COUNT];
+  fx::EffectorBase *fx[MAX_EFFECTOR_COUNT];
   /// エディットモードフラグ
   bool editMode;
   /// 選択中のエフェクト番号（editMode = true のときのみ有効）
@@ -213,5 +213,5 @@ struct satoh::msg::NEO_PIXEL_SPEED
 struct satoh::msg::SOUND_EFFECTOR
 {
   /// エフェクタークラスのポインタ
-  EffectorBase *fx[MAX_EFFECTOR_COUNT];
+  fx::EffectorBase *fx[MAX_EFFECTOR_COUNT];
 };

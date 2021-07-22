@@ -7,17 +7,20 @@
 #pragma once
 
 #include "effector_base.h"
-#include "lib_calc.hpp"
-#include "lib_osc.hpp"
+#include "lib/lib_calc.hpp"
+#include "lib/lib_osc.hpp"
 #include <cstdio> // sprintf
 
 namespace satoh
 {
+namespace fx
+{
 class Oscillator;
 }
+} // namespace satoh
 
 /// @brief Sodiumから拝借したオシレーター
-class satoh::Oscillator : public satoh::EffectorBase
+class satoh::fx::Oscillator : public satoh::fx::EffectorBase
 {
   enum
   {
@@ -80,8 +83,8 @@ class satoh::Oscillator : public satoh::EffectorBase
 
 public:
   /// @brief コンストラクタ
-  Oscillator()                                                                   //
-      : EffectorBase(fx::OSCILLATOR, "Oscillator", "OS", RGB{0x00, 0x08, 0x20}), //
+  Oscillator()                                                               //
+      : EffectorBase(OSCILLATOR, "Oscillator", "OS", RGB{0x00, 0x08, 0x20}), //
         ui_({
             EffectParameterF(0, 100, 1, "LEVEL"), //
             EffectParameterF(2, 200, 2, "FREQ"),  //

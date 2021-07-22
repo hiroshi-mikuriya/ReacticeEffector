@@ -7,19 +7,22 @@
 #pragma once
 
 #include "effector_base.h"
-#include "lib_calc.hpp"
-#include "lib_delay.hpp"
-#include "lib_filter.hpp"
-#include "lib_osc.hpp"
+#include "lib/lib_calc.hpp"
+#include "lib/lib_delay.hpp"
+#include "lib/lib_filter.hpp"
+#include "lib/lib_osc.hpp"
 #include <cstdio> // sprintf
 
 namespace satoh
 {
+namespace fx
+{
 class Chorus;
 }
+} // namespace satoh
 
 /// @brief Sodiumから拝借したコーラス
-class satoh::Chorus : public satoh::EffectorBase
+class satoh::fx::Chorus : public satoh::fx::EffectorBase
 {
   enum
   {
@@ -35,7 +38,7 @@ class satoh::Chorus : public satoh::EffectorBase
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
   mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
   sineWave sin1;
-  delayBufF del1;
+  delayBufF<16> del1;
   hpf hpf1;
   lpf2nd lpf2nd1;
   lpf2nd lpf2nd2;
@@ -100,7 +103,7 @@ class satoh::Chorus : public satoh::EffectorBase
 public:
   /// @brief コンストラクタ
   Chorus()
-      : EffectorBase(fx::CHORUS, "Chorus", "CH", RGB{0x00, 0x10, 0x20}), //
+      : EffectorBase(CHORUS, "Chorus", "CH", RGB{0x00, 0x10, 0x20}), //
         ui_({
             EffectParameterF(1, 100, 1, "LEVEL"), //
             EffectParameterF(1, 100, 1, "MIX"),   //
@@ -114,7 +117,6 @@ public:
         fback_(0),                                //
         depth_(0)                                 //
   {
-    del1.set(20.0f);  // 最大ディレイタイム設定
     hpf1.set(100.0f); // ディレイ音のローカット設定
     init(ui_, COUNT);
   }

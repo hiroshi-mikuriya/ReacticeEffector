@@ -7,18 +7,21 @@
 #pragma once
 
 #include "effector_base.h"
-#include "lib_calc.hpp"
-#include "lib_delay.hpp"
-#include "lib_filter.hpp"
+#include "lib/lib_calc.hpp"
+#include "lib/lib_delay.hpp"
+#include "lib/lib_filter.hpp"
 #include <cstdio> // sprintf
 
 namespace satoh
 {
+namespace fx
+{
 class Delay;
 }
+} // namespace satoh
 
 /// @brief Sodiumから拝借したディレイ
-class satoh::Delay : public satoh::EffectorBase
+class satoh::fx::Delay : public satoh::fx::EffectorBase
 {
   enum
   {
@@ -80,8 +83,8 @@ class satoh::Delay : public satoh::EffectorBase
 
 public:
   /// @brief コンストラクタ
-  Delay()                                                              //
-      : EffectorBase(fx::DELAY, "Delay", "DL", RGB{0x20, 0x00, 0x20}), //
+  Delay()                                                          //
+      : EffectorBase(DELAY, "Delay", "DL", RGB{0x20, 0x00, 0x20}), //
         ui_({
             EffectParameterF(10, 100, 5, "TIME"), //
             EffectParameterF(0, 100, 1, "E.LV"),  //

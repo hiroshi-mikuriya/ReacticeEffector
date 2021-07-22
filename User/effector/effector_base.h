@@ -13,6 +13,8 @@
 
 namespace satoh
 {
+namespace fx
+{
 class EffectorBase;
 template <typename T>
 class EffectParameter;
@@ -39,12 +41,13 @@ inline bool compress(float min, float &v, float max) noexcept
   }
   return false;
 }
+} // namespace fx
 } // namespace satoh
 
 /// @brief エフェクトパラメータが共通で持つ属性
 /// @tparam T パラメータの型
 template <typename T>
-class satoh::EffectParameter
+class satoh::fx::EffectParameter
 {
   const T min_;        ///< 最小値
   const T max_;        ///< 最大値
@@ -56,7 +59,7 @@ class satoh::EffectParameter
   /// @brief データ圧縮
   /// @retval true 圧縮した
   /// @retval false 圧縮しなかった
-  bool compress() noexcept { return satoh::compress(min_, v_, max_); }
+  bool compress() noexcept { return satoh::fx::compress(min_, v_, max_); }
 
 public:
   /// @brief コンストラクタ
@@ -107,7 +110,7 @@ public:
   /// @retval false 元々の値と同じだったため設定されなかった
   bool setValue(T v) noexcept
   {
-    satoh::compress(min_, v, max_);
+    satoh::fx::compress(min_, v, max_);
     if (v_ == v)
     {
       return false;
@@ -130,7 +133,7 @@ public:
 };
 
 /// @brief エフェクター基底クラス
-class satoh::EffectorBase
+class satoh::fx::EffectorBase
 {
   /// ON/OFF状態
   bool isActive_;
@@ -176,7 +179,7 @@ public:
   /// @param[in] name エフェクター名
   /// @param[in] shortName エフェクター名（短縮）
   /// @param[in] ledColor アクティブ時のLED色
-  explicit EffectorBase(fx::ID id, const char *name, const char *shortName, RGB const &ledColor) //
+  explicit EffectorBase(ID id, const char *name, const char *shortName, RGB const &ledColor) //
       : isActive_(false), uiParam_(0), paramCount_(0), id_(id), name_(name), shortName_(shortName), ledColor_(ledColor)
   {
   }
@@ -200,7 +203,7 @@ public:
   virtual void toggleActive() noexcept { isActive_ = !isActive_; }
   /// @brief エフェクターIDを取得
   /// @return エフェクターID
-  virtual fx::ID getID() const noexcept { return id_; }
+  virtual ID getID() const noexcept { return id_; }
   /// @brief エフェクト名を取得
   /// @return 文字列のポインタ
   virtual const char *getName() const noexcept { return name_; }

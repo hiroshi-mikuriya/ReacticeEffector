@@ -25,7 +25,7 @@ class satoh::SSD1306 : public satoh::I2CDeviceBase
   /// 通信可否
   const bool ok_;
   /// 表示対象エフェクター
-  EffectorBase const *effector_;
+  fx::EffectorBase const *effector_;
   /// パッチ番号
   uint8_t patch_;
   /// 選択中のパラメータ番号

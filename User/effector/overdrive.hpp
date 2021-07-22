@@ -7,17 +7,20 @@
 #pragma once
 
 #include "effector_base.h"
-#include "lib_calc.hpp"
-#include "lib_filter.hpp"
+#include "lib/lib_calc.hpp"
+#include "lib/lib_filter.hpp"
 #include <cstdio> // sprintf
 
 namespace satoh
 {
+namespace fx
+{
 class OverDrive;
 }
+} // namespace satoh
 
 /// @brief Sodiumから拝借したオーバードライブ
-class satoh::OverDrive : public satoh::EffectorBase
+class satoh::fx::OverDrive : public satoh::fx::EffectorBase
 {
   enum
   {
@@ -83,8 +86,8 @@ class satoh::OverDrive : public satoh::EffectorBase
 
 public:
   /// @brief コンストラクタ
-  OverDrive()                                                                  //
-      : EffectorBase(fx::OVERDRIVE, "Overdrive", "OD", RGB{0x20, 0x20, 0x00}), //
+  OverDrive()                                                              //
+      : EffectorBase(OVERDRIVE, "Overdrive", "OD", RGB{0x20, 0x20, 0x00}), //
         ui_({
             EffectParameterF(1, 100, 1, "LEVEL"),  //
             EffectParameterF(1, 100, 1, "GAIN"),   //

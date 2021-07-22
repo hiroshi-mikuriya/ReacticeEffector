@@ -17,7 +17,7 @@
 #include "effector/oscillator.hpp"
 #include "effector/overdrive.hpp"
 #include "effector/phaser.hpp"
-#include "effector/reverb.hpp"
+// #include "effector/reverb.hpp"
 #include "effector/tremolo.hpp"
 
 namespace satoh
@@ -37,19 +37,19 @@ class satoh::state::Effectors
   /// @brief デフォルトコンストラクタ削除
   Effectors() = delete;
 
-  Bypass bypass_;
-  Booster booster_;
-  OverDrive overDrive_;
-  Distortion distortion_;
-  Chorus chorus_;
-  Phaser phaser_;
-  Tremolo tremolo_;
-  // Delay delay_;
-  // Reverb reverb_;
-  Oscillator oscillator_;
-  BqFilter bqFilter_;
+  fx::Bypass bypass_;
+  fx::Booster booster_;
+  fx::OverDrive overDrive_;
+  fx::Distortion distortion_;
+  fx::Chorus chorus_;
+  fx::Phaser phaser_;
+  fx::Tremolo tremolo_;
+  // fx::Delay delay_;
+  // fx::Reverb reverb_;
+  fx::Oscillator oscillator_;
+  fx::BqFilter bqFilter_;
   /// エフェクター一覧
-  EffectorBase *list_[9];
+  fx::EffectorBase *list_[9];
 
 public:
   /// @brief コンストラクタ
@@ -71,11 +71,11 @@ public:
   /// @brief エフェクター取得
   /// @param[in] i インデックス
   /// @return エフェクター
-  EffectorBase *getFx(size_t i) noexcept { return list_[i]; }
+  fx::EffectorBase *getFx(size_t i) noexcept { return list_[i]; }
   /// @brief エフェクター取得
   /// @param[in] i インデックス
   /// @return エフェクター
-  EffectorBase const *getFx(size_t i) const noexcept { return list_[i]; }
+  fx::EffectorBase const *getFx(size_t i) const noexcept { return list_[i]; }
   /// @brief エフェクター数を取得
   /// @return エフェクター数
   size_t count() const noexcept { return satoh::countof(list_); }
@@ -84,7 +84,7 @@ public:
   /// @retval 0以上 インデックス
   /// @retval -1 見つからない
   /// @retval -2 引数がNULL
-  int find(EffectorBase const *fx)
+  int find(fx::EffectorBase const *fx)
   {
     if (fx == 0)
     {
@@ -105,7 +105,7 @@ public:
   ///   @arg true 次のエフェクターを検索
   ///   @arg false 前のエフェクターを検索
   /// @return 次 or 前のエフェクター
-  EffectorBase *getNext(EffectorBase const *cur, bool next) noexcept
+  fx::EffectorBase *getNext(fx::EffectorBase const *cur, bool next) noexcept
   {
     int ix = find(cur);
     if (ix < 0)
@@ -130,7 +130,7 @@ struct satoh::state::EffectParam
 struct satoh::state::Patch
 {
   /// エフェクター
-  EffectorBase *fx[MAX_EFFECTOR_COUNT];
+  fx::EffectorBase *fx[MAX_EFFECTOR_COUNT];
   /// パラメータ
   EffectParam param[MAX_EFFECTOR_COUNT];
   /// @brief fx -> param

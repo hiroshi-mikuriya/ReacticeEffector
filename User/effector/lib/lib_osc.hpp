@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.h"
+#include "constant.h"
 #include "lib_calc.hpp"
 
 // のこぎり波
@@ -23,7 +23,7 @@ public:
 
   float output() // のこぎり波出力 0～1
   {
-    float y = y1 + freq / SAMPLING_FREQ;
+    float y = y1 + freq / satoh::SAMPLING_FREQ;
     if (y > 1)
       y = y - 1.0f;
     y1 = y; // 前回出力値を記録
@@ -50,7 +50,7 @@ public:
 
   float output() // 正弦波出力 -1～1
   {
-    return sinf(2.0f * PI * saw.output());
+    return sinf(2.0f * satoh::PI * saw.output());
   }
 };
 

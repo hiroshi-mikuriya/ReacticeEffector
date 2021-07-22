@@ -11,11 +11,14 @@
 
 namespace satoh
 {
+namespace fx
+{
 class Bypass;
 }
+} // namespace satoh
 
 /// @brief バイパス
-class satoh::Bypass : public satoh::EffectorBase
+class satoh::fx::Bypass : public satoh::fx::EffectorBase
 {
   /// @brief UI表示のパラメータを、エフェクト処理で使用する値へ変換する
   /// @param[in] n 変換対象のパラメータ番号
@@ -30,7 +33,7 @@ class satoh::Bypass : public satoh::EffectorBase
 
 public:
   /// @brief コンストラクタ
-  Bypass() : EffectorBase(fx::BYPASS, "---", "--", RGB{0x00, 0x00, 0x00}) //
+  Bypass() : EffectorBase(BYPASS, "---", "--", RGB{0x00, 0x00, 0x00}) //
   {
     init(0, 0);
   }

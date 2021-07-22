@@ -1,12 +1,12 @@
 #pragma once
 
-#include "common.h"
+#include "constant.h"
 #include "lib_calc.hpp"
 
 /* 2 * PI * fc / fs 計算 -----------------------------*/
 inline float omega(float fc)
 {
-  return 2.0f * PI * fc / SAMPLING_FREQ;
+  return 2.0f * satoh::PI * fc / satoh::SAMPLING_FREQ;
 }
 
 /* 1次LPF、HPF、APF用の係数計算、50～10kHzでの近似曲線 -----------------------------*/
@@ -151,35 +151,35 @@ inline float bqCosOmega(float fc); // プロトタイプ宣言
 inline float bqSinOmega(float fc)
 {
   float w;
-  if (fc < SAMPLING_FREQ / 10.0f)
+  if (fc < satoh::SAMPLING_FREQ / 10.0f)
   {
     w = omega(fc);
     return -0.0000070241321f + 1.00045830f * w - 0.0038841709f * w * w - 0.15837971f * w * w * w;
   }
-  else if (fc < SAMPLING_FREQ / 4.0f)
+  else if (fc < satoh::SAMPLING_FREQ / 4.0f)
   {
     w = omega(fc);
     return -0.032685534f + 1.13017828f * w - 0.17781076f * w * w - 0.078404483f * w * w * w;
   }
   else
-    return bqCosOmega(fc - SAMPLING_FREQ / 4.0f);
+    return bqCosOmega(fc - satoh::SAMPLING_FREQ / 4.0f);
 }
 
 inline float bqCosOmega(float fc)
 {
   float w;
-  if (fc < SAMPLING_FREQ / 20.0f)
+  if (fc < satoh::SAMPLING_FREQ / 20.0f)
   {
     w = omega(fc);
     return 1.0f - 0.5f * w * w;
   }
-  else if (fc < SAMPLING_FREQ / 4.0f)
+  else if (fc < satoh::SAMPLING_FREQ / 4.0f)
   {
     w = omega(fc);
     return 0.987157f + 0.075570696f * w - 0.65302817f * w * w + 0.13027421f * w * w * w;
   }
   else
-    return -bqSinOmega(fc - SAMPLING_FREQ / 4.0f);
+    return -bqSinOmega(fc - satoh::SAMPLING_FREQ / 4.0f);
 }
 
 inline float bqAlphaQ(float fc, float q)

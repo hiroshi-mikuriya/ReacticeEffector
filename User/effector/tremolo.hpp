@@ -7,17 +7,20 @@
 #pragma once
 
 #include "effector_base.h"
-#include "lib_calc.hpp"
-#include "lib_osc.hpp"
+#include "lib/lib_calc.hpp"
+#include "lib/lib_osc.hpp"
 #include <cstdio> // sprintf
 
 namespace satoh
 {
+namespace fx
+{
 class Tremolo;
 }
+} // namespace satoh
 
 /// @brief Sodiumから拝借したトレモロ
-class satoh::Tremolo : public satoh::EffectorBase
+class satoh::fx::Tremolo : public satoh::fx::EffectorBase
 {
   enum
   {
@@ -78,8 +81,8 @@ class satoh::Tremolo : public satoh::EffectorBase
 
 public:
   /// @brief コンストラクタ
-  Tremolo()                                                                //
-      : EffectorBase(fx::TREMOLO, "Tremolo", "TR", RGB{0x00, 0x20, 0x00}), //
+  Tremolo()                                                            //
+      : EffectorBase(TREMOLO, "Tremolo", "TR", RGB{0x00, 0x20, 0x00}), //
         ui_({
             EffectParameterF(1, 100, 1, "LEVEL"), //
             EffectParameterF(1, 100, 1, "RATE"),  //
@@ -105,7 +108,7 @@ public:
       float fx = right[i];
       float gain = 2.0f * tri.output() - 1.0f; // LFO -1～1 三角波
       gain *= wave_;                           // 三角波を増幅
-      satoh::compress(-1.0f, gain, 1.0f);      // クリッピング（矩形波に近い形へ）
+      satoh::fx::compress(-1.0f, gain, 1.0f);  // クリッピング（矩形波に近い形へ）
       gain = depth_ * gain;                    // DEPTH -10～10 dB
       fx *= dbToGain(gain);                    // 音量を揺らす
       fx *= level_;                            // LEVEL

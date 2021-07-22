@@ -7,18 +7,21 @@
 #pragma once
 
 #include "effector_base.h"
-#include "lib_calc.hpp"
-#include "lib_delay.hpp"
-#include "lib_filter.hpp"
+#include "lib/lib_calc.hpp"
+#include "lib/lib_delay.hpp"
+#include "lib/lib_filter.hpp"
 #include <cstdio> // sprintf
 
 namespace satoh
 {
+namespace fx
+{
 class Reverb;
 }
+} // namespace satoh
 
 /// @brief エフェクタークラスの実装参考用テンプレート
-class satoh::Reverb : public satoh::EffectorBase
+class satoh::fx::Reverb : public satoh::fx::EffectorBase
 {
   enum
   {
@@ -111,8 +114,8 @@ class satoh::Reverb : public satoh::EffectorBase
 
 public:
   /// @brief コンストラクタ
-  Reverb()                                                               //
-      : EffectorBase(fx::REVERB, "Reverb", "RV", RGB{0x20, 0x20, 0x20}), //
+  Reverb()                                                           //
+      : EffectorBase(REVERB, "Reverb", "RV", RGB{0x20, 0x20, 0x20}), //
         ui_({
             EffectParameterF(0, 100, 1, "LEVEL"),  //
             EffectParameterF(0, 100, 1, "MIX"),    //

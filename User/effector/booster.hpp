@@ -7,17 +7,20 @@
 #pragma once
 
 #include "effector_base.h"
-#include "lib_filter.hpp"
+#include "lib/lib_filter.hpp"
 #include <cmath>  // powf
 #include <cstdio> // sprintf
 
 namespace satoh
 {
+namespace fx
+{
 class Booster;
 }
+} // namespace satoh
 
 /// @brief Sodiumから拝借したBooster
-class satoh::Booster : public satoh::EffectorBase
+class satoh::fx::Booster : public satoh::fx::EffectorBase
 {
   enum
   {
@@ -76,7 +79,7 @@ class satoh::Booster : public satoh::EffectorBase
 public:
   /// @brief コンストラクタ
   Booster()
-      : EffectorBase(fx::BOOSTER, "Booster", "BT", RGB{0x20, 0x00, 0x00}), //
+      : EffectorBase(BOOSTER, "Booster", "BT", RGB{0x20, 0x00, 0x00}), //
         ui_({
             EffectParameterF(0, 10, 1, "LEVEL"), //
             EffectParameterF(0, 10, 1, "HIGH"),  //
@@ -100,7 +103,7 @@ public:
       fx = lpf_.process(fx); // ローパスフィルタ
       fx = hpf_.process(fx); // ハイパスフィルタ
       fx = fx * gain_;       // 音量調整
-      satoh::compress(0, fx, 0.99f);
+      satoh::fx::compress(0, fx, 0.99f);
       right[i] = fx;
     }
   }

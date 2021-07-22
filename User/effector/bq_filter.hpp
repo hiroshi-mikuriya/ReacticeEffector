@@ -7,17 +7,20 @@
 #pragma once
 
 #include "effector_base.h"
-#include "lib_calc.hpp"
-#include "lib_filter.hpp"
+#include "lib/lib_calc.hpp"
+#include "lib/lib_filter.hpp"
 #include <cstdio> // sprintf
 
 namespace satoh
 {
+namespace fx
+{
 class BqFilter;
 }
+} // namespace satoh
 
 /// @brief Sodiumから拝借したBQフィルター
-class satoh::BqFilter : public satoh::EffectorBase
+class satoh::fx::BqFilter : public satoh::fx::EffectorBase
 {
   enum
   {
@@ -104,8 +107,8 @@ class satoh::BqFilter : public satoh::EffectorBase
 
 public:
   /// @brief コンストラクタ
-  BqFilter()                                                                   //
-      : EffectorBase(fx::BQ_FILTER, "BQ Filter", "BQ", RGB{0x00, 0x20, 0x20}), //
+  BqFilter()                                                               //
+      : EffectorBase(BQ_FILTER, "BQ Filter", "BQ", RGB{0x00, 0x20, 0x20}), //
         ui_({
             EffectParameterF(-20, 20, 1, "LV"), //
             EffectParameterF(0, 8, 1, "TYPE"),  //

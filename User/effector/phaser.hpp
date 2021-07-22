@@ -7,17 +7,20 @@
 #pragma once
 
 #include "effector_base.h"
-#include "lib_filter.hpp"
-#include "lib_osc.hpp"
+#include "lib/lib_filter.hpp"
+#include "lib/lib_osc.hpp"
 #include <cstdio> // sprintf
 
 namespace satoh
 {
+namespace fx
+{
 class Phaser;
 }
+} // namespace satoh
 
 /// @brief Sodiumから拝借したフェイザー
-class satoh::Phaser : public satoh::EffectorBase
+class satoh::fx::Phaser : public satoh::fx::EffectorBase
 {
   enum
   {
@@ -73,8 +76,8 @@ class satoh::Phaser : public satoh::EffectorBase
 
 public:
   /// @brief コンストラクタ
-  Phaser()                                                              //
-      : EffectorBase(fx::PHASER, "Phaser", "PH", RGB{0x8, 0x20, 0x00}), //
+  Phaser()                                                          //
+      : EffectorBase(PHASER, "Phaser", "PH", RGB{0x8, 0x20, 0x00}), //
         ui_({
             EffectParameterF(0, 100, 1, "LEVEL"), //
             EffectParameterF(0, 100, 1, "RATE"),  //
