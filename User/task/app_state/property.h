@@ -181,6 +181,8 @@ struct satoh::state::Property
   Effectors effectors[MAX_EFFECTOR_COUNT];
   /// パッチデータ
   Patch patches[MAX_BANK][MAX_PATCH];
+  /// 最後にタップを押した時間
+  uint32_t lastTapTick = 0;
   /// @brief コンストラクタ
   Property() : effectors({Effectors(0), Effectors(1), Effectors(2)})
   {
