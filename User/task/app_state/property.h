@@ -72,11 +72,11 @@ public:
   /// @brief エフェクター取得
   /// @param[in] i インデックス
   /// @return エフェクター
-  fx::EffectorBase *getFx(size_t i) noexcept { return list_[i]; }
+  fx::EffectorBase *getFx(size_t i) noexcept { return list_[i % count()]; }
   /// @brief エフェクター取得
   /// @param[in] i インデックス
   /// @return エフェクター
-  fx::EffectorBase const *getFx(size_t i) const noexcept { return list_[i]; }
+  fx::EffectorBase const *getFx(size_t i) const noexcept { return list_[i % count()]; }
   /// @brief エフェクター数を取得
   /// @return エフェクター数
   size_t count() const noexcept { return satoh::countof(list_); }
