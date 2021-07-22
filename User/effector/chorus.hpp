@@ -38,7 +38,7 @@ class satoh::fx::Chorus : public satoh::fx::EffectorBase
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
   mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
   sineWave sin1;
-  delayBufF<16> del1;
+  delayBufF del1;
   hpf hpf1;
   lpf2nd lpf2nd1;
   lpf2nd lpf2nd2;
@@ -112,6 +112,7 @@ public:
             EffectParameterF(1, 100, 1, "DEPTH"), //
             EffectParameterF(1, 100, 1, "TONE"),  //
         }),                                       //
+        del1(16),                                 //
         level_(0),                                //
         mix_(0),                                  //
         fback_(0),                                //
@@ -120,6 +121,13 @@ public:
     hpf1.set(100.0f); // ディレイ音のローカット設定
     init(ui_, COUNT);
   }
+  /// @brief moveコンストラクタ
+  /// @param[in] that 移動元
+  Chorus(Chorus &&) = default;
+  /// @brief move演算子
+  /// @param[in] that 移動元
+  /// @return 自身の参照
+  Chorus &operator=(Chorus &&) = default;
   /// @brief デストラクタ
   virtual ~Chorus() {}
   /// @brief エフェクト処理実行
