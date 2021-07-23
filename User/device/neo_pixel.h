@@ -17,9 +17,9 @@ class NeoPixel;
 /// @brief Neo Pixel 制御クラス
 class satoh::NeoPixel
 {
-  SpiMaster *spi_;               ///< SPI通信クラス
-  const uint32_t ledCount_;      ///< LED数
-  std::unique_ptr<uint8_t> buf_; ///< 送信バッファ
+  SpiMaster *spi_;          ///< SPI通信クラス
+  const uint32_t ledCount_; ///< LED数
+  Alloc<uint8_t> buf_;      ///< 送信バッファ
 public:
   /// @brief コンストラクタ
   /// @param[in] spi SPI通信クラス

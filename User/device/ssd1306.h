@@ -6,9 +6,9 @@
 
 #pragma once
 
+#include "common/alloc.hpp"
 #include "i2c_device_base.hpp"
 #include "message/type.h"
-#include <memory>
 
 namespace satoh
 {
@@ -19,9 +19,9 @@ class SSD1306;
 class satoh::SSD1306 : public satoh::I2CDeviceBase
 {
   /// 表示用バッファ
-  std::unique_ptr<uint8_t> dispbuf_;
+  Alloc<uint8_t> dispbuf_;
   /// 通信用バッファ
-  std::unique_ptr<uint8_t> txbuf_;
+  Alloc<uint8_t> txbuf_;
   /// 通信可否
   const bool ok_;
   /// 表示対象エフェクター

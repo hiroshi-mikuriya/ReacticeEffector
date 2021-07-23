@@ -7,6 +7,7 @@
 #include "ssd1306.h"
 #include "common/utils.h"
 #include "fonts.h"
+#include <cstdio>  // sprintf
 #include <cstring> // memset
 
 namespace
@@ -218,8 +219,8 @@ void satoh::SSD1306::drawEffectPage() noexcept
 
 satoh::SSD1306::SSD1306(I2C *i2c) noexcept //
     : I2CDeviceBase(i2c, SLAVE_ADDR),      //
-      dispbuf_(new uint8_t[BUF_SIZE]),     //
-      txbuf_(new uint8_t[WIDTH + 32]),     //
+      dispbuf_(BUF_SIZE),                  //
+      txbuf_(WIDTH + 32),                  //
       ok_(init()),                         //
       effector_(0),                        //
       patch_(0),                           //

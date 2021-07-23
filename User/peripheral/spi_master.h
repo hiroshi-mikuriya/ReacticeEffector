@@ -7,8 +7,8 @@
 #pragma once
 
 #include "cmsis_os.h"
+#include "common/alloc.hpp"
 #include "stm32f7xx.h"
-#include <memory>
 
 namespace satoh
 {
@@ -20,14 +20,14 @@ constexpr int32_t SPI_MASTER_CLS_SIG_MASK = 0x000000FF;
 /// @brief SPIマスター通信クラス
 class satoh::SpiMaster
 {
-  osThreadId threadId_;            ///< 通信実行するスレッドID
-  bool sendOnly_;                  ///< 送信専用
-  SPI_TypeDef *const spi_;         ///< SPIペリフェラル
-  DMA_TypeDef *const dma_;         ///< DMA
-  const uint32_t txStream_;        ///< 送信DMAストリーム
-  std::unique_ptr<uint8_t> txbuf_; ///< DMA送信バッファ
-  const uint32_t rxStream_;        ///< 受信DMAストリーム
-  std::unique_ptr<uint8_t> rxbuf_; ///< DMA受信バッファ
+  osThreadId threadId_;     ///< 通信実行するスレッドID
+  bool sendOnly_;           ///< 送信専用
+  SPI_TypeDef *const spi_;  ///< SPIペリフェラル
+  DMA_TypeDef *const dma_;  ///< DMA
+  const uint32_t txStream_; ///< 送信DMAストリーム
+  Alloc<uint8_t> txbuf_;    ///< DMA送信バッファ
+  const uint32_t rxStream_; ///< 受信DMAストリーム
+  Alloc<uint8_t> rxbuf_;    ///< DMA受信バッファ
 
 public:
   /// @brief 関数リターン値定義

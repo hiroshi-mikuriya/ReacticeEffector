@@ -5,9 +5,9 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "sound_task.h"
+#include "common/alloc.hpp"
 #include "main.h"
 #include "message/msglib.h"
-#include <memory>
 
 namespace
 {
@@ -88,10 +88,15 @@ void soundTaskProc(void const *argument)
     return;
   }
   constexpr uint32_t SIZE = LR_BLOCK_SIZE * 2;
-  std::unique_ptr<int32_t> rxbuf(new int32_t[SIZE]); // 音声信号受信バッファ配列 Lch前半 Lch後半 Rch前半 Rch後半
-  std::unique_ptr<int32_t> txbuf(new int32_t[SIZE]); // 音声信号送信バッファ配列
-  std::unique_ptr<float> left(new float[BLOCK_SIZE]);
-  std::unique_ptr<float> right(new float[BLOCK_SIZE]);
+  satoh::Alloc<int32_t> rxbuf(SIZE); // 音声信号受信バッファ配列 Lch前半 Lch後半 Rch前半 Rch後半
+  satoh::Alloc<int32_t> txbuf(SIZE); // 音声信号送信バッファ配列
+  satoh::Alloc<float> left(BLOCK_SIZE);
+  satoh::Alloc<float> right(BLOCK_SIZE);
+  if (!rxbuf.ok() || !txbuf.ok() || !left.ok() || !right.ok())
+  {
+    // TODO エラー通知？
+    return;
+  }
   extern SAI_HandleTypeDef hsai_BlockA1;
   extern SAI_HandleTypeDef hsai_BlockB1;
   HAL_SAI_Transmit_DMA(&hsai_BlockB1, reinterpret_cast<uint8_t *>(txbuf.get()), SIZE);

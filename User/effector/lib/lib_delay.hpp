@@ -6,8 +6,9 @@
 
 #pragma once
 
+#include "common/alloc.hpp"
 #include "constant.h"
-#include <memory>
+#include <algorithm>
 
 namespace satoh
 {
@@ -76,7 +77,7 @@ inline float satoh::toFloat<float>(float v)
 }
 
 /// @brief ディレイバッファ
-/// @tparam T 保持するデータ型
+/// @tparam T 保持するデータ型（int8_t, int16_t or float）
 template <typename T>
 class satoh::delayBuf
 {
@@ -94,9 +95,9 @@ class satoh::delayBuf
   /// @return バッファサイズ
   static constexpr uint32_t getBufferSize(float time) { return 1 + static_cast<uint32_t>(getInterval(time)); }
 
-  const uint32_t count_;   // サンプル要素数
-  std::unique_ptr<T> buf_; // ディレイバッファ配列
-  uint32_t wpos_;          // 書き込み位置
+  const uint32_t count_; // サンプル要素数
+  Alloc<T> buf_;         // ディレイバッファ配列
+  uint32_t wpos_;        // 書き込み位置
 
   /// @brief float値を変換して保存する
   /// @param[in] pos 格納先のインデックス
@@ -112,24 +113,21 @@ public:
   /// @param[in] maxTime 最大保持時間（ミリ秒）
   explicit delayBuf(float maxTime) noexcept //
       : count_(getBufferSize(maxTime)),     //
-        buf_(new T[count_]),                //
+        buf_(count_),                       //
         wpos_(0)                            //
   {
     memset(buf_.get(), 0, count_ * sizeof(T));
   }
   /// @brief moveコンストラクタ
-  /// @param[in] that 移動元
-  explicit delayBuf(delayBuf &&that) = default;
+  explicit delayBuf(delayBuf &&) = default;
   /// @brief move演算子
-  /// @param[in] that 移動元
-  /// @return 自身の参照
-  delayBuf &operator=(delayBuf &&that) = default;
+  delayBuf &operator=(delayBuf &&) = default;
   /// @brief デストラクタ
   virtual ~delayBuf() {}
   /// @brief メモリ確保成功・失敗を取得
   /// @retval true 成功
   /// @retval false 失敗
-  bool ok() const noexcept { return !!buf_; }
+  bool ok() const noexcept { return buf_.ok(); }
   /// @brief 要素数を取得
   /// @return 要素数
   uint32_t count() const noexcept { return count_; }

@@ -86,10 +86,10 @@ public:
   Delay()                                                          //
       : EffectorBase(DELAY, "Delay", "DL", RGB{0x20, 0x00, 0x20}), //
         ui_({
-            EffectParameterF(10, 50, 50, 2, "TIME"), //
-            EffectParameterF(0, 100, 1, "E.LV"),     //
-            EffectParameterF(0, 99, 1, "F.BACK"),    //
-            EffectParameterF(0, 100, 1, "TONE"),     //
+            EffectParameterF(10, 100, 50, 2, "TIME"), //
+            EffectParameterF(0, 100, 1, "E.LV"),      //
+            EffectParameterF(0, 99, 1, "F.BACK"),     //
+            EffectParameterF(0, 100, 1, "TONE"),      //
         }),
         del1_(ui_[DTIME].getMax()), //
         dtime_(0),                  //

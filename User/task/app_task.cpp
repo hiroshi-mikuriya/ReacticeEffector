@@ -10,18 +10,13 @@
 #include "app_state/patch_edit.h"
 #include "app_state/playing.h"
 
-namespace
-{
-/// 状態プロパティ
-satoh::state::Property s_prop;
-} // namespace
-
 void appTaskProc(void const *argument)
 {
   if (satoh::registerMsgTarget(4) != osOK)
   {
     return;
   }
+  static satoh::state::Property s_prop;
   satoh::state::PatchEdit stPE(s_prop);
   satoh::state::EffectEdit stEE(s_prop);
   satoh::state::Playing stPL(s_prop);
