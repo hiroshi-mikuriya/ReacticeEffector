@@ -7,6 +7,7 @@
 #pragma once
 
 #include "common/rgb.h"
+#include "constant.h"
 #include "id.h"
 #include <cstdint>
 #include <cstring> // strlen, memcpy
@@ -136,9 +137,11 @@ public:
 class satoh::fx::EffectorBase
 {
   /// UIパラメータ
-  EffectParameterF *uiParam_;
+  EffectParameterF *uiParam_ = 0;
   /// パラメータ総数
-  uint8_t paramCount_;
+  uint8_t paramCount_ = 0;
+  /// デフォルト値
+  float defaultParam_[MAX_PARAM_COUNT] = {0};
   /// エフェクターID
   const fx::ID id_;
   /// エフェクター名
@@ -167,6 +170,7 @@ protected:
     paramCount_ = paramCount;
     for (uint8_t n = 0; n < paramCount_; ++n)
     {
+      defaultParam_[n] = uiParam_[n].getValue();
       convUiToFx(n);
     }
   }
@@ -178,7 +182,7 @@ public:
   /// @param[in] shortName エフェクター名（短縮）
   /// @param[in] ledColor アクティブ時のLED色
   explicit EffectorBase(ID id, const char *name, const char *shortName, RGB const &ledColor) //
-      : uiParam_(0), paramCount_(0), id_(id), name_(name), shortName_(shortName), ledColor_(ledColor)
+      : id_(id), name_(name), shortName_(shortName), ledColor_(ledColor)
   {
   }
   /// @brief デストラクタ
@@ -204,6 +208,17 @@ public:
   /// @brief パラメータ数を取得
   /// @return パラメータ数
   virtual uint8_t getParamCount() const noexcept { return paramCount_; }
+  /// @brief デフォルト値を取得
+  /// @param[in] n 取得対象のパラメータ番号
+  /// @return デフォルト値
+  virtual float getDefaultParam(uint8_t n) const noexcept
+  {
+    if (n < paramCount_)
+    {
+      return defaultParam_[n];
+    }
+    return 0;
+  }
   /// @brief パラメータ取得
   /// @param[in] n 取得対象のパラメータ番号
   /// @return パラメータ
@@ -214,6 +229,14 @@ public:
       return uiParam_[n].getValue();
     }
     return 0;
+  }
+  /// @brief 全てのパラメータを初期値に戻す
+  virtual void setDefaultParam() noexcept
+  {
+    for (uint8_t n = 0; n < paramCount_; ++n)
+    {
+      setParam(n, defaultParam_[n]);
+    }
   }
   /// @brief パラメータ設定
   /// @param[in] n 設定対象のパラメータ番号

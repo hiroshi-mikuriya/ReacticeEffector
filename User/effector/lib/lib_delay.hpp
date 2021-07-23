@@ -85,7 +85,7 @@ class satoh::delayBuf
   delayBuf() = delete;
   /// @brief コピーコンストラクタ削除
   delayBuf(delayBuf const &) = delete;
-  /// @brief コピー演算子削除
+  /// @brief 代入演算子削除
   delayBuf &operator=(delayBuf const &) = delete;
 
   /// @brief 書込位置と読出位置の間隔を計算
@@ -102,11 +102,11 @@ class satoh::delayBuf
   /// @brief float値を変換して保存する
   /// @param[in] pos 格納先のインデックス
   /// @param[in] v 値
-  void setFloat(uint32_t pos, float v) noexcept { buf_.get()[pos] = fromFloat<T>(v); }
+  void setFloat(uint32_t pos, float v) noexcept { buf_[pos] = fromFloat<T>(v); }
   /// @brief 値を読み出して、floatへ変換して取得する
   /// @param[in] pos 読み出し先のインデックス
   /// @return float値
-  float getFloat(uint32_t pos) const noexcept { return toFloat<T>(buf_.get()[pos]); }
+  float getFloat(uint32_t pos) const noexcept { return toFloat<T>(buf_[pos]); }
 
 public:
   /// @brief コンストラクタ
@@ -127,7 +127,7 @@ public:
   /// @brief メモリ確保成功・失敗を取得
   /// @retval true 成功
   /// @retval false 失敗
-  bool ok() const noexcept { return buf_.ok(); }
+  bool ok() const noexcept { return static_cast<bool>(buf_); }
   /// @brief 要素数を取得
   /// @return 要素数
   uint32_t count() const noexcept { return count_; }

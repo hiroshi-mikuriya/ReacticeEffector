@@ -9,6 +9,7 @@
 #include "app_state/error.h"
 #include "app_state/patch_edit.h"
 #include "app_state/playing.h"
+#include "common/alloc.hpp"
 
 void appTaskProc(void const *argument)
 {
@@ -16,31 +17,14 @@ void appTaskProc(void const *argument)
   {
     return;
   }
-  static satoh::state::Property s_prop;
-  satoh::state::PatchEdit stPE(s_prop);
-  satoh::state::EffectEdit stEE(s_prop);
-  satoh::state::Playing stPL(s_prop);
-  satoh::state::Error stER(s_prop);
+  satoh::AllocCls<satoh::state::PatchTable> patch; // TODO 保存から読み出す or 初期値を入れる
+  satoh::AllocCls<satoh::state::Property> prop(patch.get());
+  satoh::state::PatchEdit stPE(*prop);
+  satoh::state::EffectEdit stEE(*prop);
+  satoh::state::Playing stPL(*prop);
+  satoh::state::Error stER(*prop);
   satoh::state::Base *states[] = {&stPL, &stPE, &stEE, &stER};
   satoh::state::ID stID = satoh::state::PLAYING;
-  // TODO 暫定的にパッチに初期値を入れておく
-  s_prop.patches[0][0].fx[0] = s_prop.effectors[0].getFx(0);
-  s_prop.patches[0][1].fx[0] = s_prop.effectors[0].getFx(1);
-  s_prop.patches[0][2].fx[0] = s_prop.effectors[0].getFx(2);
-  s_prop.patches[0][3].fx[0] = s_prop.effectors[0].getFx(3);
-
-  s_prop.patches[1][0].fx[0] = s_prop.effectors[0].getFx(4);
-  s_prop.patches[1][1].fx[0] = s_prop.effectors[0].getFx(5);
-  s_prop.patches[1][2].fx[0] = s_prop.effectors[0].getFx(6);
-  s_prop.patches[1][3].fx[0] = s_prop.effectors[0].getFx(7);
-
-  s_prop.patches[2][0].fx[0] = s_prop.effectors[0].getFx(8);
-  s_prop.patches[2][1].fx[0] = s_prop.effectors[0].getFx(1);
-  s_prop.patches[2][1].fx[1] = s_prop.effectors[1].getFx(2);
-  s_prop.patches[2][2].fx[0] = s_prop.effectors[0].getFx(1);
-  s_prop.patches[2][2].fx[1] = s_prop.effectors[1].getFx(3);
-  s_prop.patches[2][3].fx[0] = s_prop.effectors[0].getFx(3);
-  s_prop.patches[2][3].fx[1] = s_prop.effectors[1].getFx(4);
   states[stID]->init();
   for (;;)
   {

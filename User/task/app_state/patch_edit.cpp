@@ -12,7 +12,7 @@ satoh::state::ID satoh::state::PatchEdit::run(msg::MODE_KEY const *src) noexcept
 {
   if (src->ok == satoh::msg::BUTTON_DOWN)
   {
-    auto *fx = m_.getCurrectPatch().fx[m_.editSelectedFxNum];
+    auto *fx = m_.getEditSelectedFx();
     if (fx->getID() != fx::BYPASS)
     {
       return EFFECT_EDIT;
@@ -20,7 +20,7 @@ satoh::state::ID satoh::state::PatchEdit::run(msg::MODE_KEY const *src) noexcept
   }
   if (src->rtn == satoh::msg::BUTTON_DOWN)
   {
-    m_.getCurrectPatch().dump();
+    m_.savePatch();
     return PLAYING;
   }
   if (src->up == satoh::msg::BUTTON_DOWN)
@@ -45,8 +45,7 @@ satoh::state::ID satoh::state::PatchEdit::run(msg::EFFECT_KEY const *src) noexce
   {
     if (src->button[i] == msg::BUTTON_DOWN)
     {
-      m_.getCurrectPatch().dump();
-      m_.patchNum = i;
+      m_.changePatch(i);
       return PLAYING;
     }
   }
@@ -54,9 +53,9 @@ satoh::state::ID satoh::state::PatchEdit::run(msg::EFFECT_KEY const *src) noexce
 }
 satoh::state::ID satoh::state::PatchEdit::run(msg::ACC_GYRO const *src) noexcept
 {
-  for (auto *fx : m_.getCurrectPatch().fx)
+  for (size_t i = 0; i < MAX_EFFECTOR_COUNT; ++i)
   {
-    fx->setGyroParam(src->acc);
+    m_.getFx(i)->setGyroParam(src->acc);
   }
   return PATCH_EDIT;
 }
@@ -85,45 +84,34 @@ satoh::state::ID satoh::state::PatchEdit::run(msg::ROTARY_ENCODER const *src) no
 void satoh::state::PatchEdit::updateDisplay() noexcept
 {
   msg::OLED_DISP_BANK cmd{};
-  cmd.bank = m_.bankNum + 1;
-  cmd.patch = m_.patchNum + 1;
+  cmd.bank = m_.getBankNum() + 1;
+  cmd.patch = m_.getPatchNum() + 1;
   cmd.editMode = true;
-  cmd.selectedFx = m_.editSelectedFxNum + 1;
+  cmd.selectedFx = m_.getEditSelectedFxNum() + 1;
   for (size_t i = 0; i < satoh::countof(cmd.fx); ++i)
   {
-    cmd.fx[i] = m_.getCurrectPatch().fx[i];
+    cmd.fx[i] = m_.getFx(i);
   }
   sendMsg(i2cTaskHandle, msg::OLED_DISP_BANK_REQ, &cmd, sizeof(cmd));
 }
 void satoh::state::PatchEdit::modSelectedFxNum(bool up) noexcept
 {
-  if (up)
-  {
-    m_.editSelectedFxNum = (m_.editSelectedFxNum + 1) % MAX_EFFECTOR_COUNT;
-  }
-  else
-  {
-    m_.editSelectedFxNum = (m_.editSelectedFxNum + MAX_EFFECTOR_COUNT - 1) % MAX_EFFECTOR_COUNT;
-  }
+  m_.updateEditSelectedFxNum(up);
   updateDisplay();
 }
 void satoh::state::PatchEdit::modFxList(bool next) noexcept
 {
-  auto &pch = m_.getCurrectPatch();
-  auto *cur = pch.fx[m_.editSelectedFxNum];
-  auto *fx = m_.effectors[m_.editSelectedFxNum].getNext(cur, next);
-  pch.fx[m_.editSelectedFxNum] = fx;
+  m_.updateNextFx(next);
   updateDisplay();
   msg::SOUND_EFFECTOR sound{};
   for (size_t i = 0; i < satoh::countof(sound.fx); ++i)
   {
-    sound.fx[i] = pch.fx[i];
+    sound.fx[i] = m_.getFx(i);
   }
   sendMsg(soundTaskHandle, msg::SOUND_CHANGE_EFFECTOR_REQ, &sound, sizeof(sound));
 }
 void satoh::state::PatchEdit::init() noexcept
 {
-  m_.editSelectedFxNum = 0;
   updateDisplay();
 }
 void satoh::state::PatchEdit::deinit() noexcept

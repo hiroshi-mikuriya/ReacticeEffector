@@ -63,21 +63,19 @@ satoh::state::ID satoh::state::Playing::run(msg::MODE_KEY const *src) noexcept
   }
   if (src->up == satoh::msg::BUTTON_DOWN)
   {
-    m_.getCurrectPatch().dump();
-    m_.bankNum = (m_.bankNum + MAX_BANK + 1) % MAX_BANK;
+    m_.changeBank(true);
     modBank();
   }
   if (src->down == satoh::msg::BUTTON_DOWN)
   {
-    m_.getCurrectPatch().dump();
-    m_.bankNum = (m_.bankNum + MAX_BANK - 1) % MAX_BANK;
+    m_.changeBank(false);
     modBank();
   }
   if (src->tap == satoh::msg::BUTTON_DOWN)
   {
-    for (auto *fx : m_.getCurrectPatch().fx)
+    for (size_t i = 0; i < MAX_EFFECTOR_COUNT; ++i)
     {
-      fx->tap();
+      m_.getFx(i)->tap();
     }
     // TODO 暫定
     uint32_t tick = osKernelSysTick();
@@ -124,8 +122,7 @@ satoh::state::ID satoh::state::Playing::run(msg::EFFECT_KEY const *src) noexcept
   {
     if (src->button[i] == msg::BUTTON_DOWN)
     {
-      m_.getCurrectPatch().dump();
-      m_.patchNum = i;
+      m_.changePatch(i);
       modBank();
       break;
     }
@@ -134,9 +131,9 @@ satoh::state::ID satoh::state::Playing::run(msg::EFFECT_KEY const *src) noexcept
 }
 satoh::state::ID satoh::state::Playing::run(msg::ACC_GYRO const *src) noexcept
 {
-  for (auto *fx : m_.getCurrectPatch().fx)
+  for (size_t i = 0; i < MAX_EFFECTOR_COUNT; ++i)
   {
-    fx->setGyroParam(src->acc);
+    m_.getFx(i)->setGyroParam(src->acc);
   }
   return PLAYING;
 }
@@ -146,13 +143,12 @@ satoh::state::ID satoh::state::Playing::run(msg::ROTARY_ENCODER const *src) noex
 }
 void satoh::state::Playing::modBank() noexcept
 {
-  m_.getCurrectPatch().load();
   msg::OLED_DISP_BANK disp{};
-  disp.bank = m_.bankNum + 1;
-  disp.patch = m_.patchNum + 1;
+  disp.bank = m_.getBankNum() + 1;
+  disp.patch = m_.getPatchNum() + 1;
   for (size_t i = 0; i < satoh::countof(disp.fx); ++i)
   {
-    disp.fx[i] = m_.getCurrectPatch().fx[i];
+    disp.fx[i] = m_.getFx(i);
   }
   sendMsg(i2cTaskHandle, msg::OLED_DISP_BANK_REQ, &disp, sizeof(disp));
   msg::SOUND_EFFECTOR sound{};
@@ -168,12 +164,13 @@ void satoh::state::Playing::modBank() noexcept
       satoh::RGB{0x00, 0x00, 0x20}, //
       satoh::RGB{0x20, 0x20, 0x00}, //
   };
-  led.rgb[m_.patchNum] = colorList[m_.patchNum];
+  led.rgb[m_.getPatchNum()] = colorList[m_.getPatchNum()];
   sendMsg(i2cTaskHandle, msg::LED_ALL_EFFECT_REQ, &led, sizeof(led));
 }
 void satoh::state::Playing::init() noexcept
 {
   modBank();
+  m_.initEditSelectedFxNum();
 }
 void satoh::state::Playing::deinit() noexcept
 {

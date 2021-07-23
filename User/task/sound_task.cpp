@@ -92,7 +92,7 @@ void soundTaskProc(void const *argument)
   satoh::Alloc<int32_t> txbuf(SIZE); // 音声信号送信バッファ配列
   satoh::Alloc<float> left(BLOCK_SIZE);
   satoh::Alloc<float> right(BLOCK_SIZE);
-  if (!rxbuf.ok() || !txbuf.ok() || !left.ok() || !right.ok())
+  if (!rxbuf || !txbuf || !left || !right)
   {
     // TODO エラー通知？
     return;

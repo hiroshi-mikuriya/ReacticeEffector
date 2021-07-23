@@ -15,7 +15,7 @@ satoh::state::ID satoh::state::EffectEdit::run(msg::MODE_KEY const *src) noexcep
   }
   if (src->rtn == satoh::msg::BUTTON_DOWN)
   {
-    m_.getCurrectPatch().dump();
+    m_.savePatch();
     return PATCH_EDIT;
   }
   if (src->up == satoh::msg::BUTTON_DOWN)
@@ -40,8 +40,7 @@ satoh::state::ID satoh::state::EffectEdit::run(msg::EFFECT_KEY const *src) noexc
   {
     if (src->button[i] == msg::BUTTON_DOWN)
     {
-      m_.getCurrectPatch().dump();
-      m_.patchNum = i;
+      m_.changePatch(i);
       return PLAYING;
     }
   }
@@ -49,15 +48,15 @@ satoh::state::ID satoh::state::EffectEdit::run(msg::EFFECT_KEY const *src) noexc
 }
 satoh::state::ID satoh::state::EffectEdit::run(msg::ACC_GYRO const *src) noexcept
 {
-  for (auto *fx : m_.getCurrectPatch().fx)
+  for (size_t i = 0; i < MAX_EFFECTOR_COUNT; ++i)
   {
-    fx->setGyroParam(src->acc);
+    m_.getFx(i)->setGyroParam(src->acc);
   }
   return EFFECT_EDIT;
 }
 satoh::state::ID satoh::state::EffectEdit::run(msg::ROTARY_ENCODER const *src) noexcept
 {
-  auto *fx = m_.getCurrectPatch().fx[m_.editSelectedFxNum];
+  auto *fx = m_.getEditSelectedFx();
   int8_t selectKnob = src->angleDiff[0];
   if (0 < selectKnob)
   {
@@ -93,7 +92,7 @@ satoh::state::ID satoh::state::EffectEdit::run(msg::ROTARY_ENCODER const *src) n
 }
 void satoh::state::EffectEdit::modSelectedParam(bool up)
 {
-  auto *fx = m_.getCurrectPatch().fx[m_.editSelectedFxNum];
+  auto *fx = m_.getEditSelectedFx();
   int8_t d = up ? 1 : -1;
   selectedParamNum_ = (selectedParamNum_ + fx->getParamCount() + d) % fx->getParamCount();
   msg::OLED_SELECT_PARAM cmd{selectedParamNum_};
@@ -102,10 +101,10 @@ void satoh::state::EffectEdit::modSelectedParam(bool up)
 void satoh::state::EffectEdit::init() noexcept
 {
   selectedParamNum_ = 0;
-  auto *fx = m_.getCurrectPatch().fx[m_.editSelectedFxNum];
+  auto *fx = m_.getEditSelectedFx();
   msg::OLED_DISP_EFFECTOR cmd{};
   cmd.fx = fx;
-  cmd.patch = m_.editSelectedFxNum + 1;
+  cmd.patch = m_.getEditSelectedFxNum() + 1;
   sendMsg(i2cTaskHandle, msg::OLED_DISP_EFFECTOR_REQ, &cmd, sizeof(cmd));
 }
 void satoh::state::EffectEdit::deinit() noexcept

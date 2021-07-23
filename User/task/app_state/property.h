@@ -27,7 +27,8 @@ namespace state
 class Effectors;
 struct EffectParam;
 struct Patch;
-struct Property;
+struct PatchTable;
+class Property;
 } // namespace state
 } // namespace satoh
 
@@ -56,182 +57,141 @@ class satoh::state::Effectors
 public:
   /// @brief コンストラクタ
   /// @param[in] n FX番号（0, 1, 2）
-  explicit Effectors(uint8_t n) : count_(0)
-  {
-    // TODO n は何か使う可能性がある気がするのでとっておく
-    if (bypass_.ok())
-    {
-      list_[count_++] = &bypass_;
-    }
-    if (booster_.ok())
-    {
-      list_[count_++] = &booster_;
-    }
-    if (overDrive_.ok())
-    {
-      list_[count_++] = &overDrive_;
-    }
-    if (distortion_.ok())
-    {
-      list_[count_++] = &distortion_;
-    }
-    if (chorus_.ok())
-    {
-      list_[count_++] = &chorus_;
-    }
-    if (phaser_.ok())
-    {
-      list_[count_++] = &phaser_;
-    }
-    if (tremolo_.ok())
-    {
-      list_[count_++] = &tremolo_;
-    }
-    if (delay_.ok())
-    {
-      list_[count_++] = &delay_;
-    }
-    if (oscillator_.ok())
-    {
-      list_[count_++] = &oscillator_;
-    }
-    if (bqFilter_.ok())
-    {
-      list_[count_++] = &bqFilter_;
-    }
-  }
+  explicit Effectors(uint8_t n);
   /// @brief エフェクター取得
   /// @param[in] i インデックス
   /// @return エフェクター
-  fx::EffectorBase *getFx(size_t i) noexcept { return list_[i % count()]; }
+  fx::EffectorBase *getFx(size_t i) noexcept;
   /// @brief エフェクター取得
   /// @param[in] i インデックス
   /// @return エフェクター
-  fx::EffectorBase const *getFx(size_t i) const noexcept { return list_[i % count()]; }
+  fx::EffectorBase const *getFx(size_t i) const noexcept;
+  /// @brief エフェクター取得
+  /// @param[in] id エフェクターID
+  /// @return エフェクター
+  fx::EffectorBase *getFxById(fx::ID id) noexcept;
+  /// @brief エフェクター取得
+  /// @param[in] id エフェクターID
+  /// @return エフェクター
+  fx::EffectorBase const *getFxById(fx::ID id) const noexcept;
   /// @brief エフェクター数を取得
   /// @return エフェクター数
-  size_t count() const noexcept { return count_; }
+  size_t count() const noexcept;
   /// @brief エフェクター一覧から検索してインデックスを返す
   /// @param[in] fx 検索対象のエフェクター
   /// @retval 0以上 インデックス
   /// @retval -1 見つからない
   /// @retval -2 引数がNULL
-  int find(fx::EffectorBase const *fx)
-  {
-    if (fx == 0)
-    {
-      return -2;
-    }
-    for (size_t i = 0; i < count(); ++i)
-    {
-      if (getFx(i) == fx)
-      {
-        return static_cast<int>(i);
-      }
-    }
-    return -1;
-  }
+  int find(fx::EffectorBase const *fx);
   /// @brief 次のエフェクターを取得
   /// @param[in] cur 現在選択中のエフェクター
   /// @param[in] next
   ///   @arg true 次のエフェクターを検索
   ///   @arg false 前のエフェクターを検索
   /// @return 次 or 前のエフェクター
-  fx::EffectorBase *getNext(fx::EffectorBase const *cur, bool next) noexcept
-  {
-    int ix = find(cur);
-    if (ix < 0)
-    {
-      return getFx(0);
-    }
-    int d = next ? 1 : -1;
-    ix = (ix + d + count()) % count();
-    return getFx(ix);
-  }
+  fx::EffectorBase *getNext(fx::EffectorBase const *cur, bool next) noexcept;
 };
 
 /// @brief １つのエフェクターが持つデータ
 struct satoh::state::EffectParam
 {
-  fx::ID id;
-  bool gyro[6];
-  float value[6];
+  fx::ID id;      ///< エフェクターID
+  bool gyro[6];   ///< ジャイロ有効・無効
+  float value[6]; ///< パラメータ値
+  /// @brief FXからパラメータを読み込む
+  /// @param[in] fx 読み込み先
+  void read(fx::EffectorBase const *fx) noexcept;
+  /// @brief エフェクターにパラメータを書き込む
+  /// @param[in] fx 書き込み先
+  void write(fx::EffectorBase *fx) const noexcept;
 };
 
 /// @brief １つのパッチが持つデータ
 struct satoh::state::Patch
 {
-  /// エフェクター
-  fx::EffectorBase *fx[MAX_EFFECTOR_COUNT];
   /// パラメータ
   EffectParam param[MAX_EFFECTOR_COUNT];
-  /// @brief fx -> param
-  void dump() noexcept
-  {
-    for (size_t i = 0; i < satoh::countof(fx); ++i)
-    {
-      auto const *fx0 = fx[i];
-      auto &param0 = param[i];
-      param0.id = fx0->getID();
-      for (uint8_t n = 0; n < fx0->getParamCount(); ++n)
-      {
-        param0.gyro[n] = fx0->isGyroEnabled(n);
-        param0.value[n] = fx0->getParam(n);
-      }
-    }
-  }
-  /// @brief param -> fx
-  void load() noexcept
-  {
-    for (size_t i = 0; i < satoh::countof(fx); ++i)
-    {
-      auto *fx0 = fx[i];
-      auto const &param0 = param[i];
-      if (param0.id != fx0->getID())
-      {
-        continue;
-      }
-      for (uint8_t n = 0; n < fx0->getParamCount(); ++n)
-      {
-        fx0->setGyroEnable(n, param0.gyro[n]);
-        fx0->setParam(n, param0.value[n]);
-      }
-    }
-  }
+};
+
+/// @brief 全パッチ
+struct satoh::state::PatchTable
+{
+  /// パッチデータ
+  Patch m_[MAX_BANK][MAX_PATCH];
 };
 
 /// @brief 状態プロパティ
-struct satoh::state::Property
+class satoh::state::Property
 {
   /// バンク番号
-  uint8_t bankNum = 0;
+  uint8_t bankNum_;
   /// パッチ番号
-  uint8_t patchNum = 0;
-  /// 編集中のエフェクト番号
-  uint8_t editSelectedFxNum = 0;
-  /// エフェクター実態
-  Effectors effectors[MAX_EFFECTOR_COUNT];
+  uint8_t patchNum_;
+  /// エフェクター一覧
+  Effectors effectors_[MAX_EFFECTOR_COUNT];
   /// パッチデータ
-  Patch patches[MAX_BANK][MAX_PATCH];
+  PatchTable *patches_;
+  /// 現在有効になっているエフェクター
+  fx::EffectorBase *fx_[MAX_EFFECTOR_COUNT];
+  /// 編集中のエフェクト番号
+  uint8_t editSelectedFxNum_;
+  /// @brief パッチをロードする
+  void loadPatch() noexcept;
+
+public:
   /// 最後にタップを押した時間
   uint32_t lastTapTick = 0;
   /// @brief コンストラクタ
-  Property() : effectors({Effectors(0), Effectors(1), Effectors(2)})
-  {
-    for (size_t bix = 0; bix < MAX_BANK; ++bix)
-    {
-      for (size_t pix = 0; pix < MAX_PATCH; ++pix)
-      {
-        auto &pch = patches[bix][pix];
-        for (size_t i = 0; i < satoh::countof(pch.fx); ++i)
-        {
-          pch.fx[i] = effectors[i].getFx(0);
-        }
-        pch.dump();
-      }
-    }
-  }
+  /// @param[in] パッチテーブル
+  explicit Property(PatchTable *patch);
+  /// @brief エフェクター番号を指定して取得
+  /// @param[in] n 0, 1, 2
+  /// @return エフェクター
+  fx::EffectorBase *getFx(uint8_t n) noexcept;
+  /// @brief エフェクター番号を指定して取得
+  /// @param[in] n 0, 1, 2
+  /// @return エフェクター
+  fx::EffectorBase const *getFx(uint8_t n) const noexcept;
+  /// @brief 選択中のエフェクターを取得
+  /// @return エフェクター
+  fx::EffectorBase *getEditSelectedFx() noexcept;
+  /// @brief 選択中のエフェクターを取得
+  /// @return エフェクター
+  fx::EffectorBase const *getEditSelectedFx() const noexcept;
+  /// @brief バンク番号更新
+  /// @param[in] up
+  ///   @arg true +1
+  ///   @arg false -1
+  /// @note 変更前のパッチを保存し、変更後のパッチを読み出す
+  void changeBank(bool up) noexcept;
+  /// @brief パッチ番号更新
+  /// @param[in] n パッチ番号
+  /// @note 変更前のパッチを保存し、変更後のパッチを読み出す
+  void changePatch(uint8_t n) noexcept;
+  /// @brief バンク番号取得
+  /// @return バンク番号
+  uint8_t getBankNum() const noexcept;
+  /// @brief パッチ番号取得
+  /// @return パッチ番号
+  uint8_t getPatchNum() const noexcept;
   /// @brief 選択中のパッチを取得
   /// @return 選択中のパッチ
-  Patch &getCurrectPatch() noexcept { return patches[bankNum][patchNum]; }
+  Patch &getCurrectPatch() noexcept;
+  /// @brief パッチを保存する
+  void savePatch() noexcept;
+  /// @brief 選択中のFX1-3のエフェクタを変更する
+  /// @param[in] up
+  ///   @arg true +1
+  ///   @arg false -1
+  void updateNextFx(bool up) noexcept;
+  /// @brief 編集中のエフェクト番号更新
+  /// @param[in] up
+  ///   @arg true +1
+  ///   @arg false -1
+  void updateEditSelectedFxNum(bool up) noexcept;
+  /// @brief 編集中のエフェクト番号を取得
+  /// @return 編集中のエフェクト番号
+  uint8_t getEditSelectedFxNum() const noexcept;
+  /// @brief 編集中のエフェクト番号を0に戻す
+  void initEditSelectedFxNum() noexcept;
 };
