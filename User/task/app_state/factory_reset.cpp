@@ -90,4 +90,5 @@ void state::factoryReset(state::PatchTable &pch) noexcept
       {fx::DISTORTION, {}, {75, 75, 50}}, //
       {fx::DELAY, {}, {50, 50, 50, 50}},  //
   }};
+  pch.initialized = true;
 }

@@ -144,7 +144,7 @@ void state::EffectParam::write(fx::EffectorBase *fx) const noexcept
 
 void state::Property::loadPatch() noexcept
 {
-  auto &pch = getCurrectPatch();
+  auto const &pch = getCurrectPatch();
   for (size_t i = 0; i < countof(effectors_); ++i)
   {
     auto &param = pch.param[i];
@@ -160,8 +160,10 @@ state::Property::Property(PatchTable *patch)                  //
       patches_(patch),                                        //
       editSelectedFxNum_(0)                                   //
 {
-  // TODO 保存データ読み出し
-  factoryReset(*patch);
+  if (!patch->initialized)
+  {
+    factoryReset(*patch);
+  }
   loadPatch();
 }
 
@@ -219,6 +221,11 @@ uint8_t state::Property::getPatchNum() const noexcept
 state::Patch &state::Property::getCurrectPatch() noexcept
 {
   return patches_->m_[bankNum_][patchNum_];
+}
+
+state::Patch const &state::Property::getCurrectPatch() const noexcept
+{
+  return const_cast<Property *>(this)->getCurrectPatch();
 }
 
 void state::Property::savePatch() noexcept

@@ -116,6 +116,7 @@ struct satoh::state::Patch
 /// @brief 全パッチ
 struct satoh::state::PatchTable
 {
+  bool initialized = false;
   /// パッチデータ
   Patch m_[MAX_BANK][MAX_PATCH];
 };
@@ -177,6 +178,9 @@ public:
   /// @brief 選択中のパッチを取得
   /// @return 選択中のパッチ
   Patch &getCurrectPatch() noexcept;
+  /// @brief 選択中のパッチを取得
+  /// @return 選択中のパッチ
+  Patch const &getCurrectPatch() const noexcept;
   /// @brief パッチを保存する
   void savePatch() noexcept;
   /// @brief 選択中のFX1-3のエフェクタを変更する
