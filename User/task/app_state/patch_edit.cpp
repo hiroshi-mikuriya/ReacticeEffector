@@ -20,7 +20,6 @@ satoh::state::ID satoh::state::PatchEdit::run(msg::MODE_KEY const *src) noexcept
   }
   if (src->rtn == satoh::msg::BUTTON_DOWN)
   {
-    m_.savePatch();
     return PLAYING;
   }
   if (src->up == satoh::msg::BUTTON_DOWN)
@@ -116,5 +115,5 @@ void satoh::state::PatchEdit::init() noexcept
 }
 void satoh::state::PatchEdit::deinit() noexcept
 {
-  // TODO
+  m_.savePatch();
 }
