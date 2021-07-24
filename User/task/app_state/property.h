@@ -116,9 +116,13 @@ struct satoh::state::Patch
 /// @brief 全パッチ
 struct satoh::state::PatchTable
 {
-  bool initialized = false;
+  /// CRC（データ破損判定）
+  uint32_t crc_;
   /// パッチデータ
   Patch m_[MAX_BANK][MAX_PATCH];
+  /// @brief CRCを計算
+  /// @return CRC計算結果
+  uint32_t calcCrc() const noexcept;
 };
 
 /// @brief 状態プロパティ

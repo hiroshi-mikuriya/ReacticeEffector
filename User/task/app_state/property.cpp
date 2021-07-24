@@ -6,6 +6,8 @@
 
 #include "property.h"
 #include "factory_reset.h"
+#include "stm32f7xx.h"
+#include "stm32f7xx_ll_crc.h"
 
 namespace state = satoh::state;
 namespace fx = satoh::fx;
@@ -140,6 +142,17 @@ void state::EffectParam::write(fx::EffectorBase *fx) const noexcept
   }
 }
 
+uint32_t satoh::state::PatchTable::calcCrc() const noexcept
+{
+  LL_CRC_SetInitialData(CRC, 0);
+  auto p = reinterpret_cast<uint32_t const *>(m_);
+  for (size_t i = 0; i < sizeof(m_) / sizeof(*p); ++i)
+  {
+    LL_CRC_FeedData32(CRC, *(p++));
+  }
+  return LL_CRC_ReadData32(CRC);
+}
+
 // state::Property
 
 void state::Property::loadPatch() noexcept
@@ -160,7 +173,7 @@ state::Property::Property(PatchTable *patch)                  //
       patches_(patch),                                        //
       editSelectedFxNum_(0)                                   //
 {
-  if (!patch->initialized)
+  if (patch->calcCrc() != patch->crc_)
   {
     factoryReset(*patch);
   }
@@ -235,6 +248,7 @@ void state::Property::savePatch() noexcept
   {
     pch.param[i].read(fx_[i]);
   }
+  patches_->crc_ = patches_->calcCrc();
 }
 
 void state::Property::updateNextFx(bool up) noexcept

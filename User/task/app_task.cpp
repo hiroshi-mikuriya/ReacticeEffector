@@ -19,7 +19,7 @@ namespace
 void initBackup()
 {
   __HAL_RCC_PWR_CLK_ENABLE();
-  HAL_PWR_EnableBkUpAccess();
+  LL_PWR_EnableBkUpAccess();
   __HAL_RCC_BKPSRAM_CLK_ENABLE();
   LL_PWR_EnableBkUpRegulator();
   while (!LL_PWR_IsActiveFlag_BRR())

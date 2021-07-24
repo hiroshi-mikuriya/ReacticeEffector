@@ -31,6 +31,7 @@ extern "C" {
 #include "stm32f7xx_hal.h"
 
 #include "stm32f7xx_ll_adc.h"
+#include "stm32f7xx_ll_crc.h"
 #include "stm32f7xx_ll_dma.h"
 #include "stm32f7xx_ll_i2c.h"
 #include "stm32f7xx_ll_rcc.h"
