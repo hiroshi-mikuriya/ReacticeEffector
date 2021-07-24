@@ -88,10 +88,10 @@ void soundTaskProc(void const *argument)
     return;
   }
   constexpr uint32_t SIZE = LR_BLOCK_SIZE * 2;
-  satoh::Alloc<int32_t> rxbuf(SIZE); // 音声信号受信バッファ配列 Lch前半 Lch後半 Rch前半 Rch後半
-  satoh::Alloc<int32_t> txbuf(SIZE); // 音声信号送信バッファ配列
-  satoh::Alloc<float> left(BLOCK_SIZE);
-  satoh::Alloc<float> right(BLOCK_SIZE);
+  satoh::unique_ptr<int32_t> rxbuf(satoh::allocArray<int32_t>(SIZE)); // 音声信号受信バッファ配列 Lch前半 Lch後半 Rch前半 Rch後半
+  satoh::unique_ptr<int32_t> txbuf(satoh::allocArray<int32_t>(SIZE)); // 音声信号送信バッファ配列
+  satoh::unique_ptr<float> left(satoh::allocArray<float>(BLOCK_SIZE));
+  satoh::unique_ptr<float> right(satoh::allocArray<float>(BLOCK_SIZE));
   if (!rxbuf || !txbuf || !left || !right)
   {
     // TODO エラー通知？

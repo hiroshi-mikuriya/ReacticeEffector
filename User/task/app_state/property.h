@@ -6,19 +6,10 @@
 
 #pragma once
 
-#include "common/utils.h"
+#include "common/alloc.hpp"
 #include "constant.h"
-#include "effector/booster.hpp"
-#include "effector/bq_filter.hpp"
-#include "effector/bypass.hpp"
-#include "effector/chorus.hpp"
-#include "effector/delay.hpp"
-#include "effector/distortion.hpp"
-#include "effector/oscillator.hpp"
-#include "effector/overdrive.hpp"
-#include "effector/phaser.hpp"
-// #include "effector/reverb.hpp"
-#include "effector/tremolo.hpp"
+#include "effector/effector_base.h"
+#include <memory>
 
 namespace satoh
 {
@@ -37,27 +28,34 @@ class satoh::state::Effectors
 {
   /// @brief デフォルトコンストラクタ削除
   Effectors() = delete;
-
-  fx::Bypass bypass_;
-  fx::Booster booster_;
-  fx::OverDrive overDrive_;
-  fx::Distortion distortion_;
-  fx::Chorus chorus_;
-  fx::Phaser phaser_;
-  fx::Tremolo tremolo_;
-  fx::Delay delay_;
-  // fx::Reverb reverb_;
-  fx::Oscillator oscillator_;
-  fx::BqFilter bqFilter_;
+  /// エフェクターポインタ型
+  using Ptr = unique_ptr<fx::EffectorBase>;
   /// エフェクター一覧
-  fx::EffectorBase *list_[16];
+  Ptr list_[16];
   /// エフェクター数
   size_t count_;
+  /// @brief エフェクターを一覧に追加する
+  /// @tparam FX エフェクター種類
+  /// @tparam Args エフェクタークラスコンストラクタ引数型
+  /// @param[in] cond 追加条件（trueならば追加する）
+  /// @param[in] args エフェクタークラスコンストラクタ引数
+  template <typename FX, class... Args>
+  void addList(bool cond, Args... args)
+  {
+    if (cond)
+    {
+      Ptr ptr = Ptr(alloc<FX>(args...));
+      if (ptr->ok())
+      {
+        list_[count_++] = std::move(ptr);
+      }
+    }
+  }
 
 public:
   /// @brief コンストラクタ
   /// @param[in] n FX番号（0, 1, 2）
-  explicit Effectors(uint8_t n);
+  explicit Effectors(uint8_t n) noexcept;
   /// @brief エフェクター取得
   /// @param[in] i インデックス
   /// @return エフェクター

@@ -81,8 +81,6 @@ inline float satoh::toFloat<float>(float v)
 template <typename T>
 class satoh::delayBuf
 {
-  /// @brief デフォルトコンストラクタ削除
-  delayBuf() = delete;
   /// @brief コピーコンストラクタ削除
   delayBuf(delayBuf const &) = delete;
   /// @brief 代入演算子削除
@@ -95,25 +93,27 @@ class satoh::delayBuf
   /// @return バッファサイズ
   static constexpr uint32_t getBufferSize(float time) { return 1 + static_cast<uint32_t>(getInterval(time)); }
 
-  const uint32_t count_; // サンプル要素数
-  Alloc<T> buf_;         // ディレイバッファ配列
-  uint32_t wpos_;        // 書き込み位置
+  uint32_t count_;    // サンプル要素数
+  unique_ptr<T> buf_; // ディレイバッファ配列
+  uint32_t wpos_;     // 書き込み位置
 
   /// @brief float値を変換して保存する
   /// @param[in] pos 格納先のインデックス
   /// @param[in] v 値
-  void setFloat(uint32_t pos, float v) noexcept { buf_[pos] = fromFloat<T>(v); }
+  void setFloat(uint32_t pos, float v) noexcept { buf_.get()[pos] = fromFloat<T>(v); }
   /// @brief 値を読み出して、floatへ変換して取得する
   /// @param[in] pos 読み出し先のインデックス
   /// @return float値
-  float getFloat(uint32_t pos) const noexcept { return toFloat<T>(buf_[pos]); }
+  float getFloat(uint32_t pos) const noexcept { return toFloat<T>(buf_.get()[pos]); }
 
 public:
+  /// @brief コンストラクタ
+  delayBuf() noexcept : count_(0), wpos_(0) {}
   /// @brief コンストラクタ
   /// @param[in] maxTime 最大保持時間（ミリ秒）
   explicit delayBuf(float maxTime) noexcept //
       : count_(getBufferSize(maxTime)),     //
-        buf_(count_),                       //
+        buf_(allocArray<T>(count_)),        //
         wpos_(0)                            //
   {
     memset(buf_.get(), 0, count_ * sizeof(T));
@@ -121,7 +121,7 @@ public:
   /// @brief moveコンストラクタ
   explicit delayBuf(delayBuf &&) = default;
   /// @brief move演算子
-  delayBuf &operator=(delayBuf &&) = default;
+  delayBuf &operator=(delayBuf &&that) = default;
   /// @brief デストラクタ
   virtual ~delayBuf() {}
   /// @brief メモリ確保成功・失敗を取得

@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "common/alloc.hpp"
 #include "common/rgb.h"
 #include "peripheral/spi_master.h"
 
@@ -19,7 +20,8 @@ class satoh::NeoPixel
 {
   SpiMaster *spi_;          ///< SPI通信クラス
   const uint32_t ledCount_; ///< LED数
-  Alloc<uint8_t> buf_;      ///< 送信バッファ
+  unique_ptr<uint8_t> buf_; ///< 送信バッファ
+
 public:
   /// @brief コンストラクタ
   /// @param[in] spi SPI通信クラス

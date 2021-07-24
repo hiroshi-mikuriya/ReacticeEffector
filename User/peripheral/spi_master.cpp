@@ -25,7 +25,7 @@ satoh::SpiMaster::SpiMaster(osThreadId threadId,          //
       spi_(spi),                                          //
       dma_(dma),                                          //
       txStream_(txStream),                                //
-      txbuf_(bufferSize),                                 //
+      txbuf_(allocArray<uint8_t>(bufferSize)),            //
       rxStream_(0),                                       //
       rxbuf_()                                            //
 {
@@ -50,9 +50,9 @@ satoh::SpiMaster::SpiMaster(osThreadId threadId,          //
       spi_(spi),                                          //
       dma_(dma),                                          //
       txStream_(txStream),                                //
-      txbuf_(bufferSize),                                 //
+      txbuf_(allocArray<uint8_t>(bufferSize)),            //
       rxStream_(rxStream),                                //
-      rxbuf_(bufferSize)                                  //
+      rxbuf_(allocArray<uint8_t>(bufferSize))             //
 {
   LL_SPI_Enable(spi_);
   LL_DMA_ConfigAddresses(dma_, txStream_,                          //

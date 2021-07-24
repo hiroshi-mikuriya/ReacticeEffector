@@ -39,10 +39,8 @@ class satoh::fx::Reverb : public satoh::fx::EffectorBase
 
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
   mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
-  signalSw bypassIn;
-  signalSw bypassOutL;
-  signalSw bypassOutR;
-  delayBufF del[10];
+  typedef delayBuf<int8_t> Buffer;
+  Buffer del[10];
   lpf lpfIn;
   lpf lpfFB[4];
   hpf hpfOutL;
@@ -130,7 +128,7 @@ public:
   {
     for (int i = 0; i < 10; i++)
     {
-      del[i].set(dt[i]); // ディレイタイム設定
+      del[i] = Buffer(dt[i]); // ディレイタイム設定
     }
     init(ui_, COUNT);
   }
@@ -144,7 +142,7 @@ public:
   {
     for (uint32_t i = 0; i < size; ++i)
     {
-      float fxR = bypassIn.process(0.0f, right[i], isActive());
+      float fxR = right[i];
       fxR = 0.25f * lpfIn.process(fxR);
 
       // Early Reflection
@@ -195,8 +193,8 @@ public:
       fxR = (1.0f - mix_) * right[i] + mix_ * hpfOutR.process(outR);
       float fxL = (1.0f - mix_) * left[i] + mix_ * hpfOutL.process(outL);
 
-      left[i] = bypassOutL.process(left[i], level_ * fxL, isActive());
-      right[i] = bypassOutR.process(right[i], level_ * fxR, isActive());
+      left[i] = level_ * fxL;
+      right[i] = level_ * fxR;
     }
   }
 };

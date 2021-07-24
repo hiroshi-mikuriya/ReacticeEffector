@@ -7,178 +7,80 @@
 #pragma once
 
 #include <cmsis_os.h>
-#include <cstddef> // std::size_t
+#include <memory>  // std::unique_ptr
 #include <utility> // std::move
 
 namespace satoh
 {
+template <typename T, class... Args>
+T *alloc(Args... args) noexcept;
+
 template <typename T>
-class Alloc;
+T *allocArray(std::size_t size) noexcept;
+
 template <typename T>
-class AllocCls;
+class Deleter;
+
+template <typename T>
+using unique_ptr = std::unique_ptr<T, Deleter<T>>;
 } // namespace satoh
 
-/// @brief メモリ確保（要素のコンストラクタ・デストラクタは呼ばない版）
-/// @tparam T 型
-template <typename T>
-class satoh::Alloc
+/// @brief RTOSからメモリ確保し、コンストラクタを呼び出しポインタを返す
+/// @tparam T メモリ確保する型
+/// @tparam Args コンストラクタ引数型
+/// @param[in] args コンストラクタ引数
+template <typename T, class... Args>
+T *satoh::alloc(Args... args) noexcept
 {
-  /// コピーコンストラクタ削除
-  Alloc(Alloc const &) = delete;
-  /// 代入演算子削除
-  Alloc &operator=(Alloc const &) = delete;
+  void *ptr = pvPortMalloc(sizeof(T));
+  return new (ptr) T(args...);
+}
 
-  T *m_;             ///< メモリ
-  std::size_t size_; ///< 要素数
+/// @brief RTOSからメモリ確保し、コンストラクタを呼ばずにポインタを返す
+/// @tparam T メモリ確保する型
+/// @param[in] size メモリ確保する数
+template <typename T>
+T *satoh::allocArray(std::size_t size) noexcept
+{
+  return static_cast<T *>(pvPortMalloc(size * sizeof(T)));
+}
 
+/// @brief satoh::allocでメモリ確保したオブジェクトを破棄する
+template <typename T = void>
+class satoh::Deleter
+{
 public:
-  /// @brief コンストラクタ
-  Alloc() : m_(0), size_(0) {}
-  /// @brief コンストラクタ
-  /// @param[in] size 要素数
-  explicit Alloc(std::size_t size)                            //
-      : m_(static_cast<T *>(pvPortMalloc(size * sizeof(T)))), //
-        size_(size)                                           //
+  constexpr Deleter() noexcept = default;
+
+  // 別の Deleter オブジェクトから Deleter オブジェクトを構築します。
+  // このコンストラクタは U* が T* に暗黙に変換可能な場合にのみ、オーバーロード解決に参加します。
+  template <typename U, typename std::enable_if<std::is_convertible<U *, T *>::value, std::nullptr_t>::type = nullptr>
+  explicit Deleter(const Deleter<U> &) noexcept
   {
   }
-  /// @brief moveコンストラクタ
-  /// @param[in] that 移動元
-  explicit Alloc(Alloc &&that) //
-      : m_(that.m_),           //
-        size_(that.size_)      //
+  /// @brief オブジェクト破棄
+  /// @param[in] ptr オブジェクトのポインタ
+  void operator()(T *ptr) const
   {
-    that.m_ = 0;
-    that.size_ = 0;
+    ptr->~T(); // 配置newしているので意図的にデストラクタを呼び出す必要がある
+    vPortFree(ptr);
   }
-  /// @brief move演算子
-  /// @param[in] that 移動元
-  /// @return 自身の参照
-  Alloc &operator=(Alloc &&that)
-  {
-    if (this != &that)
-    {
-      reset();
-      m_ = that.m_;
-      size_ = that.size_;
-      that.m_ = 0;
-      that.size_ = 0;
-    }
-    return *this;
-  }
-  /// @brief デストラクタ
-  virtual ~Alloc() { reset(); }
-  /// @brief メモリ開放
-  void reset() noexcept
-  {
-    if (m_)
-    {
-      vPortFree(m_);
-      m_ = 0;
-      size_ = 0;
-    }
-  }
-  /// @brief 要素数取得
-  /// @return 要素数
-  std::size_t size() const noexcept { return size_; }
-  /// @brief 有効なリソースを所有しているかを判定する。
-  /// @retval true 所有している
-  /// @retval false 所有していない
-  explicit operator bool() const noexcept { return !!m_; }
-  /// @brief ポインタ取得
-  /// @return ポインタ
-  T *get() noexcept { return m_; }
-  /// @brief ポインタ取得
-  /// @return ポインタ
-  T const *get() const noexcept { return const_cast<Alloc *>(this)->get(); }
-  /// @brief 参照取得
-  /// @return 参照
-  T &operator*() { return *get(); }
-  /// @brief 参照取得
-  /// @return 参照
-  T const &operator*() const { return *const_cast<Alloc *>(this); }
-  /// @brief 任意の位置の要素にアクセスする。
-  /// @param[in] i インデックス
-  T &operator[](std::size_t i) { return m_[i]; }
-  /// @brief 任意の位置の要素にアクセスする。
-  /// @param[in] i インデックス
-  T const &operator[](std::size_t i) const { return (*const_cast<Alloc *>(this))[i]; }
 };
 
-/// @brief メモリ確保（コンストラクタ・デストラクタを呼ぶ版）
-/// @tparam T 型
+/// @brief satoh::allocArrayでメモリ確保したオブジェクトを破棄する
 template <typename T>
-class satoh::AllocCls
+class satoh::Deleter<T[]>
 {
-  /// コピーコンストラクタ削除
-  AllocCls(AllocCls const &) = delete;
-  /// 代入演算子削除
-  AllocCls &operator=(AllocCls const &) = delete;
-
-  Alloc<T> m_; ///< メモリ
-  T *ptr_;     ///< new確保用メモリ
-
 public:
-  /// @brief コンストラクタ
-  explicit AllocCls() : ptr_(0) {}
-  /// @brief コンストラクタ
-  /// @tparam Args コンストラクタ引数型
-  template <class... Args>
-  explicit AllocCls(Args... args) : m_(1), ptr_(new (m_.get()) T(args...))
+  constexpr Deleter() noexcept = default;
+
+  // 別の Deleter オブジェクトから Deleter オブジェクトを構築します。
+  // このコンストラクタは U(*)[] が T(*)[] に暗黙に変換可能な場合にのみ、オーバーロード解決に参加します。
+  template <typename U, typename std::enable_if<std::is_convertible<U (*)[], T (*)[]>::value, std::nullptr_t>::type = nullptr>
+  Deleter(const Deleter<U[]> &) noexcept
   {
   }
-  /// @brief moveコンストラクタ
-  /// @param[in] that 移動元
-  AllocCls(AllocCls &&that) //
-      : m_(std::move(that.m_)), ptr_(that.ptr_)
-  {
-    that.ptr_ = 0;
-  }
-  /// @brief move演算子
-  /// @param[in] that 移動元
-  /// @return 自身の参照
-  AllocCls &operator=(AllocCls &&that)
-  {
-    if (this != &that)
-    {
-      reset();
-      m_ = std::move(that.m_);
-      ptr_ = that.ptr_;
-      that.ptr_ = 0;
-    }
-    return *this;
-  }
-  /// @brief デストラクタ
-  virtual ~AllocCls() { reset(); }
-  /// @brief メモリ開放
-  void reset() noexcept
-  {
-    if (ptr_)
-    {
-      delete ptr_;
-      ptr_ = 0;
-      m_.reset();
-    }
-  }
-  /// @brief 有効なリソースを所有しているかを判定する。
-  /// @retval true 所有している
-  /// @retval false 所有していない
-  explicit operator bool() const noexcept { return static_cast<bool>(m_); }
-  /// @brief ポインタ取得
-  /// @return ポインタ
-  T *get() noexcept { return m_.get(); }
-  /// @brief ポインタ取得
-  /// @return ポインタ
-  T const *get() const noexcept { return const_cast<AllocCls *>(this)->get(); }
-  /// @brief 参照取得
-  /// @return 参照
-  T &operator*() { return *m_; }
-  /// @brief 参照取得
-  /// @return 参照
-  T const &operator*() const { return *const_cast<AllocCls *>(this); }
-  /// @brief ポインタ取得
-  /// @return ポインタ
-  T *operator->() noexcept { return get(); }
-  /// @brief ポインタ取得
-  /// @return ポインタ
-  T const *operator->() const noexcept { return get(); }
+  /// @brief オブジェクト破棄
+  /// @param[in] ptr オブジェクトのポインタ
+  void operator()(T *ptr) const { vPortFree(ptr); }
 };

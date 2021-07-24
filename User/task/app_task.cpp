@@ -12,6 +12,7 @@
 #include "common/alloc.hpp"
 #include "stm32f7xx.h"
 #include "stm32f7xx_ll_pwr.h"
+#include <memory>
 
 namespace
 {
@@ -31,19 +32,20 @@ void initBackup()
 
 void appTaskProc(void const *argument)
 {
+  namespace state = satoh::state;
   if (satoh::registerMsgTarget(4) != osOK)
   {
     return;
   }
   initBackup();
-  auto *patch = reinterpret_cast<satoh::state::PatchTable *>(BKPSRAM_BASE);
-  satoh::AllocCls<satoh::state::Property> prop(patch);
-  satoh::state::PatchEdit stPE(*prop);
-  satoh::state::EffectEdit stEE(*prop);
-  satoh::state::Playing stPL(*prop);
-  satoh::state::Error stER(*prop);
-  satoh::state::Base *states[] = {&stPL, &stPE, &stEE, &stER};
-  satoh::state::ID stID = satoh::state::PLAYING;
+  auto *patch = reinterpret_cast<state::PatchTable *>(BKPSRAM_BASE);
+  std::unique_ptr<state::Property, satoh::Deleter<state::Property>> prop(satoh::alloc<state::Property>(patch));
+  state::PatchEdit stPE(*prop);
+  state::EffectEdit stEE(*prop);
+  state::Playing stPL(*prop);
+  state::Error stER(*prop);
+  state::Base *states[] = {&stPL, &stPE, &stEE, &stER};
+  state::ID stID = state::PLAYING;
   states[stID]->init();
   for (;;)
   {

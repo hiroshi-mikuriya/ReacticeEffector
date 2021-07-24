@@ -5,6 +5,18 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "property.h"
+#include "common/utils.h"
+#include "effector/booster.hpp"
+#include "effector/bq_filter.hpp"
+#include "effector/bypass.hpp"
+#include "effector/chorus.hpp"
+#include "effector/delay.hpp"
+#include "effector/distortion.hpp"
+#include "effector/oscillator.hpp"
+#include "effector/overdrive.hpp"
+#include "effector/phaser.hpp"
+#include "effector/reverb.hpp"
+#include "effector/tremolo.hpp"
 #include "factory_reset.h"
 #include "stm32f7xx.h"
 #include "stm32f7xx_ll_crc.h"
@@ -16,52 +28,22 @@ namespace fx = satoh::fx;
 
 state::Effectors::Effectors(uint8_t n) : count_(0)
 {
-  // TODO n は何か使う可能性がある気がするのでとっておく
-  if (bypass_.ok())
-  {
-    list_[count_++] = &bypass_;
-  }
-  if (booster_.ok())
-  {
-    list_[count_++] = &booster_;
-  }
-  if (overDrive_.ok())
-  {
-    list_[count_++] = &overDrive_;
-  }
-  if (distortion_.ok())
-  {
-    list_[count_++] = &distortion_;
-  }
-  if (chorus_.ok())
-  {
-    list_[count_++] = &chorus_;
-  }
-  if (phaser_.ok())
-  {
-    list_[count_++] = &phaser_;
-  }
-  if (tremolo_.ok())
-  {
-    list_[count_++] = &tremolo_;
-  }
-  if (delay_.ok())
-  {
-    list_[count_++] = &delay_;
-  }
-  if (oscillator_.ok())
-  {
-    list_[count_++] = &oscillator_;
-  }
-  if (bqFilter_.ok())
-  {
-    list_[count_++] = &bqFilter_;
-  }
+  addList<fx::Bypass>(true);
+  addList<fx::Booster>(true);
+  addList<fx::OverDrive>(true);
+  addList<fx::Distortion>(true);
+  addList<fx::Chorus>(true);
+  addList<fx::Phaser>(true);
+  addList<fx::Tremolo>(true);
+  addList<fx::Delay>(0 < n);
+  addList<fx::Oscillator>(n == 0);
+  addList<fx::BqFilter>(true);
+  // addList<fx::Reverb>(n == 2);
 }
 
 fx::EffectorBase *state::Effectors::getFx(size_t i) noexcept
 {
-  return list_[i % count()];
+  return list_[i % count()].get();
 }
 
 fx::EffectorBase const *state::Effectors::getFx(size_t i) const noexcept

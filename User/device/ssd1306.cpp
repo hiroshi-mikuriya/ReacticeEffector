@@ -217,14 +217,14 @@ void satoh::SSD1306::drawEffectPage() noexcept
   }
 }
 
-satoh::SSD1306::SSD1306(I2C *i2c) noexcept //
-    : I2CDeviceBase(i2c, SLAVE_ADDR),      //
-      dispbuf_(BUF_SIZE),                  //
-      txbuf_(WIDTH + 32),                  //
-      ok_(init()),                         //
-      effector_(0),                        //
-      patch_(0),                           //
-      selectedParam_(0)                    //
+satoh::SSD1306::SSD1306(I2C *i2c) noexcept     //
+    : I2CDeviceBase(i2c, SLAVE_ADDR),          //
+      dispbuf_(allocArray<uint8_t>(BUF_SIZE)), //
+      txbuf_(allocArray<uint8_t>(WIDTH + 32)), //
+      ok_(init()),                             //
+      effector_(0),                            //
+      patch_(0),                               //
+      selectedParam_(0)                        //
 {
   if (ok_)
   {
