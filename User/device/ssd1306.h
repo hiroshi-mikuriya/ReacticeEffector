@@ -80,5 +80,15 @@ public:
   /// @param[in] src バンク設定
   /// @retval true 通信成功
   /// @retval false 通信失敗
-  bool update(msg::OLED_DISP_BANK const &src);
+  bool update(msg::OLED_DISP_BANK const &src) noexcept;
+  /// @brief コンファーム画面表示する
+  /// @param[in] src コンファーム画面設定
+  /// @retval true 通信成功
+  /// @retval false 通信失敗
+  bool update(msg::OLED_DISP_CONFIRM const &src) noexcept;
+  /// @brief テキスト表示する
+  /// @param[in] src テキスト設定
+  /// @retval true 通信成功
+  /// @retval false 通信失敗
+  bool update(msg::OLED_DISP_TEXT const &src) noexcept;
 };

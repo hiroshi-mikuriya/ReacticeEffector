@@ -7,6 +7,7 @@
 #include "task/app_task.h"
 #include "app_state/effect_edit.h"
 #include "app_state/error.h"
+#include "app_state/factory_reset.h"
 #include "app_state/patch_edit.h"
 #include "app_state/playing.h"
 #include "common/alloc.hpp"
@@ -43,8 +44,9 @@ void appTaskProc(void const *argument)
   state::PatchEdit stPE(*prop);
   state::EffectEdit stEE(*prop);
   state::Playing stPL(*prop);
+  state::FactoryReset stFR(*prop);
   state::Error stER(*prop);
-  state::Base *states[] = {&stPL, &stPE, &stEE, &stER};
+  state::Base *states[] = {&stPL, &stPE, &stEE, &stFR, &stER};
   state::ID stID = state::PLAYING;
   states[stID]->init();
   for (;;)

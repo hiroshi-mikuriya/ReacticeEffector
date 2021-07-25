@@ -40,7 +40,7 @@ satoh::state::ID satoh::state::PatchEdit::run(msg::MODE_KEY const *src) noexcept
 }
 satoh::state::ID satoh::state::PatchEdit::run(msg::EFFECT_KEY const *src) noexcept
 {
-  for (uint8_t i = 0; i < satoh::countof(src->button); ++i)
+  for (uint8_t i = 0; i < countof(src->button); ++i)
   {
     if (src->button[i] == msg::BUTTON_DOWN)
     {
@@ -87,7 +87,7 @@ void satoh::state::PatchEdit::updateDisplay() noexcept
   cmd.patch = m_.getPatchNum() + 1;
   cmd.editMode = true;
   cmd.selectedFx = m_.getEditSelectedFxNum() + 1;
-  for (size_t i = 0; i < satoh::countof(cmd.fx); ++i)
+  for (size_t i = 0; i < countof(cmd.fx); ++i)
   {
     cmd.fx[i] = m_.getFx(i);
   }
@@ -103,7 +103,7 @@ void satoh::state::PatchEdit::modFxList(bool next) noexcept
   m_.updateNextFx(next);
   updateDisplay();
   msg::SOUND_EFFECTOR sound{};
-  for (size_t i = 0; i < satoh::countof(sound.fx); ++i)
+  for (size_t i = 0; i < countof(sound.fx); ++i)
   {
     sound.fx[i] = m_.getFx(i);
   }

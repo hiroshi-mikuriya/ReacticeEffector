@@ -35,7 +35,7 @@ satoh::state::ID satoh::state::EffectEdit::run(msg::MODE_KEY const *src) noexcep
 }
 satoh::state::ID satoh::state::EffectEdit::run(msg::EFFECT_KEY const *src) noexcept
 {
-  for (uint8_t i = 0; i < satoh::countof(src->button); ++i)
+  for (uint8_t i = 0; i < countof(src->button); ++i)
   {
     if (src->button[i] == msg::BUTTON_DOWN)
     {

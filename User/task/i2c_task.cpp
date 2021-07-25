@@ -223,6 +223,12 @@ void i2cTaskProc(void const *argument)
     case satoh::msg::OLED_DISP_BANK_REQ:
       oledUpdate<satoh::msg::OLED_DISP_BANK>(oled, msg);
       break;
+    case satoh::msg::OLED_DISP_CONFIRM_REQ:
+      oledUpdate<satoh::msg::OLED_DISP_CONFIRM>(oled, msg);
+      break;
+    case satoh::msg::OLED_DISP_TEXT_REQ:
+      oledUpdate<satoh::msg::OLED_DISP_TEXT>(oled, msg);
+      break;
     case satoh::msg::OLED_UPDATE_PARAM_REQ:
       res.reset();
       oledUpdateEffectorParam(oled);

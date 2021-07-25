@@ -6,7 +6,6 @@
 
 #include "playing.h"
 #include "common/utils.h"
-#include "message/msglib.h"
 #include "user.h"
 
 namespace
@@ -118,7 +117,11 @@ satoh::state::ID satoh::state::Playing::run(msg::MODE_KEY const *src) noexcept
 }
 satoh::state::ID satoh::state::Playing::run(msg::EFFECT_KEY const *src) noexcept
 {
-  for (uint8_t i = 0; i < satoh::countof(src->button); ++i)
+  if (src->button[2] && src->button[3])
+  {
+    return FACTORY_RESET;
+  }
+  for (uint8_t i = 0; i < countof(src->button); ++i)
   {
     if (src->button[i] == msg::BUTTON_DOWN)
     {
@@ -146,31 +149,27 @@ void satoh::state::Playing::modBank() noexcept
   msg::OLED_DISP_BANK disp{};
   disp.bank = m_.getBankNum() + 1;
   disp.patch = m_.getPatchNum() + 1;
-  for (size_t i = 0; i < satoh::countof(disp.fx); ++i)
+  for (size_t i = 0; i < countof(disp.fx); ++i)
   {
     disp.fx[i] = m_.getFx(i);
   }
   sendMsg(i2cTaskHandle, msg::OLED_DISP_BANK_REQ, &disp, sizeof(disp));
   msg::SOUND_EFFECTOR sound{};
-  for (size_t i = 0; i < satoh::countof(sound.fx); ++i)
+  for (size_t i = 0; i < countof(sound.fx); ++i)
   {
     sound.fx[i] = disp.fx[i];
   }
   sendMsg(soundTaskHandle, msg::SOUND_CHANGE_EFFECTOR_REQ, &sound, sizeof(sound));
   msg::LED_ALL_EFFECT led{};
-  constexpr satoh::RGB colorList[] = {
-      satoh::RGB{0x20, 0x00, 0x00}, //
-      satoh::RGB{0x00, 0x20, 0x00}, //
-      satoh::RGB{0x00, 0x00, 0x20}, //
-      satoh::RGB{0x20, 0x20, 0x00}, //
-  };
-  led.rgb[m_.getPatchNum()] = colorList[m_.getPatchNum()];
+  led.rgb[m_.getPatchNum()] = m_.getCurrentColor();
   sendMsg(i2cTaskHandle, msg::LED_ALL_EFFECT_REQ, &led, sizeof(led));
 }
 void satoh::state::Playing::init() noexcept
 {
   modBank();
   m_.initEditSelectedFxNum();
+  msg::LED_SIMPLE led{0, true};
+  sendMsg(i2cTaskHandle, msg::LED_SIMPLE_REQ, &led, sizeof(led));
 }
 void satoh::state::Playing::deinit() noexcept
 {

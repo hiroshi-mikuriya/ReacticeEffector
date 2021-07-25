@@ -269,7 +269,7 @@ bool satoh::SSD1306::update(msg::OLED_DISP_BANK const &src) noexcept
   {
     drawString("EDIT", titleFont, true, titleFont.width * 7, 0, disp);
   }
-  for (size_t i = 0; i < satoh::countof(src.fx); ++i)
+  for (size_t i = 0; i < countof(src.fx); ++i)
   {
     constexpr uint8_t margin = 5;
     uint8_t y = titleFont.height + margin + (paramFont.height + margin) * i;
@@ -279,5 +279,27 @@ bool satoh::SSD1306::update(msg::OLED_DISP_BANK const &src) noexcept
     const char *name = src.fx[i] ? src.fx[i]->getName() : BYPASS_NAME;
     drawString(name, paramFont, false, paramFont.width * (n + 1), y, disp);
   }
+  return sendBufferToDevice();
+}
+bool satoh::SSD1306::update(msg::OLED_DISP_CONFIRM const &src) noexcept
+{
+  const auto &font0 = Font_7x10;
+  const auto &font1 = Font_11x18;
+  uint8_t *disp = dispbuf_.get();
+  memset(disp, 0, BUF_SIZE);
+  drawString(src.msg1, font0, false, 0, font0.height * 0, disp);
+  drawString(src.msg2, font0, false, 0, font0.height * 1, disp);
+  drawString("YES", font1, src.yes, 10, font0.height * 3, disp);
+  drawString("NO", font1, !src.yes, 80, font0.height * 3, disp);
+  return sendBufferToDevice();
+}
+bool satoh::SSD1306::update(msg::OLED_DISP_TEXT const &src) noexcept
+{
+  const auto &font = Font_7x10;
+  uint8_t *disp = dispbuf_.get();
+  memset(disp, 0, BUF_SIZE);
+  drawString(src.msg1, font, false, 0, font.height * 1, disp);
+  drawString(src.msg2, font, false, 0, font.height * 2, disp);
+  drawString(src.msg3, font, false, 0, font.height * 3, disp);
   return sendBufferToDevice();
 }

@@ -60,6 +60,10 @@ constexpr ID OLED_SELECT_PARAM_REQ = 2 | cat::OLED;
 constexpr ID OLED_UPDATE_PARAM_REQ = 3 | cat::OLED;
 /// OLED - バンク画面表示依頼
 constexpr ID OLED_DISP_BANK_REQ = 4 | cat::OLED;
+/// OLED - コンファーム画面表示依頼
+constexpr ID OLED_DISP_CONFIRM_REQ = 5 | cat::OLED;
+/// OLED - テキスト表示依頼
+constexpr ID OLED_DISP_TEXT_REQ = 6 | cat::OLED;
 /// USB - 送信依頼
 constexpr ID USB_TX_REQ = 1 | cat::USB;
 /// USB - 受信通知
@@ -86,6 +90,8 @@ struct MODE_KEY;
 struct OLED_DISP_EFFECTOR;
 struct OLED_SELECT_PARAM;
 struct OLED_DISP_BANK;
+struct OLED_DISP_CONFIRM;
+struct OLED_DISP_TEXT;
 struct NEO_PIXEL_PATTERN;
 struct NEO_PIXEL_SPEED;
 struct SOUND_EFFECTOR;
@@ -196,6 +202,20 @@ struct satoh::msg::OLED_DISP_BANK
   bool editMode;
   /// 選択中のエフェクト番号（editMode = true のときのみ有効）
   uint8_t selectedFx;
+};
+/// OLED - コンファーム画面表示依頼型
+struct satoh::msg::OLED_DISP_CONFIRM
+{
+  char msg1[19]; ///< テキスト１行目（末尾の0含む）
+  char msg2[19]; ///< テキスト２行目（末尾の0含む）
+  bool yes;      ///< @arg YES選択 @arg NO選択
+};
+/// OLED - テキスト表示依頼型
+struct satoh::msg::OLED_DISP_TEXT
+{
+  char msg1[19]; ///< テキスト１行目（末尾の0含む）
+  char msg2[19]; ///< テキスト２行目（末尾の0含む）
+  char msg3[19]; ///< テキスト３行目（末尾の0含む）
 };
 /// NeoPixel - 点灯パターン指定型
 struct satoh::msg::NEO_PIXEL_PATTERN

@@ -183,6 +183,9 @@ public:
   /// @brief 選択中のパッチを取得
   /// @return 選択中のパッチ
   Patch const &getCurrectPatch() const noexcept;
+  /// @brief 現在のパッチの色を取得
+  /// @return パッチ色
+  RGB getCurrentColor() const noexcept;
   /// @brief パッチを保存する
   void savePatch() noexcept;
   /// @brief 選択中のFX1-3のエフェクタを変更する
@@ -200,4 +203,6 @@ public:
   uint8_t getEditSelectedFxNum() const noexcept;
   /// @brief 編集中のエフェクト番号を0に戻す
   void initEditSelectedFxNum() noexcept;
+  /// @brief ファクトリーリセットする
+  void factoryReset() noexcept;
 };

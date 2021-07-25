@@ -17,10 +17,11 @@ class Base;
 /// @brief 状態ID
 enum ID
 {
-  PLAYING = 0, ///< 演奏状態
-  PATCH_EDIT,  ///< パッチ編集状態
-  EFFECT_EDIT, ///< エフェクトパラメータ編集状態
-  ERROR,       ///< エラー状態
+  PLAYING = 0,   ///< 演奏状態
+  PATCH_EDIT,    ///< パッチ編集状態
+  EFFECT_EDIT,   ///< エフェクトパラメータ編集状態
+  FACTORY_RESET, ///< ファクトリーリセット状態
+  ERROR,         ///< エラー状態
 };
 } // namespace state
 } // namespace satoh

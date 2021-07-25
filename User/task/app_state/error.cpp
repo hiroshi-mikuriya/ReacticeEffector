@@ -32,7 +32,7 @@ satoh::state::ID satoh::state::Error::run(msg::MODE_KEY const *src) noexcept
 }
 satoh::state::ID satoh::state::Error::run(msg::EFFECT_KEY const *src) noexcept
 {
-  for (uint8_t i = 0; i < satoh::countof(src->button); ++i)
+  for (uint8_t i = 0; i < countof(src->button); ++i)
   {
   }
   return ERROR;

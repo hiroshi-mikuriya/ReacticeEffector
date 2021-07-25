@@ -113,8 +113,7 @@ void state::EffectParam::read(fx::EffectorBase const *fx) noexcept
     value[n] = fx->getParam(n);
   }
 }
-/// @brief エフェクターにパラメータを書き込む
-/// @param[in] fx 書き込み先
+
 void state::EffectParam::write(fx::EffectorBase *fx) const noexcept
 {
   for (size_t n = 0; n < countof(value); ++n)
@@ -148,16 +147,18 @@ void state::Property::loadPatch() noexcept
   }
 }
 
-state::Property::Property(PatchTable *patch)                  //
-    : bankNum_(0),                                            //
-      patchNum_(0),                                           //
-      effectors_({Effectors(0), Effectors(1), Effectors(2)}), //
-      patches_(patch),                                        //
-      editSelectedFxNum_(0)                                   //
+state::Property::Property(PatchTable *patch) //
+    : bankNum_(0),                           //
+      patchNum_(0),                          //
+      effectors_({Effectors(0),              //
+                  Effectors(1),              //
+                  Effectors(2)}),            //
+      patches_(patch),                       //
+      editSelectedFxNum_(0)                  //
 {
   if (patch->calcCrc() != patch->crc_)
   {
-    factoryReset(*patch);
+    factoryReset();
   }
   loadPatch();
 }
@@ -223,6 +224,18 @@ state::Patch const &state::Property::getCurrectPatch() const noexcept
   return const_cast<Property *>(this)->getCurrectPatch();
 }
 
+satoh::RGB state::Property::getCurrentColor() const noexcept
+{
+  for (auto const *fx : fx_)
+  {
+    if (fx->getID() != fx::BYPASS)
+    {
+      return fx->getColor();
+    }
+  }
+  return RGB{0x20, 0x20, 0x20};
+}
+
 void state::Property::savePatch() noexcept
 {
   auto &pch = getCurrectPatch();
@@ -261,4 +274,90 @@ uint8_t state::Property::getEditSelectedFxNum() const noexcept
 void state::Property::initEditSelectedFxNum() noexcept
 {
   editSelectedFxNum_ = 0;
+}
+
+void state::Property::factoryReset() noexcept
+{
+  patches_->m_[0][0] = Patch{{
+      {fx::BYPASS}, //
+      {fx::BYPASS}, //
+      {fx::BYPASS}, //
+  }};
+  patches_->m_[0][1] = Patch{{
+      {fx::BOOSTER, {}, {5, 5, 5}}, //
+      {fx::BYPASS},                 //
+      {fx::BYPASS},                 //
+  }};
+  patches_->m_[0][2] = Patch{{
+      {fx::OVERDRIVE, {}, {75, 75, 50, 50}}, //
+      {fx::BYPASS},                          //
+      {fx::BYPASS},                          //
+  }};
+  patches_->m_[0][3] = Patch{{
+      {fx::DISTORTION, {}, {75, 75, 50}}, //
+      {fx::BYPASS},                       //
+      {fx::BYPASS},                       //
+  }};
+  patches_->m_[1][0] = Patch{{
+      {fx::CHORUS, {}, {50, 50, 50, 50, 50, 50}}, //
+      {fx::BYPASS},                               //
+      {fx::BYPASS},                               //
+  }};
+  patches_->m_[1][1] = Patch{{
+      {fx::TREMOLO, {}, {50, 50, 50, 50}}, //
+      {fx::BYPASS},                        //
+      {fx::BYPASS},                        //
+  }};
+  patches_->m_[1][2] = Patch{{
+      {fx::PHASER, {}, {50, 50, 3}}, //
+      {fx::BYPASS},                  //
+      {fx::BYPASS},                  //
+  }};
+  patches_->m_[1][3] = Patch{{
+      {fx::BYPASS},                      //
+      {fx::DELAY, {}, {50, 50, 50, 50}}, //
+      {fx::BYPASS},                      //
+  }};
+  patches_->m_[2][0] = Patch{{
+      {fx::OSCILLATOR, {false, true, false}, {50, 100, 1}}, //
+      {fx::BYPASS},                                         //
+      {fx::BYPASS},                                         //
+  }};
+  patches_->m_[2][1] = Patch{{
+      {fx::BOOSTER, {}, {7, 5, 5}},          //
+      {fx::OVERDRIVE, {}, {75, 75, 50, 50}}, //
+      {fx::BYPASS},                          //
+  }};
+  patches_->m_[2][2] = Patch{{
+      {fx::BOOSTER, {}, {7, 5, 5}},       //
+      {fx::DISTORTION, {}, {75, 75, 50}}, //
+      {fx::BYPASS},                       //
+  }};
+  patches_->m_[2][3] = Patch{{
+      {fx::OVERDRIVE, {}, {75, 75, 50, 50}},      //
+      {fx::CHORUS, {}, {50, 50, 50, 50, 50, 50}}, //
+      {fx::BYPASS},                               //
+  }};
+  patches_->m_[3][0] = Patch{{
+      {fx::DISTORTION, {}, {75, 75, 50}},         //
+      {fx::CHORUS, {}, {50, 50, 50, 50, 50, 50}}, //
+      {fx::BYPASS},                               //
+  }};
+  patches_->m_[3][1] = Patch{{
+      {fx::OVERDRIVE, {}, {75, 75, 50, 50}}, //
+      {fx::PHASER, {}, {50, 50, 3}},         //
+      {fx::BYPASS},                          //
+  }};
+  patches_->m_[3][2] = Patch{{
+      {fx::TREMOLO, {}, {50, 50, 50, 50}},        //
+      {fx::CHORUS, {}, {50, 50, 50, 50, 50, 50}}, //
+      {fx::BYPASS},                               //
+  }};
+  patches_->m_[3][3] = Patch{{
+      {fx::BOOSTER, {}, {7, 5, 5}},       //
+      {fx::DISTORTION, {}, {75, 75, 50}}, //
+      {fx::DELAY, {}, {50, 50, 50, 50}},  //
+  }};
+  patches_->crc_ = patches_->calcCrc();
+  loadPatch();
 }
