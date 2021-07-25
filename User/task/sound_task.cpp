@@ -17,6 +17,8 @@ constexpr uint32_t BLOCK_SIZE = 192;
 constexpr uint32_t LR_BLOCK_SIZE = BLOCK_SIZE * 2;
 constexpr uint32_t DIV = 0x80000000;
 
+#define DMA_MEM __attribute__((section(".dtcm"))) __attribute__((aligned(4)))
+
 /// @brief float(-1.0f 〜 1.0f)に変換する
 /// @param[in] src 入力音声
 /// @param[out] left Left音声
@@ -88,8 +90,8 @@ void soundTaskProc(void const *argument)
     return;
   }
   constexpr uint32_t SIZE = LR_BLOCK_SIZE * 2;
-  satoh::unique_ptr<int32_t> rxbuf(satoh::allocArray<int32_t>(SIZE)); // 音声信号受信バッファ配列 Lch前半 Lch後半 Rch前半 Rch後半
-  satoh::unique_ptr<int32_t> txbuf(satoh::allocArray<int32_t>(SIZE)); // 音声信号送信バッファ配列
+  static int32_t rxbuf[SIZE] DMA_MEM; // 音声信号受信バッファ配列 Lch前半 Lch後半 Rch前半 Rch後半
+  static int32_t txbuf[SIZE] DMA_MEM; // 音声信号送信バッファ配列
   satoh::unique_ptr<float> left(satoh::allocArray<float>(BLOCK_SIZE));
   satoh::unique_ptr<float> right(satoh::allocArray<float>(BLOCK_SIZE));
   if (!rxbuf || !txbuf || !left || !right)
@@ -99,8 +101,8 @@ void soundTaskProc(void const *argument)
   }
   extern SAI_HandleTypeDef hsai_BlockA1;
   extern SAI_HandleTypeDef hsai_BlockB1;
-  HAL_SAI_Transmit_DMA(&hsai_BlockB1, reinterpret_cast<uint8_t *>(txbuf.get()), SIZE);
-  HAL_SAI_Receive_DMA(&hsai_BlockA1, reinterpret_cast<uint8_t *>(rxbuf.get()), SIZE);
+  HAL_SAI_Transmit_DMA(&hsai_BlockB1, reinterpret_cast<uint8_t *>(txbuf), SIZE);
+  HAL_SAI_Receive_DMA(&hsai_BlockA1, reinterpret_cast<uint8_t *>(rxbuf), SIZE);
   satoh::msg::SOUND_EFFECTOR effector{};
   for (;;)
   {
@@ -113,10 +115,10 @@ void soundTaskProc(void const *argument)
     switch (msg->type)
     {
     case satoh::msg::SOUND_DMA_HALF_NOTIFY:
-      soundProc(effector, rxbuf.get(), txbuf.get(), left.get(), right.get(), BLOCK_SIZE);
+      soundProc(effector, rxbuf, txbuf, left.get(), right.get(), BLOCK_SIZE);
       break;
     case satoh::msg::SOUND_DMA_CPLT_NOTIFY:
-      soundProc(effector, rxbuf.get() + LR_BLOCK_SIZE, txbuf.get() + LR_BLOCK_SIZE, left.get(), right.get(), BLOCK_SIZE);
+      soundProc(effector, rxbuf + LR_BLOCK_SIZE, txbuf + LR_BLOCK_SIZE, left.get(), right.get(), BLOCK_SIZE);
       break;
     case satoh::msg::SOUND_CHANGE_EFFECTOR_REQ:
       effector = *reinterpret_cast<satoh::msg::SOUND_EFFECTOR const *>(msg->bytes);

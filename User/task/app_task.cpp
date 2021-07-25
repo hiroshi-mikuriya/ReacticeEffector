@@ -11,7 +11,7 @@
 #include "app_state/patch_edit.h"
 #include "app_state/playing.h"
 #include "common/alloc.hpp"
-#include "stm32f7xx.h"
+#include "stm32f7xx_ll_bus.h"
 #include "stm32f7xx_ll_pwr.h"
 #include <memory>
 
@@ -20,9 +20,9 @@ namespace
 /// @brief バックアップ機能初期化
 void initBackup()
 {
-  __HAL_RCC_PWR_CLK_ENABLE();
+  LL_AHB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
   LL_PWR_EnableBkUpAccess();
-  __HAL_RCC_BKPSRAM_CLK_ENABLE();
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_BKPSRAM);
   LL_PWR_EnableBkUpRegulator();
   while (!LL_PWR_IsActiveFlag_BRR())
   {

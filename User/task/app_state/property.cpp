@@ -38,7 +38,7 @@ state::Effectors::Effectors(uint8_t n) : count_(0)
   addList<fx::Delay>(0 < n);
   addList<fx::Oscillator>(n == 0);
   addList<fx::BqFilter>(true);
-  // addList<fx::Reverb>(n == 2);
+  addList<fx::Reverb>(n == 2);
 }
 
 fx::EffectorBase *state::Effectors::getFx(size_t i) noexcept
@@ -289,9 +289,9 @@ void state::Property::factoryReset() noexcept
       {fx::BYPASS},                 //
   }};
   patches_->m_[0][2] = Patch{{
-      {fx::OVERDRIVE, {}, {75, 75, 50, 50}}, //
-      {fx::BYPASS},                          //
-      {fx::BYPASS},                          //
+      {fx::OVERDRIVE, {}, {60, 75, 50, 50}},      //
+      {fx::BYPASS},                               //
+      {fx::REVERB, {}, {50, 50, 60, 50, 50, 50}}, //
   }};
   patches_->m_[0][3] = Patch{{
       {fx::DISTORTION, {}, {75, 75, 50}}, //
@@ -314,9 +314,9 @@ void state::Property::factoryReset() noexcept
       {fx::BYPASS},                  //
   }};
   patches_->m_[1][3] = Patch{{
-      {fx::BYPASS},                      //
-      {fx::DELAY, {}, {50, 50, 50, 50}}, //
-      {fx::BYPASS},                      //
+      {fx::BYPASS},                       //
+      {fx::DELAY, {}, {500, 50, 50, 50}}, //
+      {fx::BYPASS},                       //
   }};
   patches_->m_[2][0] = Patch{{
       {fx::OSCILLATOR, {false, true, false}, {50, 100, 1}}, //
@@ -334,14 +334,14 @@ void state::Property::factoryReset() noexcept
       {fx::BYPASS},                       //
   }};
   patches_->m_[2][3] = Patch{{
-      {fx::OVERDRIVE, {}, {75, 75, 50, 50}},      //
+      {fx::OVERDRIVE, {}, {60, 75, 50, 50}},      //
       {fx::CHORUS, {}, {50, 50, 50, 50, 50, 50}}, //
       {fx::BYPASS},                               //
   }};
   patches_->m_[3][0] = Patch{{
       {fx::DISTORTION, {}, {75, 75, 50}},         //
       {fx::CHORUS, {}, {50, 50, 50, 50, 50, 50}}, //
-      {fx::BYPASS},                               //
+      {fx::DELAY, {}, {200, 30, 49, 50}},         //
   }};
   patches_->m_[3][1] = Patch{{
       {fx::OVERDRIVE, {}, {75, 75, 50, 50}}, //
@@ -354,9 +354,9 @@ void state::Property::factoryReset() noexcept
       {fx::BYPASS},                               //
   }};
   patches_->m_[3][3] = Patch{{
-      {fx::BOOSTER, {}, {7, 5, 5}},       //
-      {fx::DISTORTION, {}, {75, 75, 50}}, //
-      {fx::DELAY, {}, {50, 50, 50, 50}},  //
+      {fx::OVERDRIVE, {}, {50, 50, 50, 50}}, //
+      {fx::DELAY, {}, {360, 50, 50, 50}},    //
+      {fx::DELAY, {}, {720, 50, 50, 50}},    //
   }};
   patches_->crc_ = patches_->calcCrc();
   loadPatch();
