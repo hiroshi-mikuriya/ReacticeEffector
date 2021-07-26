@@ -1,4 +1,4 @@
-/// @file      task/app_state/error.h
+/// @file      state/patch_edit.h
 /// @author    SATOH GADGET
 /// @copyright Copyright© 2021 SATOH GADGET
 ///
@@ -12,12 +12,12 @@ namespace satoh
 {
 namespace state
 {
-class Error;
+class PatchEdit;
 }
 } // namespace satoh
 
-/// @brief 演奏状態
-class satoh::state::Error : public satoh::state::Base
+/// @brief パッチエディット状態
+class satoh::state::PatchEdit : public satoh::state::Base
 {
   /// プロパティ
   Property &m_;
@@ -37,13 +37,25 @@ class satoh::state::Error : public satoh::state::Base
   /// @param[in] src ROTARY_ENCODER
   /// @return 次の状態ID
   ID run(msg::ROTARY_ENCODER const *src) noexcept override;
+  /// @brief 表示更新
+  void updateDisplay() noexcept;
+  /// @brief 選択中のFX番号更新
+  /// @param[in] up
+  ///   @arg true カウントアップ
+  ///   @arg false カウントダウン
+  void modSelectedFxNum(bool up) noexcept;
+  /// @brief 選択中のFX番号のFXを変更
+  /// @param[in] next
+  ///   @arg true 1つ次へ
+  ///   @arg false 1つ前へ
+  void modFxList(bool next) noexcept;
 
 public:
   /// @brief コンストラクタ
   /// @param[in] prop プロパティ
-  explicit Error(Property &prop) : m_(prop) {}
+  explicit PatchEdit(Property &prop) : m_(prop) {}
   /// @brief デストラクタ
-  ~Error() {}
+  ~PatchEdit() {}
   /// @brief この状態に遷移したときに行う初期化処理
   void init() noexcept override;
   /// @brief この状態が終了するときに行う終了処理

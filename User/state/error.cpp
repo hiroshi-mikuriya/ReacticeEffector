@@ -1,4 +1,4 @@
-/// @file      task/app_state/error.cpp
+/// @file      state/error.cpp
 /// @author    SATOH GADGET
 /// @copyright Copyright© 2021 SATOH GADGET
 ///
@@ -8,24 +8,26 @@
 #include "common/utils.h"
 #include "user.h"
 
+namespace msg = satoh::msg;
+
 satoh::state::ID satoh::state::Error::run(msg::MODE_KEY const *src) noexcept
 {
-  if (src->ok == satoh::msg::BUTTON_DOWN)
+  if (src->ok == msg::BUTTON_DOWN)
   {
   }
-  if (src->rtn == satoh::msg::BUTTON_DOWN)
+  if (src->rtn == msg::BUTTON_DOWN)
   {
   }
-  if (src->up == satoh::msg::BUTTON_DOWN)
+  if (src->up == msg::BUTTON_DOWN)
   {
   }
-  if (src->down == satoh::msg::BUTTON_DOWN)
+  if (src->down == msg::BUTTON_DOWN)
   {
   }
-  if (src->tap == satoh::msg::BUTTON_DOWN)
+  if (src->tap == msg::BUTTON_DOWN)
   {
   }
-  if (src->re1 == satoh::msg::BUTTON_DOWN)
+  if (src->re1 == msg::BUTTON_DOWN)
   {
   }
   return ERROR;

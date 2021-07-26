@@ -7,6 +7,8 @@
 #include "msglib.h"
 #include <cstring> // memcpy
 
+namespace msg = satoh::msg;
+
 namespace
 {
 /// @brief メール情報
@@ -37,7 +39,7 @@ MailInfo *find(osThreadId threadId)
 }
 } // namespace
 
-osStatus satoh::registerMsgTarget(uint32_t msgCount) noexcept
+osStatus msg::registerTask(uint32_t msgCount) noexcept
 {
   osThreadId threadId = osThreadGetId();
   if (threadId == 0)
@@ -61,12 +63,12 @@ osStatus satoh::registerMsgTarget(uint32_t msgCount) noexcept
   return info->mailId ? osOK : osErrorResource;
 }
 
-osStatus satoh::sendMsg(osThreadId threadId, msg::ID type) noexcept
+osStatus msg::send(osThreadId threadId, msg::ID type) noexcept
 {
-  return sendMsg(threadId, type, 0, 0);
+  return msg::send(threadId, type, 0, 0);
 }
 
-osStatus satoh::sendMsg(osThreadId threadId, msg::ID type, void const *bytes, uint16_t size) noexcept
+osStatus msg::send(osThreadId threadId, msg::ID type, void const *bytes, uint16_t size) noexcept
 {
   MailInfo *info = find(threadId);
   if (info == 0)
@@ -87,7 +89,7 @@ osStatus satoh::sendMsg(osThreadId threadId, msg::ID type, void const *bytes, ui
   return osMailPut(info->mailId, m);
 }
 
-satoh::Result satoh::recvMsg(uint32_t millisec) noexcept
+msg::Result msg::recv(uint32_t millisec) noexcept
 {
   osThreadId threadId = osThreadGetId();
   if (threadId == 0)
@@ -109,32 +111,32 @@ satoh::Result satoh::recvMsg(uint32_t millisec) noexcept
   return Result(st, m, info->mailId);
 }
 
-satoh::Result::Result(osStatus status, Message *msg, osMailQId mail) noexcept //
-    : status_(status),                                                        //
-      msg_(msg),                                                              //
-      mail_(mail)                                                             //
+msg::Result::Result(osStatus status, Message *msg, osMailQId mail) noexcept //
+    : status_(status),                                                      //
+      msg_(msg),                                                            //
+      mail_(mail)                                                           //
 {
 }
-satoh::Result::Result(osStatus status) noexcept //
-    : status_(status),                          //
-      msg_(0),                                  //
-      mail_(0)                                  //
+msg::Result::Result(osStatus status) noexcept //
+    : status_(status),                        //
+      msg_(0),                                //
+      mail_(0)                                //
 {
 }
-satoh::Result::~Result()
+msg::Result::~Result()
 {
   reset();
 }
-satoh::Result::Result(Result &&that) noexcept //
-    : status_(that.status_),                  //
-      msg_(that.msg_),                        //
-      mail_(that.mail_)                       //
+msg::Result::Result(Result &&that) noexcept //
+    : status_(that.status_),                //
+      msg_(that.msg_),                      //
+      mail_(that.mail_)                     //
 {
   that.status_ = osOK;
   that.msg_ = 0;
   that.mail_ = 0;
 }
-satoh::Result &satoh::Result::operator=(Result &&that) noexcept
+msg::Result &msg::Result::operator=(Result &&that) noexcept
 {
   if (this != &that)
   {
@@ -148,7 +150,7 @@ satoh::Result &satoh::Result::operator=(Result &&that) noexcept
   }
   return *this;
 }
-void satoh::Result::reset() noexcept
+void msg::Result::reset() noexcept
 {
   if (msg_)
   {
@@ -156,11 +158,11 @@ void satoh::Result::reset() noexcept
     msg_ = 0;
   }
 }
-osStatus satoh::Result::status() const noexcept
+osStatus msg::Result::status() const noexcept
 {
   return status_;
 }
-satoh::Message const *satoh::Result::msg() const noexcept
+msg::Message const *msg::Result::msg() const noexcept
 {
   return msg_;
 }

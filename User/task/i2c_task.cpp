@@ -17,6 +17,8 @@
 #include "task/i2c_monitor_task.h"
 #include "task/sound_task.h"
 
+namespace msg = satoh::msg;
+
 namespace
 {
 satoh::I2C *s_i2c = 0; ///< I2C通信オブジェクト
@@ -28,19 +30,19 @@ void gyroGetProc(satoh::Gyro const &mpu6050, satoh::Gyro const &icm20602) noexce
 {
   if (mpu6050.ok())
   {
-    satoh::msg::ACC_GYRO ag{};
+    msg::ACC_GYRO ag{};
     if (mpu6050.getAccelGyro(ag.acc, ag.gyro))
     {
-      satoh::sendMsg(appTaskHandle, satoh::msg::GYRO_NOTIFY, &ag, sizeof(ag));
+      msg::send(appTaskHandle, msg::GYRO_NOTIFY, &ag, sizeof(ag));
     }
     return;
   }
   if (icm20602.ok())
   {
-    satoh::msg::ACC_GYRO ag{};
+    msg::ACC_GYRO ag{};
     if (icm20602.getAccelGyro(ag.acc, ag.gyro))
     {
-      satoh::sendMsg(appTaskHandle, satoh::msg::GYRO_NOTIFY, &ag, sizeof(ag));
+      msg::send(appTaskHandle, msg::GYRO_NOTIFY, &ag, sizeof(ag));
     }
     return;
   }
@@ -48,11 +50,11 @@ void gyroGetProc(satoh::Gyro const &mpu6050, satoh::Gyro const &icm20602) noexce
 /// @brief レベルメーター更新処理
 /// @param[in] level レベルメーターと通信するオブジェクト
 /// @param[in] msg リクエストメッセージ
-void ledLevelUpdateProc(satoh::LevelMeter &level, satoh::Message const *msg) noexcept
+void ledLevelUpdateProc(satoh::LevelMeter &level, msg::Message const *msg) noexcept
 {
   if (level.ok())
   {
-    auto *param = reinterpret_cast<satoh::msg::LED_LEVEL const *>(msg->bytes);
+    auto *param = reinterpret_cast<msg::LED_LEVEL const *>(msg->bytes);
     level.setLeft(param->left);
     level.setRight(param->right);
     level.show();
@@ -61,11 +63,11 @@ void ledLevelUpdateProc(satoh::LevelMeter &level, satoh::Message const *msg) noe
 /// @brief Power/Modulation LED点灯・消灯処理
 /// @param[in] level レベルメーターと通信するオブジェクト
 /// @param[in] msg リクエストメッセージ
-void ledSimpleProc(satoh::LevelMeter &level, satoh::Message const *msg) noexcept
+void ledSimpleProc(satoh::LevelMeter &level, msg::Message const *msg) noexcept
 {
   if (level.ok())
   {
-    auto *param = reinterpret_cast<satoh::msg::LED_SIMPLE const *>(msg->bytes);
+    auto *param = reinterpret_cast<msg::LED_SIMPLE const *>(msg->bytes);
     if (param->led == 0)
     {
       level.setPower(param->level);
@@ -80,22 +82,22 @@ void ledSimpleProc(satoh::LevelMeter &level, satoh::Message const *msg) noexcept
 /// @brief エフェクトLED更新処理（LED指定）
 /// @param[in] led エフェクトLEDと通信するオブジェクト
 /// @param[in] msg リクエストメッセージ
-void ledEffectProc(satoh::PCA9635 &led, satoh::Message const *msg) noexcept
+void ledEffectProc(satoh::PCA9635 &led, msg::Message const *msg) noexcept
 {
   if (led.ok())
   {
-    auto *param = reinterpret_cast<satoh::msg::LED_EFFECT const *>(msg->bytes);
+    auto *param = reinterpret_cast<msg::LED_EFFECT const *>(msg->bytes);
     led.set(param->rgb, param->led);
   }
 }
 /// @brief エフェクトLED更新処理（全LED）
 /// @param[in] led エフェクトLEDと通信するオブジェクト
 /// @param[in] msg リクエストメッセージ
-void ledAllEffectProc(satoh::PCA9635 &led, satoh::Message const *msg) noexcept
+void ledAllEffectProc(satoh::PCA9635 &led, msg::Message const *msg) noexcept
 {
   if (led.ok())
   {
-    auto *param = reinterpret_cast<satoh::msg::LED_ALL_EFFECT const *>(msg->bytes);
+    auto *param = reinterpret_cast<msg::LED_ALL_EFFECT const *>(msg->bytes);
     led.set(param->rgb);
   }
 }
@@ -109,14 +111,14 @@ void keyUpdateProc(satoh::AT42QT1070 &modeKey)
     {
       return;
     }
-    satoh::msg::MODE_KEY msg{};
+    msg::MODE_KEY msg{};
     msg.tap = keys[0];
     msg.re1 = keys[1];
     msg.down = keys[2];
     msg.ok = keys[3];
     msg.up = keys[4];
     msg.rtn = keys[5];
-    satoh::sendMsg(appTaskHandle, satoh::msg::MODE_KEY_NOTIFY, &msg, sizeof(msg));
+    msg::send(appTaskHandle, msg::MODE_KEY_NOTIFY, &msg, sizeof(msg));
   }
 }
 /// @brief エンコーダ状態取得処理
@@ -124,16 +126,16 @@ void encoderGetProc(satoh::RotaryEncoder &encoder)
 {
   if (encoder.ok())
   {
-    satoh::msg::ROTARY_ENCODER enc{};
-    satoh::msg::EFFECT_KEY key{};
+    msg::ROTARY_ENCODER enc{};
+    msg::EFFECT_KEY key{};
     int res = encoder.read(key.button, enc.angleDiff);
     if (res & 1)
     {
-      satoh::sendMsg(appTaskHandle, satoh::msg::ROTARY_ENCODER_NOTIFY, &enc, sizeof(enc));
+      msg::send(appTaskHandle, msg::ROTARY_ENCODER_NOTIFY, &enc, sizeof(enc));
     }
     if (res & 2)
     {
-      satoh::sendMsg(appTaskHandle, satoh::msg::EFFECT_KEY_CHANGED_NOTIFY, &key, sizeof(key));
+      msg::send(appTaskHandle, msg::EFFECT_KEY_CHANGED_NOTIFY, &key, sizeof(key));
     }
   }
 }
@@ -142,7 +144,7 @@ void encoderGetProc(satoh::RotaryEncoder &encoder)
 /// @param[in] oled OLED通信オブジェクト
 /// @param[in] msg リクエストメッセージ
 template <typename T>
-void oledUpdate(satoh::SSD1306 &oled, satoh::Message const *msg)
+void oledUpdate(satoh::SSD1306 &oled, msg::Message const *msg)
 {
   if (oled.ok())
   {
@@ -163,7 +165,7 @@ void oledUpdateEffectorParam(satoh::SSD1306 &oled)
 
 void i2cTaskProc(void const *argument)
 {
-  if (satoh::registerMsgTarget(12) != osOK)
+  if (msg::registerTask(12) != osOK)
   {
     return;
   }
@@ -178,7 +180,7 @@ void i2cTaskProc(void const *argument)
   satoh::Gyro icm20602(s_i2c, satoh::ICM20602);
   for (;;)
   {
-    auto res = satoh::recvMsg();
+    auto res = msg::recv();
     if (res.status() != osOK)
     {
       continue;
@@ -190,46 +192,46 @@ void i2cTaskProc(void const *argument)
     }
     switch (msg->type)
     {
-    case satoh::msg::LED_LEVEL_UPDATE_REQ:
+    case msg::LED_LEVEL_UPDATE_REQ:
       ledLevelUpdateProc(level, msg);
       break;
-    case satoh::msg::LED_SIMPLE_REQ:
+    case msg::LED_SIMPLE_REQ:
       ledSimpleProc(level, msg);
       break;
-    case satoh::msg::LED_EFFECT_REQ:
+    case msg::LED_EFFECT_REQ:
       ledEffectProc(led, msg);
       break;
-    case satoh::msg::LED_ALL_EFFECT_REQ:
+    case msg::LED_ALL_EFFECT_REQ:
       ledAllEffectProc(led, msg);
       break;
-    case satoh::msg::GYRO_GET_REQ:
+    case msg::GYRO_GET_REQ:
       res.reset();
       gyroGetProc(mpu6050, icm20602);
       break;
-    case satoh::msg::MODE_KEY_GET_REQ:
+    case msg::MODE_KEY_GET_REQ:
       res.reset();
       keyUpdateProc(modeKey);
       break;
-    case satoh::msg::ENCODER_GET_REQ:
+    case msg::ENCODER_GET_REQ:
       res.reset();
       encoderGetProc(encoder);
       break;
-    case satoh::msg::OLED_DISP_EFFECTOR_REQ:
-      oledUpdate<satoh::msg::OLED_DISP_EFFECTOR>(oled, msg);
+    case msg::OLED_DISP_EFFECTOR_REQ:
+      oledUpdate<msg::OLED_DISP_EFFECTOR>(oled, msg);
       break;
-    case satoh::msg::OLED_SELECT_PARAM_REQ:
-      oledUpdate<satoh::msg::OLED_SELECT_PARAM>(oled, msg);
+    case msg::OLED_SELECT_PARAM_REQ:
+      oledUpdate<msg::OLED_SELECT_PARAM>(oled, msg);
       break;
-    case satoh::msg::OLED_DISP_BANK_REQ:
-      oledUpdate<satoh::msg::OLED_DISP_BANK>(oled, msg);
+    case msg::OLED_DISP_BANK_REQ:
+      oledUpdate<msg::OLED_DISP_BANK>(oled, msg);
       break;
-    case satoh::msg::OLED_DISP_CONFIRM_REQ:
-      oledUpdate<satoh::msg::OLED_DISP_CONFIRM>(oled, msg);
+    case msg::OLED_DISP_CONFIRM_REQ:
+      oledUpdate<msg::OLED_DISP_CONFIRM>(oled, msg);
       break;
-    case satoh::msg::OLED_DISP_TEXT_REQ:
-      oledUpdate<satoh::msg::OLED_DISP_TEXT>(oled, msg);
+    case msg::OLED_DISP_TEXT_REQ:
+      oledUpdate<msg::OLED_DISP_TEXT>(oled, msg);
       break;
-    case satoh::msg::OLED_UPDATE_PARAM_REQ:
+    case msg::OLED_UPDATE_PARAM_REQ:
       res.reset();
       oledUpdateEffectorParam(oled);
       break;
@@ -269,17 +271,17 @@ void i2cTxErrorIRQ(void)
 
 void extiSwIRQ(void)
 {
-  satoh::sendMsg(i2cTaskHandle, satoh::msg::ENCODER_GET_REQ);
+  msg::send(i2cTaskHandle, msg::ENCODER_GET_REQ);
   notifyExtiSwIRQ();
 }
 
 void extiSw2IRQ(void)
 {
-  satoh::sendMsg(i2cTaskHandle, satoh::msg::MODE_KEY_GET_REQ);
+  msg::send(i2cTaskHandle, msg::MODE_KEY_GET_REQ);
   notifyExtiSw2IRQ();
 }
 
 void extiMpuIRQ(void)
 {
-  satoh::sendMsg(i2cTaskHandle, satoh::msg::GYRO_GET_REQ);
+  msg::send(i2cTaskHandle, msg::GYRO_GET_REQ);
 }

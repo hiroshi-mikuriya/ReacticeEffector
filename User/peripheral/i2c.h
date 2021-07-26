@@ -20,6 +20,13 @@ constexpr int32_t I2C_CLS_SIG_MASK = 0x0000FFFF;
 /// @brief I2C通信クラス
 class satoh::I2C
 {
+  /// @brief デフォルトコンストラクタ削除
+  I2C() = delete;
+  /// @brief コピーコンストラクタ削除
+  I2C(I2C const &) = delete;
+  /// @brief 代入演算子削除
+  I2C &operator=(I2C const &) = delete;
+
   I2C_TypeDef *const i2cx_;             ///< I2Cペリフェラル
   osThreadId threadId_;                 ///< イベント通知先のスレッドID
   DMA_TypeDef *const dma_;              ///< 送受信DMA

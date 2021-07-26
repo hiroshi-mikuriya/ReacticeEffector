@@ -20,6 +20,13 @@ constexpr int32_t SPI_MASTER_CLS_SIG_MASK = 0x000000FF;
 /// @brief SPIマスター通信クラス
 class satoh::SpiMaster
 {
+  /// @brief デフォルトコンストラクタ削除
+  SpiMaster() = delete;
+  /// @brief コピーコンストラクタ削除
+  SpiMaster(SpiMaster const &) = delete;
+  /// @brief 代入演算子削除
+  SpiMaster &operator=(SpiMaster const &) = delete;
+
   osThreadId threadId_;         ///< 通信実行するスレッドID
   bool sendOnly_;               ///< 送信専用
   SPI_TypeDef *const spi_;      ///< SPIペリフェラル

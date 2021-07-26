@@ -92,7 +92,7 @@ void adcTaskProc(void const *argument)
       satoh::msg::LED_LEVEL level{};
       level.left = getLevel(left.getRange());
       level.right = getLevel(right.getRange());
-      satoh::sendMsg(i2cTaskHandle, satoh::msg::LED_LEVEL_UPDATE_REQ, &level, sizeof(level));
+      satoh::msg::send(i2cTaskHandle, satoh::msg::LED_LEVEL_UPDATE_REQ, &level, sizeof(level));
       left.reset();
       right.reset();
     }

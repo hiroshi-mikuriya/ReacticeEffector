@@ -10,6 +10,8 @@
 #include "message/msglib.h"
 #include "stm32f7xx_ll_dma.h"
 
+namespace msg = satoh::msg;
+
 namespace
 {
 satoh::SpiMaster *s_spi = 0;
@@ -17,28 +19,28 @@ satoh::SpiMaster *s_spi = 0;
 
 void neoPixelTaskProc(void const *argument)
 {
-  if (satoh::registerMsgTarget(2) != osOK)
+  if (msg::registerTask(2) != osOK)
   {
     return;
   }
   constexpr uint32_t LED_COUNT = 100;
   s_spi = new satoh::SpiMaster(neoPixelTaskHandle, SPI3, DMA1, LL_DMA_STREAM_5, LED_COUNT * 3 * 8);
   satoh::NeoPixel np(s_spi, LED_COUNT);
-  satoh::msg::NEO_PIXEL_PATTERN ptn{};
-  satoh::msg::NEO_PIXEL_SPEED speed = {100};
+  msg::NEO_PIXEL_PATTERN ptn{};
+  msg::NEO_PIXEL_SPEED speed = {100};
   for (int i = 0;; i = (i + 1) % 6)
   {
-    auto res = satoh::recvMsg(speed.interval);
+    auto res = msg::recv(speed.interval);
     if (res.status() == osOK && res.msg())
     {
       auto msg = res.msg();
-      if (msg->type == satoh::msg::NEO_PIXEL_SET_SPEED)
+      if (msg->type == msg::NEO_PIXEL_SET_SPEED)
       {
-        speed = *reinterpret_cast<satoh::msg::NEO_PIXEL_SPEED const *>(msg->bytes);
+        speed = *reinterpret_cast<msg::NEO_PIXEL_SPEED const *>(msg->bytes);
       }
-      if (msg->type == satoh::msg::NEO_PIXEL_SET_PATTERN)
+      if (msg->type == msg::NEO_PIXEL_SET_PATTERN)
       {
-        ptn = *reinterpret_cast<satoh::msg::NEO_PIXEL_PATTERN const *>(msg->bytes);
+        ptn = *reinterpret_cast<msg::NEO_PIXEL_PATTERN const *>(msg->bytes);
       }
       continue;
     }

@@ -5,12 +5,12 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "task/app_task.h"
-#include "app_state/effect_edit.h"
-#include "app_state/error.h"
-#include "app_state/factory_reset.h"
-#include "app_state/patch_edit.h"
-#include "app_state/playing.h"
 #include "common/alloc.hpp"
+#include "state/effect_edit.h"
+#include "state/error.h"
+#include "state/factory_reset.h"
+#include "state/patch_edit.h"
+#include "state/playing.h"
 #include "stm32f7xx_ll_bus.h"
 #include "stm32f7xx_ll_pwr.h"
 #include <memory>
@@ -34,7 +34,8 @@ void initBackup()
 void appTaskProc(void const *argument)
 {
   namespace state = satoh::state;
-  if (satoh::registerMsgTarget(4) != osOK)
+  namespace msg = satoh::msg;
+  if (msg::registerTask(4) != osOK)
   {
     return;
   }
@@ -51,7 +52,7 @@ void appTaskProc(void const *argument)
   states[stID]->init();
   for (;;)
   {
-    auto res = satoh::recvMsg();
+    auto res = msg::recv();
     auto *msg = res.msg();
     if (msg == 0)
     {

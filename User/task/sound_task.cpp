@@ -10,6 +10,8 @@
 #include "main.h"
 #include "message/msglib.h"
 
+namespace msg = satoh::msg;
+
 namespace
 {
 constexpr int32_t SIG_INITADC = 1 << 0;
@@ -51,7 +53,7 @@ inline void toInt32(float const *left, float const *right, int32_t *dst, uint32_
 /// @param[in] left L音声計算用バッファ
 /// @param[in] right R音声計算用バッファ
 /// @param[in] size 音声データ数
-void soundProc(satoh::msg::SOUND_EFFECTOR &effector, int32_t const *src, int32_t *dst, float *left, float *right, uint32_t size)
+void soundProc(msg::SOUND_EFFECTOR &effector, int32_t const *src, int32_t *dst, float *left, float *right, uint32_t size)
 {
   LL_GPIO_SetOutputPin(TP13_GPIO_Port, TP13_Pin);
   toFloat(src, left, right, size);
@@ -84,7 +86,7 @@ void initPCM3060(satoh::I2C *i2c)
 void soundTaskProc(void const *argument)
 {
   osSignalWait(SIG_INITADC, osWaitForever);
-  if (satoh::registerMsgTarget(4) != osOK)
+  if (msg::registerTask(4) != osOK)
   {
     return;
   }
@@ -102,10 +104,10 @@ void soundTaskProc(void const *argument)
   extern SAI_HandleTypeDef hsai_BlockB1;
   HAL_SAI_Transmit_DMA(&hsai_BlockB1, reinterpret_cast<uint8_t *>(txbuf.get()), SIZE);
   HAL_SAI_Receive_DMA(&hsai_BlockA1, reinterpret_cast<uint8_t *>(rxbuf.get()), SIZE);
-  satoh::msg::SOUND_EFFECTOR effector{};
+  msg::SOUND_EFFECTOR effector{};
   for (;;)
   {
-    auto res = satoh::recvMsg();
+    auto res = msg::recv();
     auto *msg = res.msg();
     if (!msg)
     {
@@ -113,14 +115,14 @@ void soundTaskProc(void const *argument)
     }
     switch (msg->type)
     {
-    case satoh::msg::SOUND_DMA_HALF_NOTIFY:
+    case msg::SOUND_DMA_HALF_NOTIFY:
       soundProc(effector, rxbuf.get(), txbuf.get(), left.get(), right.get(), BLOCK_SIZE);
       break;
-    case satoh::msg::SOUND_DMA_CPLT_NOTIFY:
+    case msg::SOUND_DMA_CPLT_NOTIFY:
       soundProc(effector, rxbuf.get() + LR_BLOCK_SIZE, txbuf.get() + LR_BLOCK_SIZE, left.get(), right.get(), BLOCK_SIZE);
       break;
-    case satoh::msg::SOUND_CHANGE_EFFECTOR_REQ:
-      effector = *reinterpret_cast<satoh::msg::SOUND_EFFECTOR const *>(msg->bytes);
+    case msg::SOUND_CHANGE_EFFECTOR_REQ:
+      effector = *reinterpret_cast<msg::SOUND_EFFECTOR const *>(msg->bytes);
       break;
     }
   }
@@ -130,8 +132,8 @@ extern "C"
 {
   /// @brief DMA半分受信コールバック
   /// @param[in] hsai SAI
-  void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai) { satoh::sendMsg(soundTaskHandle, satoh::msg::SOUND_DMA_HALF_NOTIFY); }
+  void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai) { msg::send(soundTaskHandle, msg::SOUND_DMA_HALF_NOTIFY); }
   /// @brief DMA全部受信コールバック
   /// @param[in] hsai SAI
-  void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai) { satoh::sendMsg(soundTaskHandle, satoh::msg::SOUND_DMA_CPLT_NOTIFY); }
+  void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai) { msg::send(soundTaskHandle, msg::SOUND_DMA_CPLT_NOTIFY); }
 }

@@ -11,6 +11,8 @@
 
 namespace satoh
 {
+namespace msg
+{
 struct Message;
 class Result;
 
@@ -18,7 +20,7 @@ class Result;
 /// @param[in] msgCount 格納できる最大メッセージ数
 /// @retval osOK 成功
 /// @retval それ以外 失敗理由
-osStatus registerMsgTarget(uint32_t msgCount) noexcept;
+osStatus registerTask(uint32_t msgCount) noexcept;
 /// @brief メッセージ送信
 /// @param[in] threadId 送信先タスクID
 /// @param[in] type メッセージ種別
@@ -26,7 +28,7 @@ osStatus registerMsgTarget(uint32_t msgCount) noexcept;
 /// @retval osErrorParameter 引数エラー
 /// @retval osEventTimeout タイムアウト
 /// @retval osErrorOS 送信失敗
-osStatus sendMsg(osThreadId threadId, msg::ID type) noexcept;
+osStatus send(osThreadId threadId, msg::ID type) noexcept;
 /// @brief メッセージ送信
 /// @param[in] threadId 送信先タスクID
 /// @param[in] type メッセージ種別
@@ -36,15 +38,16 @@ osStatus sendMsg(osThreadId threadId, msg::ID type) noexcept;
 /// @retval osErrorParameter 引数エラー
 /// @retval osEventTimeout タイムアウト
 /// @retval osErrorOS 送信失敗
-osStatus sendMsg(osThreadId threadId, msg::ID type, void const *bytes, uint16_t size) noexcept;
+osStatus send(osThreadId threadId, msg::ID type, void const *bytes, uint16_t size) noexcept;
 /// @brief メッセージ受信
 /// @param[in] millisec タイムアウト時間
 /// @return 受信結果
-Result recvMsg(uint32_t millisec = osWaitForever) noexcept;
+Result recv(uint32_t millisec = osWaitForever) noexcept;
+} // namespace msg
 } // namespace satoh
 
 /// @brief メッセージ型
-struct satoh::Message
+struct satoh::msg::Message
 {
   msg::ID type;      ///< メッセージ種別
   uint16_t size;     ///< データサイズ
@@ -52,11 +55,13 @@ struct satoh::Message
 };
 
 /// @brief 受信結果型
-class satoh::Result
+class satoh::msg::Result
 {
-  /// コピーコンストラクタ削除
+  /// @brief デフォルトコンストラクタ削除
+  Result() = delete;
+  /// @brief コピーコンストラクタ削除
   Result(Result const &) = delete;
-  /// コピー代入演算子削除
+  /// @brief 代入演算子削除
   Result &operator=(Result const &) = delete;
 
   osStatus status_; ///< 受信ステータス
@@ -67,6 +72,7 @@ public:
   /// @brief コンストラクタ
   /// @param[in] status 受信ステータス
   /// @param[in] msg メッセージ
+  /// @param[in] mail メールID
   explicit Result(osStatus status, Message *msg, osMailQId mail) noexcept;
   /// @brief コンストラクタ
   /// @param[in] status 受信ステータス
@@ -77,7 +83,7 @@ public:
   Result(Result &&that) noexcept;
   /// @brief move代入演算子
   /// @param[in] that 移動元
-  /// @return インスタンスのポインタ
+  /// @return 自身の参照
   Result &operator=(Result &&that) noexcept;
   /// @brief msg_のメモリを開放する
   void reset() noexcept;

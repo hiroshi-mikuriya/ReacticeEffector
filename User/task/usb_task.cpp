@@ -9,6 +9,8 @@
 #include "message/msglib.h"
 #include "usbd_cdc_if.h"
 
+namespace msg = satoh::msg;
+
 namespace
 {
 constexpr int32_t SIG_USBTXEND = 1 << 0;
@@ -16,13 +18,13 @@ constexpr int32_t SIG_USBTXEND = 1 << 0;
 
 void usbTxTaskProc(void const *argument)
 {
-  if (satoh::registerMsgTarget(2) != osOK)
+  if (msg::registerTask(2) != osOK)
   {
     return;
   }
   for (;;)
   {
-    auto res = satoh::recvMsg();
+    auto res = msg::recv();
     if (res.status() != osOK)
     {
       continue;
@@ -32,7 +34,7 @@ void usbTxTaskProc(void const *argument)
     {
       continue;
     }
-    if (msg->type != satoh::msg::USB_TX_REQ)
+    if (msg->type != msg::USB_TX_REQ)
     {
       continue;
     }

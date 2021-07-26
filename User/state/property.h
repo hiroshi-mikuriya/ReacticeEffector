@@ -1,4 +1,4 @@
-/// @file      task/app_state/property.h
+/// @file      state/property.h
 /// @author    SATOH GADGET
 /// @copyright Copyright© 2021 SATOH GADGET
 ///

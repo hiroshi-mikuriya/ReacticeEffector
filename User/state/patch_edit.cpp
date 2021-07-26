@@ -1,4 +1,4 @@
-/// @file      task/app_state/patch_edit.cpp
+/// @file      state/patch_edit.cpp
 /// @author    SATOH GADGET
 /// @copyright Copyright© 2021 SATOH GADGET
 ///
@@ -8,9 +8,11 @@
 #include "common/utils.h"
 #include "user.h"
 
+namespace msg = satoh::msg;
+
 satoh::state::ID satoh::state::PatchEdit::run(msg::MODE_KEY const *src) noexcept
 {
-  if (src->ok == satoh::msg::BUTTON_DOWN)
+  if (src->ok == msg::BUTTON_DOWN)
   {
     auto *fx = m_.getEditSelectedFx();
     if (fx->getID() != fx::BYPASS)
@@ -18,22 +20,22 @@ satoh::state::ID satoh::state::PatchEdit::run(msg::MODE_KEY const *src) noexcept
       return EFFECT_EDIT;
     }
   }
-  if (src->rtn == satoh::msg::BUTTON_DOWN)
+  if (src->rtn == msg::BUTTON_DOWN)
   {
     return PLAYING;
   }
-  if (src->up == satoh::msg::BUTTON_DOWN)
+  if (src->up == msg::BUTTON_DOWN)
   {
     modSelectedFxNum(false);
   }
-  if (src->down == satoh::msg::BUTTON_DOWN)
+  if (src->down == msg::BUTTON_DOWN)
   {
     modSelectedFxNum(true);
   }
-  if (src->tap == satoh::msg::BUTTON_DOWN)
+  if (src->tap == msg::BUTTON_DOWN)
   {
   }
-  if (src->re1 == satoh::msg::BUTTON_DOWN)
+  if (src->re1 == msg::BUTTON_DOWN)
   {
   }
   return PATCH_EDIT;
@@ -91,7 +93,7 @@ void satoh::state::PatchEdit::updateDisplay() noexcept
   {
     cmd.fx[i] = m_.getFx(i);
   }
-  sendMsg(i2cTaskHandle, msg::OLED_DISP_BANK_REQ, &cmd, sizeof(cmd));
+  msg::send(i2cTaskHandle, msg::OLED_DISP_BANK_REQ, &cmd, sizeof(cmd));
 }
 void satoh::state::PatchEdit::modSelectedFxNum(bool up) noexcept
 {
@@ -107,7 +109,7 @@ void satoh::state::PatchEdit::modFxList(bool next) noexcept
   {
     sound.fx[i] = m_.getFx(i);
   }
-  sendMsg(soundTaskHandle, msg::SOUND_CHANGE_EFFECTOR_REQ, &sound, sizeof(sound));
+  msg::send(soundTaskHandle, msg::SOUND_CHANGE_EFFECTOR_REQ, &sound, sizeof(sound));
 }
 void satoh::state::PatchEdit::init() noexcept
 {

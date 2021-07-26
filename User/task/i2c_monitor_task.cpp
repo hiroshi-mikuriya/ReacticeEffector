@@ -22,8 +22,8 @@ void i2cMonitorTaskProc(void const *argument)
     if (ev.status == osEventTimeout)
     {
       // ロータリーエンコーダとモードキーの割り込みは発生しないことがあるので、定期的に読み出す
-      satoh::sendMsg(i2cTaskHandle, satoh::msg::ENCODER_GET_REQ);
-      satoh::sendMsg(i2cTaskHandle, satoh::msg::MODE_KEY_GET_REQ);
+      satoh::msg::send(i2cTaskHandle, satoh::msg::ENCODER_GET_REQ);
+      satoh::msg::send(i2cTaskHandle, satoh::msg::MODE_KEY_GET_REQ);
     }
   }
 }

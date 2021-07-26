@@ -1,4 +1,4 @@
-/// @file      task/app_state/factory_reset.h
+/// @file      state/effect_edit.h
 /// @author    SATOH GADGET
 /// @copyright Copyright© 2021 SATOH GADGET
 ///
@@ -12,16 +12,17 @@ namespace satoh
 {
 namespace state
 {
-class FactoryReset;
+class EffectEdit;
 }
 } // namespace satoh
 
-/// @brief ファクトリーリセット状態
-class satoh::state::FactoryReset : public satoh::state::Base
+/// @brief パッチエディット状態
+class satoh::state::EffectEdit : public satoh::state::Base
 {
-  bool yes_;
   /// プロパティ
   Property &m_;
+  /// @brief 選択中のパラメータ番号
+  uint8_t selectedParamNum_;
   /// @brief MODE_KEYを処理する
   /// @param[in] src MODE_KEY
   /// @return 次の状態ID
@@ -38,15 +39,18 @@ class satoh::state::FactoryReset : public satoh::state::Base
   /// @param[in] src ROTARY_ENCODER
   /// @return 次の状態ID
   ID run(msg::ROTARY_ENCODER const *src) noexcept override;
-  /// @brief コンファーム画面を表示する
-  void dispConfirm() const noexcept;
+  /// @brief 選択中のパラメータを変更
+  /// @param[in] up
+  ///   @arg true アップ
+  ///   @arg false ダウン
+  void modSelectedParam(bool up) noexcept;
 
 public:
   /// @brief コンストラクタ
   /// @param[in] prop プロパティ
-  explicit FactoryReset(Property &prop) : m_(prop) {}
+  explicit EffectEdit(Property &prop) : m_(prop) {}
   /// @brief デストラクタ
-  ~FactoryReset() {}
+  ~EffectEdit() {}
   /// @brief この状態に遷移したときに行う初期化処理
   void init() noexcept override;
   /// @brief この状態が終了するときに行う終了処理

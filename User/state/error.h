@@ -1,4 +1,4 @@
-/// @file      task/app_state/effect_edit.h
+/// @file      state/error.h
 /// @author    SATOH GADGET
 /// @copyright Copyright© 2021 SATOH GADGET
 ///
@@ -12,17 +12,15 @@ namespace satoh
 {
 namespace state
 {
-class EffectEdit;
+class Error;
 }
 } // namespace satoh
 
-/// @brief パッチエディット状態
-class satoh::state::EffectEdit : public satoh::state::Base
+/// @brief 演奏状態
+class satoh::state::Error : public satoh::state::Base
 {
   /// プロパティ
   Property &m_;
-  /// @brief 選択中のパラメータ番号
-  uint8_t selectedParamNum_;
   /// @brief MODE_KEYを処理する
   /// @param[in] src MODE_KEY
   /// @return 次の状態ID
@@ -39,18 +37,13 @@ class satoh::state::EffectEdit : public satoh::state::Base
   /// @param[in] src ROTARY_ENCODER
   /// @return 次の状態ID
   ID run(msg::ROTARY_ENCODER const *src) noexcept override;
-  /// @brief 選択中のパラメータを変更
-  /// @param[in] up
-  ///   @arg true アップ
-  ///   @arg false ダウン
-  void modSelectedParam(bool up) noexcept;
 
 public:
   /// @brief コンストラクタ
   /// @param[in] prop プロパティ
-  explicit EffectEdit(Property &prop) : m_(prop) {}
+  explicit Error(Property &prop) : m_(prop) {}
   /// @brief デストラクタ
-  ~EffectEdit() {}
+  ~Error() {}
   /// @brief この状態に遷移したときに行う初期化処理
   void init() noexcept override;
   /// @brief この状態が終了するときに行う終了処理

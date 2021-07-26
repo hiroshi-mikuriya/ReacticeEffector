@@ -1,4 +1,4 @@
-/// @file      task/app_state/state_base.h
+/// @file      state/state_base.h
 /// @author    SATOH GADGET
 /// @copyright Copyright© 2021 SATOH GADGET
 ///
@@ -56,7 +56,7 @@ public:
   /// @brief メッセージ処理
   /// @param[in] msg メッセージ
   /// @return 次の状態ID
-  ID run(Message const *msg) noexcept
+  ID run(msg::Message const *msg) noexcept
   {
     switch (msg->type)
     {
