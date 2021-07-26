@@ -105,8 +105,8 @@ satoh::I2C::I2C(I2C_TypeDef *const i2cx,    //
       dma_(dma),                            //
       rxStream_(rxStream),                  //
       txStream_(txStream),                  //
-      rxbuf_(allocArray<uint8_t>(32)),      //
-      txbuf_(allocArray<uint8_t>(256))      //
+      rxbuf_(makeDmaMem<uint8_t>(32)),      //
+      txbuf_(makeDmaMem<uint8_t>(256))      //
 {
   start();
 }

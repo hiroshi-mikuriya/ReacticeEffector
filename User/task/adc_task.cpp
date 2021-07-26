@@ -5,6 +5,7 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "task/adc_task.h"
+#include "common/dma_mem.h"
 #include "message/msglib.h"
 #include "stm32f7xx_ll_adc.h"
 #include "stm32f7xx_ll_dma.h"
@@ -65,13 +66,13 @@ void adcTaskProc(void const *argument)
   ADC_TypeDef *const adc = ADC1;
   DMA_TypeDef *const dma = DMA2;
   const uint32_t stream = LL_DMA_STREAM_4;
-  uint16_t buf[2] = {};
+  auto buf = satoh::makeDmaMem<uint16_t>(2);
   LL_DMA_ConfigAddresses(dma, stream,                                             //
                          LL_ADC_DMA_GetRegAddr(adc, LL_ADC_DMA_REG_REGULAR_DATA), //
-                         reinterpret_cast<uint32_t>(buf),                         //
+                         reinterpret_cast<uint32_t>(buf.get()),                   //
                          LL_DMA_DIRECTION_PERIPH_TO_MEMORY                        //
   );
-  LL_DMA_SetDataLength(dma, stream, sizeof(buf) / 2);
+  LL_DMA_SetDataLength(dma, stream, sizeof(buf.get()) / 2);
   LL_DMA_EnableIT_TC(dma, stream);
   LL_DMA_EnableIT_TE(dma, stream);
   LL_DMA_EnableStream(dma, stream);
@@ -83,8 +84,8 @@ void adcTaskProc(void const *argument)
     osEvent ev = osSignalWait(SIG_DMAEND | SIG_DMAERR | SIG_TIMER, osWaitForever);
     if (ev.value.signals & SIG_DMAEND)
     {
-      left.update(buf[0]);
-      right.update(buf[1]);
+      left.update(buf.get()[0]);
+      right.update(buf.get()[1]);
     }
     if (ev.value.signals & SIG_TIMER)
     {

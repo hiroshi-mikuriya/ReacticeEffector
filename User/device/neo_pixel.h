@@ -20,7 +20,7 @@ class satoh::NeoPixel
 {
   SpiMaster *spi_;          ///< SPI通信クラス
   const uint32_t ledCount_; ///< LED数
-  unique_ptr<uint8_t> buf_; ///< 送信バッファ
+  UniquePtr<uint8_t> buf_;  ///< 送信バッファ
 
 public:
   /// @brief コンストラクタ

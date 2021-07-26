@@ -29,7 +29,7 @@ class satoh::state::Effectors
   /// @brief デフォルトコンストラクタ削除
   Effectors() = delete;
   /// エフェクターポインタ型
-  using Ptr = unique_ptr<fx::EffectorBase>;
+  using Ptr = UniquePtr<fx::EffectorBase>;
   /// エフェクター一覧
   Ptr list_[16];
   /// エフェクター数

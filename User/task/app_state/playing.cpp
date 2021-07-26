@@ -5,6 +5,7 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "playing.h"
+#include "common/dma_mem.h"
 #include "common/utils.h"
 #include "user.h"
 
@@ -88,6 +89,12 @@ satoh::state::ID satoh::state::Playing::run(msg::MODE_KEY const *src) noexcept
   }
   if (src->re1 == satoh::msg::BUTTON_DOWN)
   {
+    {
+      // 隠し機能
+      char msg[64] = {0};
+      int n = sprintf(msg, "[FREE SIZE] rtos: %d dtcm: %d\r\n", xPortGetFreeHeapSize(), satoh::getFreeDmaMemSize());
+      sendMsg(usbTxTaskHandle, msg::USB_TX_REQ, msg, n);
+    }
     // TODO 暫定
     static int n = 0;
     switch (n)

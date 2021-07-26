@@ -86,7 +86,7 @@ public:
   Delay()                                                          //
       : EffectorBase(DELAY, "Delay", "DL", RGB{0x20, 0x00, 0x20}), //
         ui_({
-            EffectParameterF(10, 800, 100, 5, "TIME"), //
+            EffectParameterF(10, 900, 100, 5, "TIME"), //
             EffectParameterF(0, 100, 1, "E.LV"),       //
             EffectParameterF(0, 99, 1, "F.BACK"),      //
             EffectParameterF(0, 100, 1, "TONE"),       //

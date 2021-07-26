@@ -40,7 +40,7 @@ void appTaskProc(void const *argument)
   }
   initBackup();
   auto *patch = reinterpret_cast<state::PatchTable *>(BKPSRAM_BASE);
-  std::unique_ptr<state::Property, satoh::Deleter<state::Property>> prop(satoh::alloc<state::Property>(patch));
+  satoh::UniquePtr<state::Property> prop(satoh::alloc<state::Property>(patch));
   state::PatchEdit stPE(*prop);
   state::EffectEdit stEE(*prop);
   state::Playing stPL(*prop);

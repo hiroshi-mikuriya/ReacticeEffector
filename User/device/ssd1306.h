@@ -19,9 +19,9 @@ class SSD1306;
 class satoh::SSD1306 : public satoh::I2CDeviceBase
 {
   /// 表示用バッファ
-  unique_ptr<uint8_t> dispbuf_;
+  UniquePtr<uint8_t> dispbuf_;
   /// 通信用バッファ
-  unique_ptr<uint8_t> txbuf_;
+  UniquePtr<uint8_t> txbuf_;
   /// 通信可否
   const bool ok_;
   /// 表示対象エフェクター

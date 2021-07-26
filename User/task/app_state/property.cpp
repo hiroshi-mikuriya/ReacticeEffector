@@ -355,8 +355,8 @@ void state::Property::factoryReset() noexcept
   }};
   patches_->m_[3][3] = Patch{{
       {fx::OVERDRIVE, {}, {50, 50, 50, 50}}, //
-      {fx::DELAY, {}, {360, 50, 50, 50}},    //
-      {fx::DELAY, {}, {720, 50, 50, 50}},    //
+      {fx::DELAY, {}, {320, 50, 50, 50}},    //
+      {fx::DELAY, {}, {890, 50, 50, 50}},    //
   }};
   patches_->crc_ = patches_->calcCrc();
   loadPatch();

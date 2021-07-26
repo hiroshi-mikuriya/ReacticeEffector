@@ -93,9 +93,9 @@ class satoh::delayBuf
   /// @return バッファサイズ
   static constexpr uint32_t getBufferSize(float time) { return 1 + static_cast<uint32_t>(getInterval(time)); }
 
-  uint32_t count_;    // サンプル要素数
-  unique_ptr<T> buf_; // ディレイバッファ配列
-  uint32_t wpos_;     // 書き込み位置
+  uint32_t count_;   // サンプル要素数
+  UniquePtr<T> buf_; // ディレイバッファ配列
+  uint32_t wpos_;    // 書き込み位置
 
   /// @brief float値を変換して保存する
   /// @param[in] pos 格納先のインデックス

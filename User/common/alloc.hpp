@@ -22,7 +22,7 @@ template <typename T>
 class Deleter;
 
 template <typename T>
-using unique_ptr = std::unique_ptr<T, Deleter<T>>;
+using UniquePtr = std::unique_ptr<T, Deleter<T>>;
 } // namespace satoh
 
 /// @brief RTOSからメモリ確保し、コンストラクタを呼び出しポインタを返す
