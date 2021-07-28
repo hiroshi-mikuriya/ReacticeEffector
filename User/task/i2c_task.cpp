@@ -152,15 +152,6 @@ void oledUpdate(satoh::SSD1306 &oled, msg::Message const *msg)
     oled.update(*param);
   }
 }
-/// @brief OLED - エフェクターパラメータ一値更新
-/// @param[in] oled OLED通信オブジェクト
-void oledUpdateEffectorParam(satoh::SSD1306 &oled)
-{
-  if (oled.ok())
-  {
-    oled.updateParam();
-  }
-}
 } // namespace
 
 void i2cTaskProc(void const *argument)
@@ -219,9 +210,6 @@ void i2cTaskProc(void const *argument)
     case msg::OLED_DISP_EFFECTOR_REQ:
       oledUpdate<msg::OLED_DISP_EFFECTOR>(oled, msg);
       break;
-    case msg::OLED_SELECT_PARAM_REQ:
-      oledUpdate<msg::OLED_SELECT_PARAM>(oled, msg);
-      break;
     case msg::OLED_DISP_BANK_REQ:
       oledUpdate<msg::OLED_DISP_BANK>(oled, msg);
       break;
@@ -230,10 +218,6 @@ void i2cTaskProc(void const *argument)
       break;
     case msg::OLED_DISP_TEXT_REQ:
       oledUpdate<msg::OLED_DISP_TEXT>(oled, msg);
-      break;
-    case msg::OLED_UPDATE_PARAM_REQ:
-      res.reset();
-      oledUpdateEffectorParam(oled);
       break;
     }
   }

@@ -79,20 +79,34 @@ void satoh::I2C::start() const noexcept
 
 void satoh::I2C::stop() const noexcept
 {
-  LL_DMA_DisableIT_TC(dma_, rxStream_);
-  LL_DMA_DisableIT_TE(dma_, rxStream_);
-  LL_DMA_DisableIT_TC(dma_, txStream_);
-  LL_DMA_DisableIT_TE(dma_, txStream_);
-  LL_DMA_DisableStream(dma_, txStream_);
-  LL_I2C_DisableDMAReq_RX(i2cx_);
-  LL_I2C_DisableDMAReq_TX(i2cx_);
-  LL_I2C_Disable(i2cx_);
+  if (i2cx_)
+  {
+    LL_DMA_DisableIT_TC(dma_, rxStream_);
+    LL_DMA_DisableIT_TE(dma_, rxStream_);
+    LL_DMA_DisableIT_TC(dma_, txStream_);
+    LL_DMA_DisableIT_TE(dma_, txStream_);
+    LL_DMA_DisableStream(dma_, txStream_);
+    LL_I2C_DisableDMAReq_RX(i2cx_);
+    LL_I2C_DisableDMAReq_TX(i2cx_);
+    LL_I2C_Disable(i2cx_);
+  }
 }
 
 void satoh::I2C::restart() const noexcept
 {
   stop();
   start();
+}
+
+void satoh::I2C::deinit() noexcept
+{
+  i2cx_ = 0;
+  threadId_ = 0;
+  dma_ = 0;
+  rxStream_ = 0;
+  txStream_ = 0;
+  rxbuf_.reset();
+  txbuf_.reset();
 }
 
 satoh::I2C::I2C(I2C_TypeDef *const i2cx,    //
@@ -109,6 +123,35 @@ satoh::I2C::I2C(I2C_TypeDef *const i2cx,    //
       txbuf_(makeDmaMem<uint8_t>(256))      //
 {
   start();
+}
+
+satoh::I2C::I2C(I2C &&that)
+    : i2cx_(that.i2cx_),              //
+      threadId_(that.threadId_),      //
+      dma_(that.dma_),                //
+      rxStream_(that.rxStream_),      //
+      txStream_(that.txStream_),      //
+      rxbuf_(std::move(that.rxbuf_)), //
+      txbuf_(std::move(that.txbuf_))  //
+{
+  start();
+}
+
+satoh::I2C &satoh::I2C::operator=(satoh::I2C &&that)
+{
+  if (this != &that)
+  {
+    stop();
+    i2cx_ = that.i2cx_;
+    threadId_ = that.threadId_;
+    dma_ = that.dma_;
+    rxStream_ = that.rxStream_;
+    txStream_ = that.txStream_;
+    rxbuf_ = std::move(that.rxbuf_);
+    txbuf_ = std::move(that.txbuf_);
+    that.deinit();
+  }
+  return *this;
 }
 
 satoh::I2C::~I2C()
@@ -214,6 +257,10 @@ void satoh::I2C::notifyTxErrorIRQ() noexcept
 
 satoh::I2C::Result satoh::I2C::write(uint8_t slaveAddr, uint8_t const *bytes, uint32_t size, bool withSleep) const noexcept
 {
+  if (!i2cx_)
+  {
+    return Result::ERROR;
+  }
   if (LL_I2C_IsActiveFlag_BUSY(i2cx_))
   {
     restart();
@@ -238,6 +285,10 @@ satoh::I2C::Result satoh::I2C::write(uint8_t slaveAddr, uint8_t const *bytes, ui
 
 satoh::I2C::Result satoh::I2C::read(uint8_t slaveAddr, uint8_t *buffer, uint32_t size, bool withSleep) const noexcept
 {
+  if (!i2cx_)
+  {
+    return Result::ERROR;
+  }
   if (LL_I2C_IsActiveFlag_BUSY(i2cx_))
   {
     restart();

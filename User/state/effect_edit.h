@@ -44,6 +44,8 @@ class satoh::state::EffectEdit : public satoh::state::Base
   ///   @arg true アップ
   ///   @arg false ダウン
   void modSelectedParam(bool up) noexcept;
+  /// @brief エフェクト画面表示
+  void showFx() const noexcept;
 
 public:
   /// @brief コンストラクタ

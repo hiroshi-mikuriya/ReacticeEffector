@@ -10,6 +10,7 @@
 #include "user.h"
 
 namespace msg = satoh::msg;
+namespace state = satoh::state;
 
 namespace
 {
@@ -54,7 +55,7 @@ constexpr msg::NEO_PIXEL_PATTERN RED_PTN = {{
 }};
 } // namespace
 
-satoh::state::ID satoh::state::Playing::run(msg::MODE_KEY const *src) noexcept
+state::ID state::Playing::run(msg::MODE_KEY const *src) noexcept
 {
   if (src->ok == msg::BUTTON_DOWN)
   {
@@ -124,7 +125,7 @@ satoh::state::ID satoh::state::Playing::run(msg::MODE_KEY const *src) noexcept
   }
   return PLAYING;
 }
-satoh::state::ID satoh::state::Playing::run(msg::EFFECT_KEY const *src) noexcept
+state::ID state::Playing::run(msg::EFFECT_KEY const *src) noexcept
 {
   if (src->button[2] && src->button[3])
   {
@@ -141,7 +142,7 @@ satoh::state::ID satoh::state::Playing::run(msg::EFFECT_KEY const *src) noexcept
   }
   return PLAYING;
 }
-satoh::state::ID satoh::state::Playing::run(msg::ACC_GYRO const *src) noexcept
+state::ID state::Playing::run(msg::ACC_GYRO const *src) noexcept
 {
   for (size_t i = 0; i < MAX_EFFECTOR_COUNT; ++i)
   {
@@ -149,11 +150,11 @@ satoh::state::ID satoh::state::Playing::run(msg::ACC_GYRO const *src) noexcept
   }
   return PLAYING;
 }
-satoh::state::ID satoh::state::Playing::run(msg::ROTARY_ENCODER const *src) noexcept
+state::ID state::Playing::run(msg::ROTARY_ENCODER const *src) noexcept
 {
   return PLAYING;
 }
-void satoh::state::Playing::modBank() noexcept
+void state::Playing::modBank() noexcept
 {
   msg::OLED_DISP_BANK disp{};
   disp.bank = m_.getBankNum() + 1;
@@ -173,14 +174,14 @@ void satoh::state::Playing::modBank() noexcept
   led.rgb[m_.getPatchNum()] = m_.getCurrentColor();
   msg::send(i2cTaskHandle, msg::LED_ALL_EFFECT_REQ, &led, sizeof(led));
 }
-void satoh::state::Playing::init() noexcept
+void state::Playing::init() noexcept
 {
   modBank();
   m_.initEditSelectedFxNum();
   msg::LED_SIMPLE led{0, true};
   msg::send(i2cTaskHandle, msg::LED_SIMPLE_REQ, &led, sizeof(led));
 }
-void satoh::state::Playing::deinit() noexcept
+void state::Playing::deinit() noexcept
 {
   // TODO
 }

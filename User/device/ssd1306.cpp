@@ -12,7 +12,7 @@
 
 namespace
 {
-constexpr char const *BYPASS_NAME = "Bypass";
+constexpr char const *BYPASS_NAME = "---";
 
 constexpr uint8_t SLAVE_ADDR = 0x3C;
 constexpr uint8_t SET_ADDRESSING_MODE = 0x20;
@@ -165,7 +165,7 @@ bool satoh::SSD1306::sendBufferToDevice(uint8_t page) noexcept
   uint8_t *tx = txbuf_.get();
   tx[0] = CTRL_01;
   memcpy(&tx[1], dispbuf_.get() + page * WIDTH, WIDTH);
-  return write(tx, WIDTH + 1, true);
+  return write(tx, WIDTH + 1, false);
 }
 
 bool satoh::SSD1306::sendBufferToDevice() noexcept
@@ -178,57 +178,14 @@ bool satoh::SSD1306::sendBufferToDevice() noexcept
   return true;
 }
 
-void satoh::SSD1306::drawEffectPage() noexcept
-{
-  uint8_t *disp = dispbuf_.get();
-  memset(disp, 0, BUF_SIZE);
-  satoh::FontDef const &titleFont = satoh::Font_11x18;
-  satoh::FontDef const &paramFont = satoh::Font_7x10;
-  if (!effector_)
-  {
-    drawString(BYPASS_NAME, titleFont, false, 0, 0, disp);
-    return;
-  }
-  char txt[16] = {0};
-  {
-    // タイトル表示
-    sprintf(txt, "FX%d ", patch_);
-    drawString(txt, paramFont, false, 0, 0, disp);
-    drawString(effector_->getName(), titleFont, false, paramFont.width * 4, 0, disp);
-  }
-  uint8_t n = 0;
-  for (uint8_t col = 0; col < 2; ++col)
-  {
-    for (uint8_t row = 0; row < 3 && n < effector_->getParamCount(); ++row, ++n)
-    {
-      uint8_t y = titleFont.height + 6 + row * (paramFont.height + 5);
-      uint8_t cx = col * WIDTH / 2;
-      const char *key = effector_->getParamName(n);
-      drawString(key, paramFont, n == selectedParam_, cx, y, disp);
-      const char *value = effector_->getValueTxt(n);
-      size_t len = strlen(value);
-      uint8_t px = cx + 43;
-      if (2 < len)
-      {
-        px -= paramFont.width * (len - 2); // 3ケタ以上の数値を左にずらして全体が表示されるようにする
-      }
-      drawString(value, paramFont, false, px, y, disp);
-    }
-  }
-}
-
 satoh::SSD1306::SSD1306(I2C *i2c) noexcept     //
     : I2CDeviceBase(i2c, SLAVE_ADDR),          //
       dispbuf_(allocArray<uint8_t>(BUF_SIZE)), //
       txbuf_(allocArray<uint8_t>(WIDTH + 32)), //
-      ok_(init()),                             //
-      effector_(0),                            //
-      patch_(0),                               //
-      selectedParam_(0)                        //
+      ok_(init())                              //
 {
   if (ok_)
   {
-    drawEffectPage();
     sendBufferToDevice();
   }
 }
@@ -242,18 +199,41 @@ bool satoh::SSD1306::ok() const noexcept
 
 bool satoh::SSD1306::update(msg::OLED_DISP_EFFECTOR const &src) noexcept
 {
-  effector_ = src.fx;
-  patch_ = src.patch;
-  return update(msg::OLED_SELECT_PARAM{0});
-}
-bool satoh::SSD1306::update(msg::OLED_SELECT_PARAM const &src) noexcept
-{
-  selectedParam_ = src.paramNum;
-  return updateParam();
-}
-bool satoh::SSD1306::updateParam() noexcept
-{
-  drawEffectPage();
+  uint8_t *disp = dispbuf_.get();
+  memset(disp, 0, BUF_SIZE);
+  satoh::FontDef const &titleFont = satoh::Font_11x18;
+  satoh::FontDef const &paramFont = satoh::Font_7x10;
+  if (!src.fx)
+  {
+    drawString(BYPASS_NAME, titleFont, false, 0, 0, disp);
+    return sendBufferToDevice();
+  }
+  {
+    // タイトル表示
+    char txt[16] = {0};
+    sprintf(txt, "FX%d ", src.patch);
+    drawString(txt, paramFont, false, 0, 0, disp);
+    drawString(src.fx->getName(), titleFont, false, paramFont.width * 4, 0, disp);
+  }
+  uint8_t n = 0;
+  for (uint8_t col = 0; col < 2; ++col)
+  {
+    for (uint8_t row = 0; row < 3 && n < src.fx->getParamCount(); ++row, ++n)
+    {
+      uint8_t y = titleFont.height + 6 + row * (paramFont.height + 5);
+      uint8_t cx = col * WIDTH / 2;
+      const char *key = src.fx->getParamName(n);
+      drawString(key, paramFont, n == src.selectedParam, cx, y, disp);
+      const char *value = src.fx->getValueTxt(n);
+      size_t len = strlen(value);
+      uint8_t px = cx + 43;
+      if (2 < len)
+      {
+        px -= paramFont.width * (len - 2); // 3ケタ以上の数値を左にずらして全体が表示されるようにする
+      }
+      drawString(value, paramFont, false, px, y, disp);
+    }
+  }
   return sendBufferToDevice();
 }
 bool satoh::SSD1306::update(msg::OLED_DISP_BANK const &src) noexcept

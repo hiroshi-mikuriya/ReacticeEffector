@@ -27,20 +27,22 @@ class satoh::I2C
   /// @brief 代入演算子削除
   I2C &operator=(I2C const &) = delete;
 
-  I2C_TypeDef *const i2cx_;             ///< I2Cペリフェラル
+  I2C_TypeDef *i2cx_;                   ///< I2Cペリフェラル
   osThreadId threadId_;                 ///< イベント通知先のスレッドID
-  DMA_TypeDef *const dma_;              ///< 送受信DMA
-  const uint32_t rxStream_;             ///< 受信DMAストリーム
-  const uint32_t txStream_;             ///< 送信DMAストリーム
+  DMA_TypeDef *dma_;                    ///< 送受信DMA
+  uint32_t rxStream_;                   ///< 受信DMAストリーム
+  uint32_t txStream_;                   ///< 送信DMAストリーム
   mutable UniqueDmaPtr<uint8_t> rxbuf_; ///< 受信バッファ
   mutable UniqueDmaPtr<uint8_t> txbuf_; ///< 送信バッファ
 
-  /// @brief 初期化
+  /// @brief 開始処理
   void start() const noexcept;
-  /// @brief 終了処理
+  /// @brief 停止処理
   void stop() const noexcept;
   /// @brief 再初期化
   void restart() const noexcept;
+  /// @brief 終了処理
+  void deinit() noexcept;
 
 public:
   /// @brief 関数リターン値定義
@@ -59,6 +61,10 @@ public:
   /// @param[in] rxStream 受信DMAストリーム
   /// @param[in] txStream 送信DMAストリーム
   explicit I2C(I2C_TypeDef *const i2cx, osThreadId threadId, DMA_TypeDef *const dma, uint32_t rxStream, uint32_t txStream) noexcept;
+  /// @brief moveコンストラクタ @param[in] that 移動元
+  I2C(I2C &&that);
+  /// @brief move演算子 @param[in] that 移動元 @return 自身の参照
+  I2C &operator=(I2C &&that);
   /// @brief デストラクタ
   virtual ~I2C();
   /// @brief イベント割り込みが発生したら呼び出す関数

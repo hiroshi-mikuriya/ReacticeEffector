@@ -54,16 +54,12 @@ constexpr ID MODE_KEY_GET_REQ = 1 | cat::KEY;
 constexpr ID MODE_KEY_NOTIFY = 2 | cat::KEY;
 /// OLED - エフェクターパラメータ一一覧表示依頼
 constexpr ID OLED_DISP_EFFECTOR_REQ = 1 | cat::OLED;
-/// OLED - エフェクターパラメータ一選択表示依頼
-constexpr ID OLED_SELECT_PARAM_REQ = 2 | cat::OLED;
-/// OLED - エフェクターパラメータ一値更新依頼
-constexpr ID OLED_UPDATE_PARAM_REQ = 3 | cat::OLED;
 /// OLED - バンク画面表示依頼
-constexpr ID OLED_DISP_BANK_REQ = 4 | cat::OLED;
+constexpr ID OLED_DISP_BANK_REQ = 2 | cat::OLED;
 /// OLED - コンファーム画面表示依頼
-constexpr ID OLED_DISP_CONFIRM_REQ = 5 | cat::OLED;
+constexpr ID OLED_DISP_CONFIRM_REQ = 3 | cat::OLED;
 /// OLED - テキスト表示依頼
-constexpr ID OLED_DISP_TEXT_REQ = 6 | cat::OLED;
+constexpr ID OLED_DISP_TEXT_REQ = 4 | cat::OLED;
 /// USB - 送信依頼
 constexpr ID USB_TX_REQ = 1 | cat::USB;
 /// USB - 受信通知
@@ -88,7 +84,6 @@ struct ROTARY_ENCODER;
 struct EFFECT_KEY;
 struct MODE_KEY;
 struct OLED_DISP_EFFECTOR;
-struct OLED_SELECT_PARAM;
 struct OLED_DISP_BANK;
 struct OLED_DISP_CONFIRM;
 struct OLED_DISP_TEXT;
@@ -182,12 +177,8 @@ struct satoh::msg::OLED_DISP_EFFECTOR
   fx::EffectorBase *fx;
   /// パッチ番号
   uint8_t patch;
-};
-/// OLED - エフェクターパラメータ一選択表示依頼型
-struct satoh::msg::OLED_SELECT_PARAM
-{
   /// 選択中のパラメータ番号
-  uint8_t paramNum;
+  uint8_t selectedParam;
 };
 /// OLED - バンク画面表示依頼型
 struct satoh::msg::OLED_DISP_BANK

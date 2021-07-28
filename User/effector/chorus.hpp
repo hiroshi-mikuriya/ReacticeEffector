@@ -121,13 +121,6 @@ public:
     hpf1.set(100.0f); // ディレイ音のローカット設定
     init(ui_, COUNT);
   }
-  /// @brief moveコンストラクタ
-  /// @param[in] that 移動元
-  Chorus(Chorus &&) = default;
-  /// @brief move演算子
-  /// @param[in] that 移動元
-  /// @return 自身の参照
-  Chorus &operator=(Chorus &&) = default;
   /// @brief デストラクタ
   virtual ~Chorus() {}
   /// @brief エフェクターセットアップ成功・失敗

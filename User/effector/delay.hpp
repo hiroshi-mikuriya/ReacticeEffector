@@ -101,13 +101,6 @@ public:
       init(ui_, COUNT);
     }
   }
-  /// @brief moveコンストラクタ
-  /// @param[in] that 移動元
-  Delay(Delay &&) = default;
-  /// @brief move演算子
-  /// @param[in] that 移動元
-  /// @return 自身の参照
-  Delay &operator=(Delay &&) = default;
   /// @brief デストラクタ
   virtual ~Delay() {}
   /// @brief エフェクターセットアップ成功・失敗

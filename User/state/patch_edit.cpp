@@ -9,8 +9,9 @@
 #include "user.h"
 
 namespace msg = satoh::msg;
+namespace state = satoh::state;
 
-satoh::state::ID satoh::state::PatchEdit::run(msg::MODE_KEY const *src) noexcept
+state::ID state::PatchEdit::run(msg::MODE_KEY const *src) noexcept
 {
   if (src->ok == msg::BUTTON_DOWN)
   {
@@ -40,7 +41,7 @@ satoh::state::ID satoh::state::PatchEdit::run(msg::MODE_KEY const *src) noexcept
   }
   return PATCH_EDIT;
 }
-satoh::state::ID satoh::state::PatchEdit::run(msg::EFFECT_KEY const *src) noexcept
+state::ID state::PatchEdit::run(msg::EFFECT_KEY const *src) noexcept
 {
   for (uint8_t i = 0; i < countof(src->button); ++i)
   {
@@ -52,7 +53,7 @@ satoh::state::ID satoh::state::PatchEdit::run(msg::EFFECT_KEY const *src) noexce
   }
   return PATCH_EDIT;
 }
-satoh::state::ID satoh::state::PatchEdit::run(msg::ACC_GYRO const *src) noexcept
+state::ID state::PatchEdit::run(msg::ACC_GYRO const *src) noexcept
 {
   for (size_t i = 0; i < MAX_EFFECTOR_COUNT; ++i)
   {
@@ -60,7 +61,7 @@ satoh::state::ID satoh::state::PatchEdit::run(msg::ACC_GYRO const *src) noexcept
   }
   return PATCH_EDIT;
 }
-satoh::state::ID satoh::state::PatchEdit::run(msg::ROTARY_ENCODER const *src) noexcept
+state::ID state::PatchEdit::run(msg::ROTARY_ENCODER const *src) noexcept
 {
   constexpr size_t NUM_SELECT_KNOB = 0;
   constexpr size_t FX_SELECT_KNOB = 1;
@@ -82,7 +83,7 @@ satoh::state::ID satoh::state::PatchEdit::run(msg::ROTARY_ENCODER const *src) no
   }
   return PATCH_EDIT;
 }
-void satoh::state::PatchEdit::updateDisplay() noexcept
+void state::PatchEdit::updateDisplay() noexcept
 {
   msg::OLED_DISP_BANK cmd{};
   cmd.bank = m_.getBankNum() + 1;
@@ -95,12 +96,12 @@ void satoh::state::PatchEdit::updateDisplay() noexcept
   }
   msg::send(i2cTaskHandle, msg::OLED_DISP_BANK_REQ, &cmd, sizeof(cmd));
 }
-void satoh::state::PatchEdit::modSelectedFxNum(bool up) noexcept
+void state::PatchEdit::modSelectedFxNum(bool up) noexcept
 {
   m_.updateEditSelectedFxNum(up);
   updateDisplay();
 }
-void satoh::state::PatchEdit::modFxList(bool next) noexcept
+void state::PatchEdit::modFxList(bool next) noexcept
 {
   m_.updateNextFx(next);
   updateDisplay();
@@ -111,11 +112,11 @@ void satoh::state::PatchEdit::modFxList(bool next) noexcept
   }
   msg::send(soundTaskHandle, msg::SOUND_CHANGE_EFFECTOR_REQ, &sound, sizeof(sound));
 }
-void satoh::state::PatchEdit::init() noexcept
+void state::PatchEdit::init() noexcept
 {
   updateDisplay();
 }
-void satoh::state::PatchEdit::deinit() noexcept
+void state::PatchEdit::deinit() noexcept
 {
   m_.savePatch();
 }

@@ -9,8 +9,9 @@
 #include "user.h"
 
 namespace msg = satoh::msg;
+namespace state = satoh::state;
 
-satoh::state::ID satoh::state::Error::run(msg::MODE_KEY const *src) noexcept
+state::ID state::Error::run(msg::MODE_KEY const *src) noexcept
 {
   if (src->ok == msg::BUTTON_DOWN)
   {
@@ -32,26 +33,26 @@ satoh::state::ID satoh::state::Error::run(msg::MODE_KEY const *src) noexcept
   }
   return ERROR;
 }
-satoh::state::ID satoh::state::Error::run(msg::EFFECT_KEY const *src) noexcept
+state::ID state::Error::run(msg::EFFECT_KEY const *src) noexcept
 {
   for (uint8_t i = 0; i < countof(src->button); ++i)
   {
   }
   return ERROR;
 }
-satoh::state::ID satoh::state::Error::run(msg::ACC_GYRO const *src) noexcept
+state::ID state::Error::run(msg::ACC_GYRO const *src) noexcept
 {
   return ERROR;
 }
-satoh::state::ID satoh::state::Error::run(msg::ROTARY_ENCODER const *src) noexcept
+state::ID state::Error::run(msg::ROTARY_ENCODER const *src) noexcept
 {
   return ERROR;
 }
-void satoh::state::Error::init() noexcept
+void state::Error::init() noexcept
 {
   // TOOD
 }
-void satoh::state::Error::deinit() noexcept
+void state::Error::deinit() noexcept
 {
   // TODO
 }

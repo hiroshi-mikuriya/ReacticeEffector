@@ -49,7 +49,7 @@ Result recv(uint32_t millisec = osWaitForever) noexcept;
 /// @brief メッセージ型
 struct satoh::msg::Message
 {
-  msg::ID type;      ///< メッセージ種別
+  ID type;           ///< メッセージ種別
   uint16_t size;     ///< データサイズ
   uint8_t bytes[64]; ///< データ
 };

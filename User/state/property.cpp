@@ -21,8 +21,8 @@
 #include "stm32f7xx.h"
 #include "stm32f7xx_ll_crc.h"
 
-namespace state = satoh::state;
 namespace fx = satoh::fx;
+namespace state = satoh::state;
 
 // state::Effectors
 
@@ -123,7 +123,7 @@ void state::EffectParam::write(fx::EffectorBase *fx) const noexcept
   }
 }
 
-uint32_t satoh::state::PatchTable::calcCrc() const noexcept
+uint32_t state::PatchTable::calcCrc() const noexcept
 {
   LL_CRC_SetInitialData(CRC, 0);
   auto p = reinterpret_cast<uint32_t const *>(m_);
