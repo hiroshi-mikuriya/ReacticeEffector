@@ -9,6 +9,7 @@
 #include "common/rgb.h"
 #include "constant.h"
 #include "effector/effector_base.h"
+#include "error.h"
 
 namespace satoh
 {
@@ -28,6 +29,7 @@ constexpr ID OLED = 5 << SHIFT;
 constexpr ID USB = 6 << SHIFT;
 constexpr ID NEOPIXEL = 7 << SHIFT;
 constexpr ID SOUND = 8 << SHIFT;
+constexpr ID ERROR = 15 << SHIFT;
 } // namespace cat
 
 /// ジャイロ - 取得依頼
@@ -74,6 +76,8 @@ constexpr ID SOUND_DMA_HALF_NOTIFY = 1 | cat::SOUND;
 constexpr ID SOUND_DMA_CPLT_NOTIFY = 2 | cat::SOUND;
 /// Sound - エフェクター変更要求
 constexpr ID SOUND_CHANGE_EFFECTOR_REQ = 3 | cat::SOUND;
+/// Error - エラー通知
+constexpr ID ERROR_NOTIFY = 1 | cat::ERROR;
 
 struct ACC_GYRO;
 struct LED_LEVEL;
@@ -90,6 +94,7 @@ struct OLED_DISP_TEXT;
 struct NEO_PIXEL_PATTERN;
 struct NEO_PIXEL_SPEED;
 struct SOUND_EFFECTOR;
+struct ERROR;
 
 constexpr uint8_t BUTTON_UP = 0;   ///< ボタン離し中
 constexpr uint8_t BUTTON_DOWN = 1; ///< ボタン押下中
@@ -225,4 +230,10 @@ struct satoh::msg::SOUND_EFFECTOR
 {
   /// エフェクタークラスのポインタ
   fx::EffectorBase *fx[MAX_EFFECTOR_COUNT];
+};
+/// Error - エラー通知
+struct satoh::msg::ERROR
+{
+  /// エラー原因
+  error::ID cause;
 };

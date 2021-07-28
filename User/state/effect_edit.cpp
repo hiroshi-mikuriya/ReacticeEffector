@@ -5,6 +5,7 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "effect_edit.h"
+#include "common.h"
 #include "common/utils.h"
 #include "user.h"
 
@@ -30,11 +31,13 @@ state::ID state::EffectEdit::run(msg::MODE_KEY const *src) noexcept
   }
   if (src->tap == msg::BUTTON_DOWN)
   {
+    tapProc(m_);
   }
   if (src->re1 == msg::BUTTON_DOWN)
   {
+    re1Proc(m_);
   }
-  return EFFECT_EDIT;
+  return id();
 }
 state::ID state::EffectEdit::run(msg::EFFECT_KEY const *src) noexcept
 {
@@ -46,15 +49,12 @@ state::ID state::EffectEdit::run(msg::EFFECT_KEY const *src) noexcept
       return PLAYING;
     }
   }
-  return EFFECT_EDIT;
+  return id();
 }
 state::ID state::EffectEdit::run(msg::ACC_GYRO const *src) noexcept
 {
-  for (size_t i = 0; i < MAX_EFFECTOR_COUNT; ++i)
-  {
-    m_.getFx(i)->setGyroParam(src->acc);
-  }
-  return EFFECT_EDIT;
+  proc(m_, src);
+  return id();
 }
 state::ID state::EffectEdit::run(msg::ROTARY_ENCODER const *src) noexcept
 {
@@ -90,7 +90,12 @@ state::ID state::EffectEdit::run(msg::ROTARY_ENCODER const *src) noexcept
     fx->setGyroEnable(selectedParamNum_, false);
     showFx();
   }
-  return EFFECT_EDIT;
+  return id();
+}
+state::ID state::EffectEdit::run(msg::ERROR const *src) noexcept
+{
+  m_.setError(src->cause);
+  return ERROR;
 }
 void state::EffectEdit::modSelectedParam(bool up)
 {

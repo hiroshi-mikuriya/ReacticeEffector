@@ -37,6 +37,10 @@ class satoh::state::Playing : public satoh::state::Base
   /// @param[in] src ROTARY_ENCODER
   /// @return 次の状態ID
   ID run(msg::ROTARY_ENCODER const *src) noexcept override;
+  /// @brief ERRORを処理する
+  /// @param[in] src ERROR
+  /// @return 次の状態ID
+  ID run(msg::ERROR const *src) noexcept override;
   /// @brief バンク更新
   void modBank() noexcept;
 
@@ -46,6 +50,8 @@ public:
   explicit Playing(Property &prop) : m_(prop) {}
   /// @brief デストラクタ
   ~Playing() {}
+  /// @brief 状態IDを取得する @return 状態ID
+  ID id() const noexcept override { return PLAYING; }
   /// @brief この状態に遷移したときに行う初期化処理
   void init() noexcept override;
   /// @brief この状態が終了するときに行う終了処理

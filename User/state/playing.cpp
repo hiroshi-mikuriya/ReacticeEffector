@@ -5,55 +5,13 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "playing.h"
+#include "common.h"
 #include "common/dma_mem.h"
 #include "common/utils.h"
 #include "user.h"
 
 namespace msg = satoh::msg;
 namespace state = satoh::state;
-
-namespace
-{
-constexpr uint8_t V = 0x20;
-constexpr satoh::RGB RED = {V, 0, 0};
-constexpr satoh::RGB YELLOW = {V, V, 0};
-constexpr satoh::RGB GREEN = {0, V, 0};
-constexpr satoh::RGB AQUA = {0, V, V};
-constexpr satoh::RGB BLUE = {0, 0, V};
-constexpr satoh::RGB PINK = {V, 0, V};
-constexpr msg::NEO_PIXEL_PATTERN RAINBOW_PTN = {{
-    RED,    //
-    YELLOW, //
-    GREEN,  //
-    AQUA,   //
-    BLUE,   //
-    PINK,   //
-}};
-constexpr msg::NEO_PIXEL_PATTERN BLUE_PTN = {{
-    BLUE * 1, //
-    BLUE * 2, //
-    BLUE * 4, //
-    BLUE * 2, //
-    BLUE * 1, //
-    BLUE / 2, //
-}};
-constexpr msg::NEO_PIXEL_PATTERN GREEN_PTN = {{
-    GREEN * 1, //
-    GREEN * 2, //
-    GREEN * 4, //
-    GREEN * 2, //
-    GREEN * 1, //
-    GREEN / 2, //
-}};
-constexpr msg::NEO_PIXEL_PATTERN RED_PTN = {{
-    RED * 1, //
-    RED * 2, //
-    RED * 4, //
-    RED * 2, //
-    RED * 1, //
-    RED / 2, //
-}};
-} // namespace
 
 state::ID state::Playing::run(msg::MODE_KEY const *src) noexcept
 {
@@ -76,19 +34,7 @@ state::ID state::Playing::run(msg::MODE_KEY const *src) noexcept
   }
   if (src->tap == msg::BUTTON_DOWN)
   {
-    for (size_t i = 0; i < MAX_EFFECTOR_COUNT; ++i)
-    {
-      m_.getFx(i)->tap();
-    }
-    // TODO 暫定
-    uint32_t tick = osKernelSysTick();
-    uint32_t d = (tick - m_.lastTapTick) / 4;
-    if (0 < d && d < 1000)
-    {
-      msg::NEO_PIXEL_SPEED speed = {d};
-      msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_SPEED, &speed, sizeof(speed));
-    }
-    m_.lastTapTick = tick;
+    tapProc(m_);
   }
   if (src->re1 == msg::BUTTON_DOWN)
   {
@@ -98,32 +44,9 @@ state::ID state::Playing::run(msg::MODE_KEY const *src) noexcept
       int n = sprintf(msg, "[FREE SIZE] rtos: %d dtcm: %d\r\n", xPortGetFreeHeapSize(), satoh::getFreeDmaMemSize());
       msg::send(usbTxTaskHandle, msg::USB_TX_REQ, msg, n);
     }
-    // TODO 暫定
-    static int n = 0;
-    switch (n)
-    {
-    case 0:
-      msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_PATTERN, &RAINBOW_PTN, sizeof(RAINBOW_PTN));
-      break;
-    case 1:
-      msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_PATTERN, &RED_PTN, sizeof(RED_PTN));
-      break;
-    case 2:
-      msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_PATTERN, &GREEN_PTN, sizeof(GREEN_PTN));
-      break;
-    case 3:
-      msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_PATTERN, &BLUE_PTN, sizeof(BLUE_PTN));
-      break;
-    case 4:
-    {
-      msg::NEO_PIXEL_PATTERN ptn{};
-      msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_PATTERN, &ptn, sizeof(ptn));
-      break;
-    }
-    }
-    n = (n + 1) % 5;
+    re1Proc(m_);
   }
-  return PLAYING;
+  return id();
 }
 state::ID state::Playing::run(msg::EFFECT_KEY const *src) noexcept
 {
@@ -140,19 +63,21 @@ state::ID state::Playing::run(msg::EFFECT_KEY const *src) noexcept
       break;
     }
   }
-  return PLAYING;
+  return id();
 }
 state::ID state::Playing::run(msg::ACC_GYRO const *src) noexcept
 {
-  for (size_t i = 0; i < MAX_EFFECTOR_COUNT; ++i)
-  {
-    m_.getFx(i)->setGyroParam(src->acc);
-  }
-  return PLAYING;
+  proc(m_, src);
+  return id();
 }
 state::ID state::Playing::run(msg::ROTARY_ENCODER const *src) noexcept
 {
-  return PLAYING;
+  return id();
+}
+state::ID state::Playing::run(msg::ERROR const *src) noexcept
+{
+  m_.setError(src->cause);
+  return ERROR;
 }
 void state::Playing::modBank() noexcept
 {

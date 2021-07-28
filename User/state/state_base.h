@@ -45,10 +45,16 @@ class satoh::state::Base
   /// @param[in] src ROTARY_ENCODER
   /// @return 次の状態ID
   virtual ID run(msg::ROTARY_ENCODER const *src) noexcept = 0;
+  /// @brief ERRORを処理する
+  /// @param[in] src ERROR
+  /// @return 次の状態ID
+  virtual ID run(msg::ERROR const *src) noexcept = 0;
 
 public:
   /// @brief デストラクタ
   virtual ~Base() {}
+  /// @brief 状態IDを取得する @return 状態ID
+  virtual ID id() const noexcept = 0;
   /// @brief この状態に遷移したときに行う初期化処理
   virtual void init() noexcept = 0;
   /// @brief この状態が終了するときに行う終了処理
@@ -68,6 +74,8 @@ public:
       return run(reinterpret_cast<msg::ACC_GYRO const *>(msg->bytes));
     case msg::ROTARY_ENCODER_NOTIFY:
       return run(reinterpret_cast<msg::ROTARY_ENCODER const *>(msg->bytes));
+    case msg::ERROR_NOTIFY:
+      return run(reinterpret_cast<msg::ERROR const *>(msg->bytes));
     }
     return ERROR;
   }

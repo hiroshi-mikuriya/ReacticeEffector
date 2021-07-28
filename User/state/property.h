@@ -9,6 +9,7 @@
 #include "common/alloc.hpp"
 #include "constant.h"
 #include "effector/effector_base.h"
+#include "message/error.h"
 #include <memory>
 
 namespace satoh
@@ -138,6 +139,8 @@ class satoh::state::Property
   fx::EffectorBase *fx_[MAX_EFFECTOR_COUNT];
   /// 編集中のエフェクト番号
   uint8_t editSelectedFxNum_;
+  /// エラー原因
+  msg::error::ID error_;
   /// @brief パッチをロードする
   void loadPatch() noexcept;
 
@@ -205,4 +208,8 @@ public:
   void initEditSelectedFxNum() noexcept;
   /// @brief ファクトリーリセットする
   void factoryReset() noexcept;
+  /// @brief エラー原因を取得する @return エラー原因
+  msg::error::ID getError() const noexcept { return error_; }
+  /// @brief エラー原因を設定する @param[in] e エラー原因
+  void setError(msg::error::ID e) noexcept { error_ = e; }
 };

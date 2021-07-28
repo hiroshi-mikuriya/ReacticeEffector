@@ -154,7 +154,8 @@ state::Property::Property(PatchTable *patch) //
                   Effectors(1),              //
                   Effectors(2)}),            //
       patches_(patch),                       //
-      editSelectedFxNum_(0)                  //
+      editSelectedFxNum_(0),                 //
+      error_(msg::error::NONE)               //
 {
   if (patch->calcCrc() != patch->crc_)
   {

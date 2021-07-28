@@ -23,6 +23,12 @@ namespace
 {
 satoh::I2C *s_i2c = 0; ///< I2C通信オブジェクト
 
+/// @brief エラー通知する @param[in] cause エラー原因
+void sendError(msg::error::ID cause)
+{
+  msg::ERROR e{cause};
+  msg::send(appTaskHandle, msg::ERROR_NOTIFY, &e, sizeof(e));
+}
 /// @brief ジャイロ値取得処理
 /// @param[in] mpu6050 MPU6050と通信するオブジェクト
 /// @param[in] icm20602 ICM20602と通信するオブジェクト
@@ -169,6 +175,30 @@ void i2cTaskProc(void const *argument)
   satoh::AT42QT1070 modeKey(s_i2c);
   satoh::Gyro mpu6050(s_i2c, satoh::MPU6050);
   satoh::Gyro icm20602(s_i2c, satoh::ICM20602);
+  if (!mpu6050.ok() && !icm20602.ok())
+  {
+    sendError(msg::error::GYRO);
+  }
+  if (!modeKey.ok())
+  {
+    sendError(msg::error::MODE_KEY);
+  }
+  if (!level.ok())
+  {
+    sendError(msg::error::LEVEL_METER);
+  }
+  if (!led.ok())
+  {
+    sendError(msg::error::EFFECT_LED);
+  }
+  if (!encoder.ok())
+  {
+    sendError(msg::error::ROTARY_ENCODER);
+  }
+  if (!oled.ok())
+  {
+    sendError(msg::error::OLED);
+  }
   for (;;)
   {
     auto res = msg::recv();
