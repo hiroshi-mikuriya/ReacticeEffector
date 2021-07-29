@@ -165,7 +165,7 @@ bool satoh::SSD1306::sendBufferToDevice(uint8_t page) noexcept
   uint8_t *tx = txbuf_.get();
   tx[0] = CTRL_01;
   memcpy(&tx[1], dispbuf_.get() + page * WIDTH, WIDTH);
-  return write(tx, WIDTH + 1, false);
+  return write(tx, WIDTH + 1, true); // falseにすると表示が崩れる
 }
 
 bool satoh::SSD1306::sendBufferToDevice() noexcept
