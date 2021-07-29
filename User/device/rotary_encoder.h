@@ -16,6 +16,16 @@ class RotaryEncoder;
 /// @brief ロータリーエンコーダ制御クラス
 class satoh::RotaryEncoder : public satoh::I2CDeviceBase
 {
+  /// デフォルトコンストラクタ削除
+  RotaryEncoder() = delete;
+  /// コピーコンストラクタ削除
+  RotaryEncoder(RotaryEncoder const &) = delete;
+  /// 代入演算子削除
+  RotaryEncoder &operator=(RotaryEncoder const &) = delete;
+  /// moveコンストラクタ削除
+  RotaryEncoder(RotaryEncoder &&) = delete;
+  /// move演算子削除
+  RotaryEncoder &operator=(RotaryEncoder &&) = delete;
   /// デバイス状態
   const bool ok_;
   /// キャッシュ（前回値）
@@ -31,11 +41,9 @@ public:
   /// @param[in] i2c I2C通信オブジェクト
   explicit RotaryEncoder(I2C *i2c) noexcept;
   /// @brief デストラクタ
-  virtual ~RotaryEncoder();
-  /// @brief デバイス状態取得
-  /// @retval true 正常
-  /// @retval false 異常
-  bool ok() const noexcept override;
+  virtual ~RotaryEncoder() {}
+  /// @brief デバイス状態を取得する @retval true 正常 @retval false 異常あり
+  explicit operator bool() const noexcept override { return ok_; };
   /// @brief デバイスからレジスタを読み出す
   /// @param[out] button ボタン状態
   ///   @arg BUTTON_UP ボタン離し中

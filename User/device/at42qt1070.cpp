@@ -43,11 +43,6 @@ satoh::AT42QT1070::AT42QT1070(I2C *i2c) noexcept //
       ok_(init())                                //
 {
 }
-satoh::AT42QT1070::~AT42QT1070() {}
-bool satoh::AT42QT1070::ok() const noexcept
-{
-  return ok_;
-}
 int satoh::AT42QT1070::read(uint8_t (&keys)[6]) const noexcept
 {
   uint8_t v[2] = {0};

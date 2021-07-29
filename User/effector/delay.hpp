@@ -96,7 +96,7 @@ public:
         fback_(0),                  //
         elevel_(0)                  //
   {
-    if (del1_.ok())
+    if (del1_)
     {
       init(ui_, COUNT);
     }
@@ -106,7 +106,7 @@ public:
   /// @brief エフェクターセットアップ成功・失敗
   /// @retval true 成功
   /// @retval false 失敗
-  bool ok() const noexcept override { return del1_.ok(); }
+  explicit operator bool() const noexcept override { return static_cast<bool>(del1_); }
   /// @brief エフェクト処理実行
   /// @param[inout] left L音声データ
   /// @param[inout] right R音声データ

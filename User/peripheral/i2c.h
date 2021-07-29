@@ -62,9 +62,9 @@ public:
   /// @param[in] txStream 送信DMAストリーム
   explicit I2C(I2C_TypeDef *const i2cx, osThreadId threadId, DMA_TypeDef *const dma, uint32_t rxStream, uint32_t txStream) noexcept;
   /// @brief moveコンストラクタ @param[in] that 移動元
-  I2C(I2C &&that);
+  I2C(I2C &&that) noexcept;
   /// @brief move演算子 @param[in] that 移動元 @return 自身の参照
-  I2C &operator=(I2C &&that);
+  I2C &operator=(I2C &&that) noexcept;
   /// @brief デストラクタ
   virtual ~I2C();
   /// @brief イベント割り込みが発生したら呼び出す関数

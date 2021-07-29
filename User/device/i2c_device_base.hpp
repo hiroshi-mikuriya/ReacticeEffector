@@ -46,8 +46,6 @@ public:
   explicit I2CDeviceBase(I2C *i2c, uint8_t slaveAddr) noexcept : i2c_(i2c), slaveAddr_(slaveAddr << 1) {}
   /// @brief デストラクタ
   virtual ~I2CDeviceBase() {}
-  /// @brief デバイス状態取得
-  /// @retval true 正常
-  /// @retval false 異常
-  virtual bool ok() const noexcept = 0;
+  /// @brief デバイス状態を取得する @retval true 正常 @retval false 異常あり
+  virtual explicit operator bool() const noexcept = 0;
 };

@@ -195,7 +195,7 @@ public:
   /// @brief エフェクターセットアップ成功・失敗
   /// @retval true 成功
   /// @retval false 失敗
-  virtual bool ok() const noexcept { return true; }
+  virtual explicit operator bool() const noexcept { return true; }
   /// @brief エフェクターIDを取得
   /// @return エフェクターID
   virtual ID getID() const noexcept { return id_; }

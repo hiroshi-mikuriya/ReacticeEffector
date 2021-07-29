@@ -20,13 +20,6 @@ satoh::RotaryEncoder::RotaryEncoder(I2C *i2c) noexcept //
 {
 }
 
-satoh::RotaryEncoder::~RotaryEncoder() {}
-
-bool satoh::RotaryEncoder::ok() const noexcept
-{
-  return ok_;
-}
-
 int satoh::RotaryEncoder::read(uint8_t (&button)[4], int8_t (&angleDiff)[4]) noexcept
 {
   uint8_t buf[2] = {0};

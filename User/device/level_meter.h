@@ -16,6 +16,17 @@ class LevelMeter;
 /// @brief レベルメーター制御クラス
 class satoh::LevelMeter : public satoh::I2CDeviceBase
 {
+  /// デフォルトコンストラクタ削除
+  LevelMeter() = delete;
+  /// コピーコンストラクタ削除
+  LevelMeter(LevelMeter const &) = delete;
+  /// 代入演算子削除
+  LevelMeter &operator=(LevelMeter const &) = delete;
+  /// moveコンストラクタ削除
+  LevelMeter(LevelMeter &&) = delete;
+  /// move演算子削除
+  LevelMeter &operator=(LevelMeter &&) = delete;
+
   const bool ok_;   ///< デバイス状態
   uint8_t left_;    ///< レベルメーター（左）
   uint8_t right_;   ///< レベルメーター（右）
@@ -32,11 +43,9 @@ public:
   /// @param[in] i2c I2C通信オブジェクト
   explicit LevelMeter(I2C *i2c) noexcept;
   /// @brief デストラクタ
-  virtual ~LevelMeter();
-  /// @brief デバイス状態取得
-  /// @retval true 正常
-  /// @retval false 異常
-  bool ok() const noexcept override;
+  virtual ~LevelMeter() {}
+  /// @brief デバイス状態を取得する @retval true 正常 @retval false 異常あり
+  explicit operator bool() const noexcept override { return ok_; };
   /// @brief レベルメーター（左）のレベルを設定する
   /// @note この関数を呼んだだけでは点灯状態は変化しない
   /// @param[in] level レベル（0 - 7）

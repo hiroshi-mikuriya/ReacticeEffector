@@ -17,6 +17,16 @@ class PCA9635;
 /// @brief PCA9635制御クラス（エフェクトLED）
 class satoh::PCA9635 : public satoh::I2CDeviceBase
 {
+  /// デフォルトコンストラクタ削除
+  PCA9635() = delete;
+  /// コピーコンストラクタ削除
+  PCA9635(PCA9635 const &) = delete;
+  /// 代入演算子削除
+  PCA9635 &operator=(PCA9635 const &) = delete;
+  /// moveコンストラクタ削除
+  PCA9635(PCA9635 &&) = delete;
+  /// move演算子削除
+  PCA9635 &operator=(PCA9635 &&) = delete;
   /// 通信可否
   const bool ok_;
   /// @brief I2C書き込み
@@ -34,11 +44,9 @@ public:
   /// @param[in] i2c I2C通信オブジェクト
   explicit PCA9635(I2C *i2c) noexcept;
   /// @brief デストラクタ
-  virtual ~PCA9635();
-  /// @brief 通信可否
-  /// @retval true 可
-  /// @retval false 不可（デバイス繋がっていない等）
-  bool ok() const noexcept override;
+  virtual ~PCA9635() {}
+  /// @brief デバイス状態を取得する @retval true 正常 @retval false 異常あり
+  explicit operator bool() const noexcept override { return ok_; };
   /// @brief LEDの色値を設定
   /// @param[in] rgb 色値
   /// @param[in] n LED番号（0 - 3）

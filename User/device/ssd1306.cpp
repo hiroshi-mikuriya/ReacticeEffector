@@ -190,13 +190,6 @@ satoh::SSD1306::SSD1306(I2C *i2c) noexcept     //
   }
 }
 
-satoh::SSD1306::~SSD1306() {}
-
-bool satoh::SSD1306::ok() const noexcept
-{
-  return ok_;
-}
-
 bool satoh::SSD1306::update(msg::OLED_DISP_EFFECTOR const &src) noexcept
 {
   uint8_t *disp = dispbuf_.get();

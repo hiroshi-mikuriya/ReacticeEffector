@@ -60,11 +60,6 @@ satoh::PCA9635::PCA9635(I2C *i2c) noexcept //
       ok_(init())                          //
 {
 }
-satoh::PCA9635::~PCA9635() {}
-bool satoh::PCA9635::ok() const noexcept
-{
-  return ok_;
-}
 bool satoh::PCA9635::set(RGB const &rgb, uint8_t n) const noexcept
 {
   if (3 < n)

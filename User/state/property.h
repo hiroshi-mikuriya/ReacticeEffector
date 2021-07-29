@@ -46,7 +46,7 @@ class satoh::state::Effectors
     if (cond)
     {
       Ptr ptr(alloc<FX>(args...));
-      if (ptr->ok())
+      if (*ptr)
       {
         list_[count_++] = std::move(ptr);
       }

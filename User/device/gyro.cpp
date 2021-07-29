@@ -67,11 +67,6 @@ satoh::Gyro::Gyro(I2C *i2c, uint8_t slaveAddr) noexcept //
       ok_(init())                                       //
 {
 }
-satoh::Gyro::~Gyro() {}
-bool satoh::Gyro::ok() const noexcept
-{
-  return ok_;
-}
 bool satoh::Gyro::getAccel(int16_t (&acc)[3]) const noexcept
 {
   uint8_t buf[6] = {0};

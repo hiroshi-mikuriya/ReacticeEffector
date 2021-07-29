@@ -34,7 +34,7 @@ void sendError(msg::error::ID cause)
 /// @param[in] icm20602 ICM20602と通信するオブジェクト
 void gyroGetProc(satoh::Gyro const &mpu6050, satoh::Gyro const &icm20602) noexcept
 {
-  if (mpu6050.ok())
+  if (mpu6050)
   {
     msg::ACC_GYRO ag{};
     if (mpu6050.getAccelGyro(ag.acc, ag.gyro))
@@ -43,7 +43,7 @@ void gyroGetProc(satoh::Gyro const &mpu6050, satoh::Gyro const &icm20602) noexce
     }
     return;
   }
-  if (icm20602.ok())
+  if (icm20602)
   {
     msg::ACC_GYRO ag{};
     if (icm20602.getAccelGyro(ag.acc, ag.gyro))
@@ -58,7 +58,7 @@ void gyroGetProc(satoh::Gyro const &mpu6050, satoh::Gyro const &icm20602) noexce
 /// @param[in] msg リクエストメッセージ
 void ledLevelUpdateProc(satoh::LevelMeter &level, msg::Message const *msg) noexcept
 {
-  if (level.ok())
+  if (level)
   {
     auto *param = reinterpret_cast<msg::LED_LEVEL const *>(msg->bytes);
     level.setLeft(param->left);
@@ -71,7 +71,7 @@ void ledLevelUpdateProc(satoh::LevelMeter &level, msg::Message const *msg) noexc
 /// @param[in] msg リクエストメッセージ
 void ledSimpleProc(satoh::LevelMeter &level, msg::Message const *msg) noexcept
 {
-  if (level.ok())
+  if (level)
   {
     auto *param = reinterpret_cast<msg::LED_SIMPLE const *>(msg->bytes);
     if (param->led == 0)
@@ -90,7 +90,7 @@ void ledSimpleProc(satoh::LevelMeter &level, msg::Message const *msg) noexcept
 /// @param[in] msg リクエストメッセージ
 void ledEffectProc(satoh::PCA9635 &led, msg::Message const *msg) noexcept
 {
-  if (led.ok())
+  if (led)
   {
     auto *param = reinterpret_cast<msg::LED_EFFECT const *>(msg->bytes);
     led.set(param->rgb, param->led);
@@ -101,7 +101,7 @@ void ledEffectProc(satoh::PCA9635 &led, msg::Message const *msg) noexcept
 /// @param[in] msg リクエストメッセージ
 void ledAllEffectProc(satoh::PCA9635 &led, msg::Message const *msg) noexcept
 {
-  if (led.ok())
+  if (led)
   {
     auto *param = reinterpret_cast<msg::LED_ALL_EFFECT const *>(msg->bytes);
     led.set(param->rgb);
@@ -110,7 +110,7 @@ void ledAllEffectProc(satoh::PCA9635 &led, msg::Message const *msg) noexcept
 /// @brief キー状態取得処理
 void keyUpdateProc(satoh::AT42QT1070 &modeKey)
 {
-  if (modeKey.ok())
+  if (modeKey)
   {
     uint8_t keys[6] = {};
     if (modeKey.read(keys) <= 0)
@@ -130,7 +130,7 @@ void keyUpdateProc(satoh::AT42QT1070 &modeKey)
 /// @brief エンコーダ状態取得処理
 void encoderGetProc(satoh::RotaryEncoder &encoder)
 {
-  if (encoder.ok())
+  if (encoder)
   {
     msg::ROTARY_ENCODER enc{};
     msg::EFFECT_KEY key{};
@@ -152,7 +152,7 @@ void encoderGetProc(satoh::RotaryEncoder &encoder)
 template <typename T>
 void oledUpdate(satoh::SSD1306 &oled, msg::Message const *msg)
 {
-  if (oled.ok())
+  if (oled)
   {
     auto *param = reinterpret_cast<T const *>(msg->bytes);
     oled.update(*param);
@@ -175,27 +175,27 @@ void i2cTaskProc(void const *argument)
   satoh::AT42QT1070 modeKey(s_i2c);
   satoh::Gyro mpu6050(s_i2c, satoh::MPU6050);
   satoh::Gyro icm20602(s_i2c, satoh::ICM20602);
-  if (!mpu6050.ok() && !icm20602.ok())
+  if (!mpu6050 && !icm20602)
   {
     sendError(msg::error::GYRO);
   }
-  if (!modeKey.ok())
+  if (!modeKey)
   {
     sendError(msg::error::MODE_KEY);
   }
-  if (!level.ok())
+  if (!level)
   {
     sendError(msg::error::LEVEL_METER);
   }
-  if (!led.ok())
+  if (!led)
   {
     sendError(msg::error::EFFECT_LED);
   }
-  if (!encoder.ok())
+  if (!encoder)
   {
     sendError(msg::error::ROTARY_ENCODER);
   }
-  if (!oled.ok())
+  if (!oled)
   {
     sendError(msg::error::OLED);
   }

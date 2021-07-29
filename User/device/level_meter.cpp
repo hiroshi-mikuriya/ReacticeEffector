@@ -37,13 +37,6 @@ satoh::LevelMeter::LevelMeter(I2C *i2c) noexcept //
 {
 }
 
-satoh::LevelMeter::~LevelMeter() {}
-
-bool satoh::LevelMeter::ok() const noexcept
-{
-  return ok_;
-}
-
 void satoh::LevelMeter::setLeft(uint8_t level) noexcept
 {
   if (level < sizeof(LEVEL))

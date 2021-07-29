@@ -125,7 +125,7 @@ satoh::I2C::I2C(I2C_TypeDef *const i2cx,    //
   start();
 }
 
-satoh::I2C::I2C(I2C &&that)
+satoh::I2C::I2C(I2C &&that) noexcept
     : i2cx_(that.i2cx_),              //
       threadId_(that.threadId_),      //
       dma_(that.dma_),                //
@@ -137,7 +137,7 @@ satoh::I2C::I2C(I2C &&that)
   start();
 }
 
-satoh::I2C &satoh::I2C::operator=(satoh::I2C &&that)
+satoh::I2C &satoh::I2C::operator=(satoh::I2C &&that) noexcept
 {
   if (this != &that)
   {

@@ -53,9 +53,9 @@ public:
   /// @param[in] i2c I2C通信オブジェクト
   explicit SSD1306(I2C *i2c) noexcept;
   /// @brief デストラクタ
-  virtual ~SSD1306();
-  /// @brief 通信可否 @retval true 可 @retval false 不可（デバイス繋がっていない等）
-  bool ok() const noexcept override;
+  virtual ~SSD1306() {}
+  /// @brief デバイス状態を取得する @retval true 正常 @retval false 異常あり
+  explicit operator bool() const noexcept override { return ok_; };
   /// @brief パラメータ編集画面を表示する @param[in] src 画面設定 @retval true 通信成功 @retval false 通信失敗
   bool update(msg::OLED_DISP_EFFECTOR const &src) noexcept;
   /// @brief 演奏モード画面を表示する @param[in] src 画面設定 @retval true 通信成功 @retval false 通信失敗

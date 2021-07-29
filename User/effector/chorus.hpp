@@ -38,7 +38,7 @@ class satoh::fx::Chorus : public satoh::fx::EffectorBase
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
   mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
   sineWave sin1;
-  delayBuf<int16_t> del1;
+  delayBuf<int16_t> del1_;
   hpf hpf1;
   lpf2nd lpf2nd1;
   lpf2nd lpf2nd2;
@@ -112,7 +112,7 @@ public:
             EffectParameterF(1, 100, 1, "DEPTH"), //
             EffectParameterF(1, 100, 1, "TONE"),  //
         }),                                       //
-        del1(16),                                 //
+        del1_(16),                                //
         level_(0),                                //
         mix_(0),                                  //
         fback_(0),                                //
@@ -126,7 +126,7 @@ public:
   /// @brief エフェクターセットアップ成功・失敗
   /// @retval true 成功
   /// @retval false 失敗
-  bool ok() const noexcept override { return del1.ok(); }
+  explicit operator bool() const noexcept override { return static_cast<bool>(del1_); }
   /// @brief エフェクト処理実行
   /// @param[inout] left L音声データ
   /// @param[inout] right R音声データ
@@ -136,11 +136,11 @@ public:
     for (uint32_t i = 0; i < size; ++i)
     {
       float dtime = 5.0f + depth_ * (1.0f + sin1.output()); // ディレイタイム 5～15ms
-      float fx = del1.readLerp(dtime);                      // ディレイ音読込(線形補間)
+      float fx = del1_.readLerp(dtime);                     // ディレイ音読込(線形補間)
       fx = lpf2nd1.process(fx);                             // ディレイ音のTONE(ハイカット)
       fx = lpf2nd2.process(fx);
       // ディレイ音と原音をディレイバッファに書込、原音はローカットして書込
-      del1.write(fback_ * fx + hpf1.process(right[i]));
+      del1_.write(fback_ * fx + hpf1.process(right[i]));
       fx = (1.0f - mix_) * right[i] + mix_ * fx; // MIX
       fx *= 1.4f * level_;                       // LEVEL
       right[i] = fx;
