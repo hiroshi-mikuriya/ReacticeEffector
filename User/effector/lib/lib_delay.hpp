@@ -86,16 +86,17 @@ class satoh::delayBuf
   /// @brief 代入演算子削除
   delayBuf &operator=(delayBuf const &) = delete;
 
-  /// @brief 書込位置と読出位置の間隔を計算
-  static constexpr float getInterval(float time) { return 0.001f * time * satoh::SAMPLING_FREQ; }
+  /// @brief 書込位置と読出位置の間隔を計算 @param[in] ms 時間
+  static constexpr float getInterval(float ms) { return 0.001f * ms * satoh::SAMPLING_FREQ; }
   /// @brief バッファサイズ取得
-  /// @param[in] time 最大保持時間（ミリ秒）
+  /// @param[in] ms 最大保持時間（ミリ秒）
   /// @return バッファサイズ
-  static constexpr uint32_t getBufferSize(float time) { return 1 + static_cast<uint32_t>(getInterval(time)); }
+  static constexpr uint32_t getBufferSize(float ms) { return 1 + static_cast<uint32_t>(getInterval(ms)); }
 
-  uint32_t count_;   // サンプル要素数
-  UniquePtr<T> buf_; // ディレイバッファ配列
-  uint32_t wpos_;    // 書き込み位置
+  uint32_t maxSize_; ///< バッファ最大要素数
+  float interval_;   ///< インターバル
+  UniquePtr<T> buf_; ///< バッファ
+  uint32_t wpos_;    ///< 書き込み位置
 
   /// @brief float値を変換して保存する
   /// @param[in] pos 格納先のインデックス
@@ -105,18 +106,21 @@ class satoh::delayBuf
   /// @param[in] pos 読み出し先のインデックス
   /// @return float値
   float getFloat(uint32_t pos) const noexcept { return toFloat<T>(buf_.get()[pos]); }
+  /// @brief 読み込み位置を取得する @return 読み込み位置
+  float getRpos() const noexcept { return interval_ <= wpos_ ? wpos_ - interval_ : wpos_ + maxSize_ - interval_; }
 
 public:
   /// @brief コンストラクタ
-  delayBuf() noexcept : count_(0), wpos_(0) {}
+  delayBuf() noexcept : maxSize_(0), interval_(1), wpos_(0) {}
   /// @brief コンストラクタ
   /// @param[in] maxTime 最大保持時間（ミリ秒）
   explicit delayBuf(float maxTime) noexcept //
-      : count_(getBufferSize(maxTime)),     //
-        buf_(allocArray<T>(count_)),        //
+      : maxSize_(getBufferSize(maxTime)),   //
+        interval_(1),                       //
+        buf_(allocArray<T>(maxSize_)),      //
         wpos_(0)                            //
   {
-    memset(buf_.get(), 0, count_ * sizeof(T));
+    memset(buf_.get(), 0, maxSize_ * sizeof(T));
   }
   /// @brief moveコンストラクタ
   explicit delayBuf(delayBuf &&) = default;
@@ -130,38 +134,25 @@ public:
   explicit operator bool() const noexcept { return static_cast<bool>(buf_); }
   /// @brief 要素数を取得
   /// @return 要素数
-  uint32_t count() const noexcept { return count_; }
+  uint32_t size() const noexcept { return maxSize_; }
+  /// @brief インターバルを設定する @param[in] ms 時間（ミリ秒）
+  void setInterval(float ms) noexcept { interval_ = std::min(static_cast<float>(maxSize_), getInterval(std::max(1.0f, ms))); }
   /// @brief バッファ配列書き込み、書込位置を進める
   /// @param[in] v 書き込むデータ
   void write(float v) noexcept
   {
     setFloat(wpos_, v);
-    wpos_ = (wpos_ + 1) % count_;
+    wpos_ = (wpos_ + 1) % maxSize_;
   }
   /// @brief 通常のサンプル単位での読み出し
-  /// @param[in] delayTime ディレイ時間 ms
-  float read(float delayTime) const noexcept
-  {
-    uint32_t interval = static_cast<uint32_t>(getInterval(delayTime));
-    interval = std::min(interval, count_);
-    uint32_t rpos = interval <= wpos_               //
-                        ? wpos_ - interval          //
-                        : wpos_ + count_ - interval //
-        ;
-    return getFloat(rpos);
-  }
+  float read() const noexcept { return getFloat(static_cast<uint32_t>(getRpos())); }
   /// @brief 線形補間して読み出し（コーラス等に利用）
-  /// @param[in] delayTime ディレイ時間 ms
-  float readLerp(float delayTime) const noexcept
+  float readLerp() const noexcept
   {
-    float intervalF = std::min(getInterval(delayTime), static_cast<float>(count_));
-    float rposF = intervalF <= wpos_               //
-                      ? wpos_ - intervalF          //
-                      : wpos_ + count_ - intervalF //
-        ;
-    uint32_t rpos0 = static_cast<uint32_t>(rposF);
-    uint32_t rpos1 = (rpos0 + 1) % count_;
-    float t = rposF - rpos0;
+    float rpos = getRpos();
+    uint32_t rpos0 = static_cast<uint32_t>(rpos);
+    uint32_t rpos1 = (rpos0 + 1) % maxSize_;
+    float t = rpos - rpos0;
     return (1 - t) * getFloat(rpos0) + t * getFloat(rpos1);
   }
   /// @brief 固定時間（最大ディレイタイム）で読み出し

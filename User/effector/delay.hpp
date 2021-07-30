@@ -36,7 +36,6 @@ class satoh::fx::Delay : public satoh::fx::EffectorBase
   mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
   delayBuf<int8_t> del1_;
   lpf2nd lpf2ndTone_;
-  float dtime_;
   float fback_;
   float elevel_;
 
@@ -47,7 +46,7 @@ class satoh::fx::Delay : public satoh::fx::EffectorBase
     switch (n)
     {
     case DTIME:
-      dtime_ = ui_[DTIME].getValue(); // DELAYTIME 10 ～ 1500 ms
+      del1_.setInterval(ui_[DTIME].getValue());
       break;
     case ELEVEL:
       elevel_ = logPot(ui_[ELEVEL].getValue(), -20.0f, 20.0f); // EFFECT LEVEL -20 ～ +20dB
@@ -92,7 +91,6 @@ public:
             EffectParameterF(0, 100, 1, "TONE"),       //
         }),
         del1_(ui_[DTIME].getMax()), //
-        dtime_(0),                  //
         fback_(0),                  //
         elevel_(0)                  //
   {
@@ -115,12 +113,10 @@ public:
   {
     for (uint32_t i = 0; i < size; ++i)
     {
-      float fx = del1_.read(dtime_); // ディレイ音読込
-      fx = lpf2ndTone_.process(fx);  // ディレイ音のTONE（ハイカット）
-      // ディレイ音と原音をディレイバッファに書込、原音はエフェクトオン時のみ書込
+      float fx = del1_.read();
+      fx = lpf2ndTone_.process(fx);
       del1_.write(fback_ * fx + right[i]);
-      fx *= elevel_; // ディレイ音レベル
-      right[i] = right[i] + fx;
+      right[i] += fx * elevel_;
     }
   }
 };

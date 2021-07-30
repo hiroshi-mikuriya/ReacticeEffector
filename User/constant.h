@@ -19,4 +19,6 @@ constexpr size_t EFFECT_LED_COUNT = 4;            ///< エフェクトLED数
 constexpr size_t EFFECT_BUTTON_COUNT = 4;         ///< エフェクトボタン数
 constexpr float SAMPLING_FREQ = 93.75f * 1000.0f; ///< サンプリング周期
 constexpr float PI = 3.141592653589793f;          ///< 円周率
+constexpr uint32_t BLOCK_SIZE = 192;              ///< 音声信号ブロックサイズ
+
 } // namespace satoh

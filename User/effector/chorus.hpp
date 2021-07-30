@@ -135,9 +135,10 @@ public:
   {
     for (uint32_t i = 0; i < size; ++i)
     {
-      float dtime = 5.0f + depth_ * (1.0f + sin1.output()); // ディレイタイム 5～15ms
-      float fx = del1_.readLerp(dtime);                     // ディレイ音読込(線形補間)
-      fx = lpf2nd1.process(fx);                             // ディレイ音のTONE(ハイカット)
+      float dtime = 5.0f + depth_ * (1.0f + sin1.output());
+      del1_.setInterval(dtime);
+      float fx = del1_.readLerp(); // ディレイ音読込(線形補間)
+      fx = lpf2nd1.process(fx);    // ディレイ音のTONE(ハイカット)
       fx = lpf2nd2.process(fx);
       // ディレイ音と原音をディレイバッファに書込、原音はローカットして書込
       del1_.write(fback_ * fx + hpf1.process(right[i]));

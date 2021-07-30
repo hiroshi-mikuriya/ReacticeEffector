@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "common/utils.h"
 #include "effector_base.h"
 #include "lib/lib_calc.hpp"
 #include "lib/lib_delay.hpp"
@@ -33,9 +34,6 @@ class satoh::fx::Reverb : public satoh::fx::EffectorBase
     HIDUMP,    ///< ハイダンプ
     COUNT,     ///< パラメータ総数
   };
-
-  // ディレイタイム配列
-  const float dt[10] = {43.5337, 25.796, 19.392, 16.364, 7.645, 4.2546, 58.6435, 69.4325, 74.5234, 86.1244};
 
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
   mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
@@ -126,9 +124,12 @@ public:
         mix_(0),                                   //
         fback_(0)                                  //
   {
-    for (int i = 0; i < 10; i++)
+    constexpr float dt[] = {43.5337f, 25.796f,  19.392f,  16.364f,  7.645f, //
+                            4.2546f,  58.6435f, 69.4325f, 74.5234f, 86.1244f};
+    for (uint32_t i = 0; i < countof(dt); i++)
     {
       del[i] = Buffer(dt[i]); // ディレイタイム設定
+      del[i].setInterval(dt[i]);
     }
     init(ui_, COUNT);
   }
@@ -148,38 +149,38 @@ public:
       // Early Reflection
 
       del[0].write(fxR);
-      float ap = fxR + del[0].readLerp(dt[0]);
-      float am = fxR - del[0].readLerp(dt[0]);
+      float ap = fxR + del[0].readLerp();
+      float am = fxR - del[0].readLerp();
       del[1].write(am);
-      float bp = ap + del[1].readLerp(dt[1]);
-      float bm = ap - del[1].readLerp(dt[1]);
+      float bp = ap + del[1].readLerp();
+      float bm = ap - del[1].readLerp();
       del[2].write(bm);
-      float cp = bp + del[2].readLerp(dt[2]);
-      float cm = bp - del[2].readLerp(dt[2]);
+      float cp = bp + del[2].readLerp();
+      float cm = bp - del[2].readLerp();
       del[3].write(cm);
-      float dp = cp + del[3].readLerp(dt[3]);
-      float dm = cp - del[3].readLerp(dt[3]);
+      float dp = cp + del[3].readLerp();
+      float dm = cp - del[3].readLerp();
       del[4].write(dm);
-      float ep = dp + del[4].readLerp(dt[4]);
-      float em = dp - del[4].readLerp(dt[4]);
+      float ep = dp + del[4].readLerp();
+      float em = dp - del[4].readLerp();
       del[5].write(em);
 
       // Late Reflection & High Freq Dumping
 
-      float hd = del[6].readLerp(dt[6]);
+      float hd = del[6].readLerp();
       hd = lpfFB[0].process(hd);
 
-      float id = del[7].readLerp(dt[7]);
+      float id = del[7].readLerp();
       id = lpfFB[1].process(id);
 
-      float jd = del[8].readLerp(dt[8]);
+      float jd = del[8].readLerp();
       jd = lpfFB[2].process(jd);
 
-      float kd = del[9].readLerp(dt[9]);
+      float kd = del[9].readLerp();
       kd = lpfFB[3].process(kd);
 
       float outR = ep + hd * fback_;
-      float outL = del[5].readLerp(dt[5]) + id * fback_;
+      float outL = del[5].readLerp() + id * fback_;
 
       float fp = outL + outR;
       float fm = outL - outR;
