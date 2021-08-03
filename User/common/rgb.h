@@ -30,7 +30,8 @@ struct satoh::RGB
   uint8_t blue;  ///< 青
 };
 
-inline constexpr satoh::RGB operator+(satoh::RGB const &lh, satoh::RGB const &rh)
+/// @brief 加算演算子 @param[in] lh 左辺値 @param[in] rh 右辺値 @return 演算結果
+inline constexpr satoh::RGB satoh::operator+(satoh::RGB const &lh, satoh::RGB const &rh)
 {
   return satoh::RGB{
       static_cast<uint8_t>(lh.red + rh.red),     //
@@ -38,14 +39,13 @@ inline constexpr satoh::RGB operator+(satoh::RGB const &lh, satoh::RGB const &rh
       static_cast<uint8_t>(lh.blue + rh.blue)    //
   };
 }
-inline satoh::RGB &operator+=(satoh::RGB &lh, satoh::RGB const &rh)
+/// @brief 加算演算子 @param[in] lh 左辺値 @param[in] rh 右辺値 @return 演算結果
+inline satoh::RGB &satoh::operator+=(satoh::RGB &lh, satoh::RGB const &rh)
 {
-  lh.red += rh.red;
-  lh.green += rh.green;
-  lh.blue += rh.blue;
-  return lh;
+  return lh = lh + rh;
 }
-inline constexpr satoh::RGB operator-(satoh::RGB const &lh, satoh::RGB const &rh)
+/// @brief 減算演算子 @param[in] lh 左辺値 @param[in] rh 右辺値 @return 演算結果
+inline constexpr satoh::RGB satoh::operator-(satoh::RGB const &lh, satoh::RGB const &rh)
 {
   return satoh::RGB{
       static_cast<uint8_t>(lh.red - rh.red),     //
@@ -53,13 +53,12 @@ inline constexpr satoh::RGB operator-(satoh::RGB const &lh, satoh::RGB const &rh
       static_cast<uint8_t>(lh.blue - rh.blue)    //
   };
 }
-inline satoh::RGB &operator-=(satoh::RGB &lh, satoh::RGB const &rh)
+/// @brief 減算演算子 @param[in] lh 左辺値 @param[in] rh 右辺値 @return 演算結果
+inline satoh::RGB &satoh::operator-=(satoh::RGB &lh, satoh::RGB const &rh)
 {
-  lh.red -= rh.red;
-  lh.green -= rh.green;
-  lh.blue -= rh.blue;
-  return lh;
+  return lh = lh - rh;
 }
+/// @brief 乗算演算子 @param[in] lh 左辺値 @param[in] rh 右辺値 @return 演算結果
 inline constexpr satoh::RGB satoh::operator*(RGB const &rgb, int a)
 {
   return RGB{
@@ -68,13 +67,12 @@ inline constexpr satoh::RGB satoh::operator*(RGB const &rgb, int a)
       static_cast<uint8_t>(rgb.blue * a)   //
   };
 }
+/// @brief 乗算演算子 @param[in] lh 左辺値 @param[in] rh 右辺値 @return 演算結果
 inline satoh::RGB &satoh::operator*=(RGB &rgb, int a)
 {
-  rgb.red *= a;
-  rgb.green *= a;
-  rgb.blue *= a;
-  return rgb;
+  return rgb = rgb * a;
 }
+/// @brief 除算演算子 @param[in] lh 左辺値 @param[in] rh 右辺値 @return 演算結果
 inline constexpr satoh::RGB satoh::operator/(RGB const &rgb, int a)
 {
   return RGB{
@@ -83,10 +81,8 @@ inline constexpr satoh::RGB satoh::operator/(RGB const &rgb, int a)
       static_cast<uint8_t>(rgb.blue / a)   //
   };
 }
+/// @brief 除算演算子 @param[in] lh 左辺値 @param[in] rh 右辺値 @return 演算結果
 inline satoh::RGB &satoh::operator/=(RGB &rgb, int a)
 {
-  rgb.red /= a;
-  rgb.green /= a;
-  rgb.blue /= a;
-  return rgb;
+  return rgb = rgb / a;
 }

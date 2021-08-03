@@ -11,9 +11,12 @@
 #include "state/factory_reset.h"
 #include "state/patch_edit.h"
 #include "state/playing.h"
+#include "state/tuner.h"
 #include "stm32f7xx_ll_bus.h"
 #include "stm32f7xx_ll_pwr.h"
-#include <memory>
+
+namespace state = satoh::state;
+namespace msg = satoh::msg;
 
 namespace
 {
@@ -33,8 +36,6 @@ void initBackup()
 
 void appTaskProc(void const *argument)
 {
-  namespace state = satoh::state;
-  namespace msg = satoh::msg;
   if (msg::registerTask(4) != osOK)
   {
     return;
@@ -46,8 +47,9 @@ void appTaskProc(void const *argument)
   state::EffectEdit stEE(*prop);
   state::Playing stPL(*prop);
   state::FactoryReset stFR(*prop);
+  state::Tuner stTN(*prop);
   state::Error stER(*prop);
-  state::Base *states[] = {&stPL, &stPE, &stEE, &stFR, &stER};
+  state::Base *states[] = {&stPL, &stPE, &stEE, &stFR, &stTN, &stER};
   state::ID stID = state::PLAYING;
   states[stID]->init();
   for (;;)
@@ -66,4 +68,9 @@ void appTaskProc(void const *argument)
       states[stID]->init();
     }
   }
+}
+
+void appTimIRQ(void)
+{
+  msg::send(appTaskHandle, msg::APP_TIM_NOTIFY);
 }

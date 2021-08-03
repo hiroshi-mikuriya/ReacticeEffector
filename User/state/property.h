@@ -9,6 +9,7 @@
 #include "common/alloc.hpp"
 #include "constant.h"
 #include "effector/effector_base.h"
+#include "effector/tuner.h"
 #include "message/error.h"
 #include <memory>
 
@@ -141,6 +142,8 @@ class satoh::state::Property
   uint8_t editSelectedFxNum_;
   /// エラー原因
   msg::error::ID error_;
+  /// チューナー
+  fx::Tuner tuner_;
   /// @brief パッチをロードする
   void loadPatch() noexcept;
 
@@ -212,4 +215,8 @@ public:
   msg::error::ID getError() const noexcept { return error_; }
   /// @brief エラー原因を設定する @param[in] e エラー原因
   void setError(msg::error::ID e) noexcept { error_ = e; }
+  /// @brief チューナーを取得する @return チューナー
+  fx::Tuner *getTuner() noexcept { return &tuner_; }
+  /// @brief チューナーを取得する @return チューナー
+  fx::Tuner const *getTuner() const noexcept { return &tuner_; }
 };

@@ -88,6 +88,11 @@ state::ID state::PatchEdit::run(msg::ERROR const *src) noexcept
   m_.setError(src->cause);
   return ERROR;
 }
+state::ID state::PatchEdit::timer() noexcept
+{
+  timerProc(m_);
+  return id();
+}
 void state::PatchEdit::updateDisplay() noexcept
 {
   msg::OLED_DISP_BANK cmd{};

@@ -98,6 +98,11 @@ state::ID state::FactoryReset::run(msg::ERROR const *src) noexcept
   m_.setError(src->cause);
   return ERROR;
 }
+state::ID state::FactoryReset::timer() noexcept
+{
+  timerProc(m_);
+  return id();
+}
 void state::FactoryReset::dispConfirm() const noexcept
 {
   msg::OLED_DISP_CONFIRM cmd{};

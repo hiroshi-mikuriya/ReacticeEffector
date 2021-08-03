@@ -52,6 +52,10 @@ state::ID state::Error::run(msg::ERROR const *src) noexcept
 {
   return id();
 }
+state::ID state::Error::timer() noexcept
+{
+  return id();
+}
 void state::Error::init() noexcept
 {
   msg::OLED_DISP_TEXT txt{};
@@ -110,7 +114,4 @@ void state::Error::init() noexcept
   }
   msg::send(i2cTaskHandle, msg::OLED_DISP_TEXT_REQ, &txt, sizeof(txt));
 }
-void state::Error::deinit() noexcept
-{
-  // TODO
-}
+void state::Error::deinit() noexcept {}

@@ -20,6 +20,9 @@ extern "C"
   /// @param[in] argument タスク引数
   void appTaskProc(void const *argument);
 
+  /// @brief APP TIM割り込み
+  void appTimIRQ(void);
+
 #ifdef __cplusplus
 }
 #endif

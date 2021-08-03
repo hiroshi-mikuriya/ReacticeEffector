@@ -22,6 +22,7 @@ namespace cat
 constexpr ID SHIFT = 12;
 constexpr ID DEVICE = 1 << SHIFT;
 constexpr ID PERIPHERAL = 2 << SHIFT;
+constexpr ID TASK = 3 << SHIFT;
 } // namespace cat
 
 constexpr ID NONE = 0;                         ///< エラーなし
@@ -51,6 +52,7 @@ constexpr ID UART_5 = 35 | cat::PERIPHERAL;    ///< UART_5エラー
 constexpr ID UART_6 = 36 | cat::PERIPHERAL;    ///< UART_6エラー
 constexpr ID UART_7 = 37 | cat::PERIPHERAL;    ///< UART_7エラー
 constexpr ID UART_8 = 38 | cat::PERIPHERAL;    ///< UART_8エラー
+constexpr ID SOUND_MEM = 1 | cat::TASK;        ///< SOUND TASKエラー
 } // namespace error
 } // namespace msg
 } // namespace satoh

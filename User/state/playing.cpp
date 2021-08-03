@@ -50,7 +50,11 @@ state::ID state::Playing::run(msg::MODE_KEY const *src) noexcept
 }
 state::ID state::Playing::run(msg::EFFECT_KEY const *src) noexcept
 {
-  if (src->button[2] && src->button[3])
+  if (src->button[0] == msg::BUTTON_DOWN && src->button[1] == msg::BUTTON_DOWN)
+  {
+    return TUNER;
+  }
+  if (src->button[2] == msg::BUTTON_DOWN && src->button[3] == msg::BUTTON_DOWN)
   {
     return FACTORY_RESET;
   }
@@ -79,6 +83,11 @@ state::ID state::Playing::run(msg::ERROR const *src) noexcept
   m_.setError(src->cause);
   return ERROR;
 }
+state::ID state::Playing::timer() noexcept
+{
+  timerProc(m_);
+  return id();
+}
 void state::Playing::modBank() noexcept
 {
   msg::OLED_DISP_BANK disp{};
@@ -106,7 +115,4 @@ void state::Playing::init() noexcept
   msg::LED_SIMPLE led{0, true};
   msg::send(i2cTaskHandle, msg::LED_SIMPLE_REQ, &led, sizeof(led));
 }
-void state::Playing::deinit() noexcept
-{
-  // TODO
-}
+void state::Playing::deinit() noexcept {}

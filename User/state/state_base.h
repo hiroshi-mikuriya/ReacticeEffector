@@ -21,6 +21,7 @@ enum ID
   PATCH_EDIT,    ///< パッチ編集状態
   EFFECT_EDIT,   ///< エフェクトパラメータ編集状態
   FACTORY_RESET, ///< ファクトリーリセット状態
+  TUNER,         ///< チューナー状態
   ERROR,         ///< エラー状態
 };
 } // namespace state
@@ -29,26 +30,18 @@ enum ID
 /// @brief 状態基底クラス
 class satoh::state::Base
 {
-  /// @brief MODE_KEYを処理する
-  /// @param[in] src MODE_KEY
-  /// @return 次の状態ID
+  /// @brief MODE_KEYを処理する @param[in] src MODE_KEY @return 次の状態ID
   virtual ID run(msg::MODE_KEY const *src) noexcept = 0;
-  /// @brief EFFECT_KEYを処理する
-  /// @param[in] src EFFECT_KEY
-  /// @return 次の状態ID
+  /// @brief EFFECT_KEYを処理する @param[in] src EFFECT_KEY @return 次の状態ID
   virtual ID run(msg::EFFECT_KEY const *src) noexcept = 0;
-  /// @brief ACC_GYROを処理する
-  /// @param[in] src ACC_GYRO
-  /// @return 次の状態ID
+  /// @brief ACC_GYROを処理する @param[in] src ACC_GYRO @return 次の状態ID
   virtual ID run(msg::ACC_GYRO const *src) noexcept = 0;
-  /// @brief ROTARY_ENCODERを処理する
-  /// @param[in] src ROTARY_ENCODER
-  /// @return 次の状態ID
+  /// @brief ROTARY_ENCODERを処理する @param[in] src ROTARY_ENCODER @return 次の状態ID
   virtual ID run(msg::ROTARY_ENCODER const *src) noexcept = 0;
-  /// @brief ERRORを処理する
-  /// @param[in] src ERROR
-  /// @return 次の状態ID
+  /// @brief ERRORを処理する @param[in] src ERROR @return 次の状態ID
   virtual ID run(msg::ERROR const *src) noexcept = 0;
+  /// @brief タイマー通知を処理する @return 次の状態ID
+  virtual ID timer() noexcept = 0;
 
 public:
   /// @brief デストラクタ
@@ -76,6 +69,8 @@ public:
       return run(reinterpret_cast<msg::ROTARY_ENCODER const *>(msg->bytes));
     case msg::ERROR_NOTIFY:
       return run(reinterpret_cast<msg::ERROR const *>(msg->bytes));
+    case msg::APP_TIM_NOTIFY:
+      return timer();
     }
     return ERROR;
   }

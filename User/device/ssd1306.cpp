@@ -276,3 +276,17 @@ bool satoh::SSD1306::update(msg::OLED_DISP_TEXT const &src) noexcept
   drawString(src.msg3, font, false, 0, font.height * 3, disp);
   return sendBufferToDevice();
 }
+bool satoh::SSD1306::update(msg::OLED_DISP_TUNER const &src) noexcept
+{
+  const auto &font = Font_7x10;
+  uint8_t *disp = dispbuf_.get();
+  memset(disp, 0, BUF_SIZE);
+  drawString("TUNER", font, false, 40, 0, disp);
+  if (src.estimated)
+  {
+    drawString(src.name, Font_16x26, false, 50, font.height * 1 + 6, disp);
+    drawString(" ", font, true, font.width * (8 + src.diff), font.height * 5, disp);
+  }
+  drawString(" <----- = -----> ", font, false, 0, font.height * 4, disp);
+  return sendBufferToDevice();
+}

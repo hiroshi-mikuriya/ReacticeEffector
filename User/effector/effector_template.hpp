@@ -41,13 +41,13 @@ class satoh::fx::EffectorTemplate : public satoh::fx::EffectorBase
     switch (n)
     {
     case PARAM0:
-      param0_ = ui_[PARAM0].getValue(); // TODO 加工して代入する
+      param0_ = ui_[PARAM0].getValue(); // 加工して代入する
       break;
     case PARAM1:
-      param1_ = ui_[PARAM1].getValue(); // TODO 加工して代入する
+      param1_ = ui_[PARAM1].getValue(); // 加工して代入する
       break;
     case PARAM2:
-      param2_ = ui_[PARAM2].getValue(); // TODO 加工して代入する
+      param2_ = ui_[PARAM2].getValue(); // 加工して代入する
       break;
     }
   }
@@ -93,7 +93,7 @@ public:
   {
     for (uint32_t i = 0; i < size; ++i)
     {
-      // TODO param0_, param1_, param2_を使って、エフェクト処理する
+      // param0_, param1_, param2_を使って、エフェクト処理する
     }
   }
 };

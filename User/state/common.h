@@ -18,5 +18,7 @@ void proc(Property &prop, msg::ACC_GYRO const *src) noexcept;
 void tapProc(Property &prop) noexcept;
 //// @brief RE1ボタン処理 @param[in] prop プロパティ
 void re1Proc(Property &prop) noexcept;
+//// @brief タイマー処理 @param[in] prop プロパティ
+void timerProc(Property &prop) noexcept;
 } // namespace state
 } // namespace satoh

@@ -97,6 +97,11 @@ state::ID state::EffectEdit::run(msg::ERROR const *src) noexcept
   m_.setError(src->cause);
   return ERROR;
 }
+state::ID state::EffectEdit::timer() noexcept
+{
+  timerProc(m_);
+  return id();
+}
 void state::EffectEdit::modSelectedParam(bool up)
 {
   auto *fx = m_.getEditSelectedFx();

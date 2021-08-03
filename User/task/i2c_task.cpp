@@ -249,6 +249,9 @@ void i2cTaskProc(void const *argument)
     case msg::OLED_DISP_TEXT_REQ:
       oledUpdate<msg::OLED_DISP_TEXT>(oled, msg);
       break;
+    case msg::OLED_DISP_TUNER_REQ:
+      oledUpdate<msg::OLED_DISP_TUNER>(oled, msg);
+      break;
     }
   }
 }

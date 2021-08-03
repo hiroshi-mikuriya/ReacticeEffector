@@ -9,6 +9,7 @@
 #include "common/dma_mem.h"
 #include "main.h"
 #include "message/msglib.h"
+#include "user.h"
 
 namespace msg = satoh::msg;
 
@@ -90,13 +91,14 @@ void soundTaskProc(void const *argument)
   }
   constexpr uint32_t BLOCK_SIZE_2 = satoh::BLOCK_SIZE * 2;
   constexpr uint32_t BLOCK_SIZE_4 = satoh::BLOCK_SIZE * 4;
-  auto rxbuf = satoh::makeDmaMem<int32_t>(BLOCK_SIZE_4); // 音声信号受信バッファ配列 Lch前半 Lch後半 Rch前半 Rch後半
-  auto txbuf = satoh::makeDmaMem<int32_t>(BLOCK_SIZE_4); // 音声信号送信バッファ配列
-  satoh::UniquePtr<float> left(satoh::allocArray<float>(satoh::BLOCK_SIZE));
-  satoh::UniquePtr<float> right(satoh::allocArray<float>(satoh::BLOCK_SIZE));
+  auto rxbuf = satoh::makeDmaMem<int32_t>(BLOCK_SIZE_4);    // 音声信号受信バッファ配列 Lch前半 Lch後半 Rch前半 Rch後半
+  auto txbuf = satoh::makeDmaMem<int32_t>(BLOCK_SIZE_4);    // 音声信号送信バッファ配列
+  auto left = satoh::makeDmaMem<float>(satoh::BLOCK_SIZE);  // RAM節約のやめDMAメモリを使う
+  auto right = satoh::makeDmaMem<float>(satoh::BLOCK_SIZE); // RAM節約のやめDMAメモリを使う
   if (!rxbuf || !txbuf || !left || !right)
   {
-    // TODO エラー通知？
+    msg::ERROR e{msg::error::SOUND_MEM};
+    msg::send(appTaskHandle, msg::ERROR_NOTIFY, &e, sizeof(e));
     return;
   }
   extern SAI_HandleTypeDef hsai_BlockA1;

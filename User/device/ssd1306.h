@@ -64,4 +64,6 @@ public:
   bool update(msg::OLED_DISP_CONFIRM const &src) noexcept;
   /// @brief テキスト画面を表示する @param[in] src 画面設定 @retval true 通信成功 @retval false 通信失敗
   bool update(msg::OLED_DISP_TEXT const &src) noexcept;
+  /// @brief チューナー画面を表示する @param[in] src 画面設定 @retval true 通信成功 @retval false 通信失敗
+  bool update(msg::OLED_DISP_TUNER const &src) noexcept;
 };

@@ -111,3 +111,8 @@ void state::re1Proc(Property &prop) noexcept
   static_cast<void>(prop); // unused
   changeNeoPixelPattern();
 }
+
+void state::timerProc(Property &prop) noexcept
+{
+  // TODO
+}

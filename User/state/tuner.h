@@ -1,4 +1,4 @@
-/// @file      state/factory_reset.h
+/// @file      state/tuner.h
 /// @author    SATOH GADGET
 /// @copyright Copyright© 2021 SATOH GADGET
 ///
@@ -12,15 +12,13 @@ namespace satoh
 {
 namespace state
 {
-class FactoryReset;
+class Tuner;
 }
 } // namespace satoh
 
-/// @brief ファクトリーリセット状態
-class satoh::state::FactoryReset : public satoh::state::Base
+/// @brief チューナー状態
+class satoh::state::Tuner : public satoh::state::Base
 {
-  /// Yes/No選択 @arg true Yes @arg false No
-  bool yes_;
   /// プロパティ
   Property &m_;
   /// @brief MODE_KEYを処理する @param[in] src MODE_KEY @return 次の状態ID
@@ -35,17 +33,15 @@ class satoh::state::FactoryReset : public satoh::state::Base
   ID run(msg::ERROR const *src) noexcept override;
   /// @brief タイマー通知を処理する @return 次の状態ID
   ID timer() noexcept override;
-  /// @brief コンファーム画面を表示する
-  void dispConfirm() const noexcept;
 
 public:
   /// @brief コンストラクタ
   /// @param[in] prop プロパティ
-  explicit FactoryReset(Property &prop) : m_(prop) {}
+  explicit Tuner(Property &prop) : m_(prop) {}
   /// @brief デストラクタ
-  ~FactoryReset() {}
+  ~Tuner() {}
   /// @brief 状態IDを取得する @return 状態ID
-  ID id() const noexcept override { return FACTORY_RESET; }
+  ID id() const noexcept override { return TUNER; }
   /// @brief この状態に遷移したときに行う初期化処理
   void init() noexcept override;
   /// @brief この状態が終了するときに行う終了処理

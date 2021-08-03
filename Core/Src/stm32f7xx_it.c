@@ -318,6 +318,7 @@ void TIM1_UP_TIM10_IRQHandler(void)
   {
     LL_TIM_ClearFlag_UPDATE(TIM10);
     adc1TimIRQ();
+    appTimIRQ();
   }
   /* USER CODE END TIM1_UP_TIM10_IRQn 0 */
 
