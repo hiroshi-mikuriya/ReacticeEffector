@@ -134,6 +134,38 @@ uint32_t state::PatchTable::calcCrc() const noexcept
   return LL_CRC_ReadData32(CRC);
 }
 
+// state::Tap
+
+state::Tap::Tap() : lastTapTime_(0), tapInterval_(0) {}
+state::Tap::~Tap() {}
+void state::Tap::notifyTapEvent() noexcept
+{
+  uint32_t now = osKernelSysTick();
+  if (lastTapTime_ != 0)
+  {
+    tapInterval_ = now - lastTapTime_;
+  }
+  lastTapTime_ = now;
+}
+uint32_t state::Tap::getTapInterval() const noexcept
+{
+  return tapInterval_;
+}
+bool state::Tap::getLedLevel() const noexcept
+{
+  if (lastTapTime_ == 0 || tapInterval_ == 0)
+  {
+    return false;
+  }
+  uint32_t d = osKernelSysTick() - lastTapTime_;
+  uint32_t a = d % tapInterval_;
+  return a < 100;
+}
+void state::Tap::reset() noexcept
+{
+  lastTapTime_ = tapInterval_ = 0;
+}
+
 // state::Property
 
 void state::Property::loadPatch() noexcept

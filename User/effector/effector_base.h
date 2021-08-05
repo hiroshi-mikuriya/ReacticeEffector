@@ -368,8 +368,9 @@ public:
     }
     return 0;
   }
-  /// @brief タップ通知
-  virtual void tap() noexcept {}
+  /// @brief タップ間隔を設定する
+  /// @param[in] ms タップ間隔（ミリ秒）
+  virtual void setTapInterval(uint32_t ms) noexcept {}
   /// @brief LED色を取得
   /// @return LED色
   virtual RGB getColor() const noexcept { return ledColor_; }

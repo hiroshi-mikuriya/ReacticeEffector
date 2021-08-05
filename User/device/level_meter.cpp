@@ -33,7 +33,7 @@ satoh::LevelMeter::LevelMeter(I2C *i2c) noexcept //
       left_(LEVEL[0]),                           //
       right_(LEVEL[0]),                          //
       power_(false),                             //
-      modulation_(false)                         //
+      tap_(false)                                //
 {
 }
 
@@ -51,13 +51,13 @@ void satoh::LevelMeter::setRight(uint8_t level) noexcept
     right_ = LEVEL[level];
   }
 }
-void satoh::LevelMeter::setPower(bool level) noexcept
+void satoh::LevelMeter::setPowerLed(bool level) noexcept
 {
   power_ = level;
 }
-void satoh::LevelMeter::setModulation(bool level) noexcept
+void satoh::LevelMeter::setTapLed(bool level) noexcept
 {
-  modulation_ = level;
+  tap_ = level;
 }
 bool satoh::LevelMeter::show() const noexcept
 {
@@ -67,7 +67,7 @@ bool satoh::LevelMeter::show() const noexcept
   {
     v[2] &= MASK;
   }
-  if (modulation_)
+  if (tap_)
   {
     v[1] &= MASK;
   }

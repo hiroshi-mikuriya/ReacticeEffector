@@ -66,7 +66,7 @@ void ledLevelUpdateProc(satoh::LevelMeter &level, msg::Message const *msg) noexc
     level.show();
   }
 }
-/// @brief Power/Modulation LED点灯・消灯処理
+/// @brief Power/Tap LED点灯・消灯処理
 /// @param[in] level レベルメーターと通信するオブジェクト
 /// @param[in] msg リクエストメッセージ
 void ledSimpleProc(satoh::LevelMeter &level, msg::Message const *msg) noexcept
@@ -76,11 +76,11 @@ void ledSimpleProc(satoh::LevelMeter &level, msg::Message const *msg) noexcept
     auto *param = reinterpret_cast<msg::LED_SIMPLE const *>(msg->bytes);
     if (param->led == 0)
     {
-      level.setPower(param->level);
+      level.setPowerLed(param->level);
     }
     else
     {
-      level.setModulation(param->level);
+      level.setTapLed(param->level);
     }
     level.show();
   }

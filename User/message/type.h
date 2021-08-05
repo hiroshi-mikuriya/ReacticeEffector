@@ -39,7 +39,7 @@ constexpr ID GYRO_GET_REQ = 1 | cat::GYRO;
 constexpr ID GYRO_NOTIFY = 2 | cat::GYRO;
 /// LED - レベルメーター（左右）更新依頼
 constexpr ID LED_LEVEL_UPDATE_REQ = 1 | cat::LED;
-/// LED - Power/Modulation LED点灯状態変更依頼
+/// LED - Power/Tap LED点灯状態変更依頼
 constexpr ID LED_SIMPLE_REQ = 2 | cat::LED;
 /// LED - EFFECT LED点灯状態変更依頼（LED指定）
 constexpr ID LED_EFFECT_REQ = 3 | cat::LED;
@@ -119,10 +119,10 @@ struct satoh::msg::LED_LEVEL
   uint8_t left;  ///< レベルメーター左（0 - 7）
   uint8_t right; ///< レベルメーター右（0 - 7）
 };
-/// @brief Power/Modulation LED点灯状態変更依頼型
+/// @brief Power/Tap LED点灯状態変更依頼型
 struct satoh::msg::LED_SIMPLE
 {
-  uint8_t led; ///< @arg 0 POWER @arg 1 MODULATION
+  uint8_t led; ///< @arg 0 POWER @arg 1 TAP
   bool level;  ///< @arg true 点灯 @arg false 消灯
 };
 /// @brief LED - EFFECT LED点灯状態変更依頼型（LED指定）

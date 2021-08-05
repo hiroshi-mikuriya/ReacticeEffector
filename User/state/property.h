@@ -21,6 +21,7 @@ class Effectors;
 struct EffectParam;
 struct Patch;
 struct PatchTable;
+class Tap;
 class Property;
 } // namespace state
 } // namespace satoh
@@ -125,9 +126,41 @@ struct satoh::state::PatchTable
   uint32_t calcCrc() const noexcept;
 };
 
+/// @brief TAP
+class satoh::state::Tap
+{
+  uint32_t lastTapTime_; ///< 最後にタップした時刻
+  uint32_t tapInterval_; ///< タップ間隔
+
+public:
+  /// @brief コンストラクタ
+  Tap();
+  /// @brief デストラクタ
+  virtual ~Tap();
+  /// @brief タップイベント通知
+  void notifyTapEvent() noexcept;
+  /// @brief タップ間隔を取得する @return タップ間隔
+  uint32_t getTapInterval() const noexcept;
+  /// @brief タップLED出力レベルを取得する @retval true 点灯 @retval false 消灯
+  bool getLedLevel() const noexcept;
+  /// @brief リセットする
+  void reset() noexcept;
+};
+
 /// @brief 状態プロパティ
 class satoh::state::Property
 {
+  /// デフォルトコンストラクタ削除
+  Property() = delete;
+  /// コピーコンストラクタ削除
+  Property(Property const &) = delete;
+  /// moveコンストラクタ削除
+  Property(Property const &&) = delete;
+  /// コピー代入演算子削除
+  Property &operator=(Property const &) = delete;
+  /// move代入演算子削除
+  Property &operator=(Property const &&) = delete;
+
   /// バンク番号
   uint8_t bankNum_;
   /// パッチ番号
@@ -144,12 +177,12 @@ class satoh::state::Property
   msg::error::ID error_;
   /// チューナー
   fx::Tuner tuner_;
+  /// TAP
+  Tap tap_;
   /// @brief パッチをロードする
   void loadPatch() noexcept;
 
 public:
-  /// 最後にタップを押した時間
-  uint32_t lastTapTick = 0;
   /// @brief コンストラクタ
   /// @param[in] パッチテーブル
   explicit Property(PatchTable *patch);
@@ -219,4 +252,8 @@ public:
   fx::Tuner *getTuner() noexcept { return &tuner_; }
   /// @brief チューナーを取得する @return チューナー
   fx::Tuner const *getTuner() const noexcept { return &tuner_; }
+  /// @brief TAPを取得する @return TAP
+  Tap *getTap() noexcept { return &tap_; }
+  /// @brief TAPを取得する @return TAP
+  Tap const *getTap() const noexcept { return &tap_; }
 };

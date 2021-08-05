@@ -91,19 +91,19 @@ void state::proc(Property &prop, msg::ACC_GYRO const *src) noexcept
 
 void state::tapProc(Property &prop) noexcept
 {
+  auto *tap = prop.getTap();
+  tap->notifyTapEvent();
+  uint32_t interval = tap->getTapInterval();
+  if (interval == 0)
+  {
+    return;
+  }
   for (size_t i = 0; i < MAX_EFFECTOR_COUNT; ++i)
   {
-    prop.getFx(i)->tap();
+    prop.getFx(i)->setTapInterval(interval);
   }
-  // TODO 暫定
-  uint32_t tick = osKernelSysTick();
-  uint32_t d = (tick - prop.lastTapTick) / 4;
-  if (0 < d && d < 1000)
-  {
-    msg::NEO_PIXEL_SPEED speed = {d};
-    msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_SPEED, &speed, sizeof(speed));
-  }
-  prop.lastTapTick = tick;
+  msg::NEO_PIXEL_SPEED speed = {interval};
+  msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_SPEED, &speed, sizeof(speed));
 }
 
 void state::re1Proc(Property &prop) noexcept
@@ -114,5 +114,9 @@ void state::re1Proc(Property &prop) noexcept
 
 void state::timerProc(Property &prop) noexcept
 {
-  // TODO
+  auto *tap = prop.getTap();
+  msg::LED_SIMPLE cmd{};
+  cmd.led = 1;
+  cmd.level = tap->getLedLevel();
+  msg::send(i2cTaskHandle, msg::LED_SIMPLE_REQ, &cmd, sizeof(cmd));
 }

@@ -27,11 +27,11 @@ class satoh::LevelMeter : public satoh::I2CDeviceBase
   /// move演算子削除
   LevelMeter &operator=(LevelMeter &&) = delete;
 
-  const bool ok_;   ///< デバイス状態
-  uint8_t left_;    ///< レベルメーター（左）
-  uint8_t right_;   ///< レベルメーター（右）
-  bool power_;      ///< Power LED
-  bool modulation_; ///< Modulation LED
+  const bool ok_; ///< デバイス状態
+  uint8_t left_;  ///< レベルメーター（左）
+  uint8_t right_; ///< レベルメーター（右）
+  bool power_;    ///< Power LED
+  bool tap_;      ///< Tap LED
 
   /// @brief デバイス初期化
   /// @retval true 通信成功
@@ -54,18 +54,18 @@ public:
   /// @note この関数を呼んだだけでは点灯状態は変化しない
   /// @param[in] level レベル（0 - 7）
   void setRight(uint8_t level) noexcept;
-  /// @brief Power LEDの点灯・消灯を設定する
+  /// @brief POWER LEDの点灯・消灯を設定する
   /// @note この関数を呼んだだけでは点灯状態は変化しない
   /// @param[in] level
   ///    @arg true 点灯
   ///    @arg false 消灯
-  void setPower(bool level) noexcept;
-  /// @brief Modulation LEDの点灯・消灯を設定する
+  void setPowerLed(bool level) noexcept;
+  /// @brief TAP LEDの点灯・消灯を設定する
   /// @note この関数を呼んだだけでは点灯状態は変化しない
   /// @param[in] level
   ///    @arg true 点灯
   ///    @arg false 消灯
-  void setModulation(bool level) noexcept;
+  void setTapLed(bool level) noexcept;
   /// @brief 設定をLEDに反映させる
   /// @retval true 通信成功
   /// @retval false 通信失敗 or 引数エラー
