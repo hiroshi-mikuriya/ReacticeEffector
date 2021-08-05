@@ -42,7 +42,7 @@ public:
   }
   /// @brief 幅を取得
   /// @return 幅
-  uint16_t getRange() const noexcept { return max_ - min_; }
+  uint16_t getRange() const noexcept { return min_ < max_ ? max_ - min_ : 0; }
 };
 /// @brief 振幅をレベルに変換する
 /// @param[in] v 振幅
