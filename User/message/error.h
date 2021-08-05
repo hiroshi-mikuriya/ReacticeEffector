@@ -52,7 +52,8 @@ constexpr ID UART_5 = 35 | cat::PERIPHERAL;    ///< UART_5エラー
 constexpr ID UART_6 = 36 | cat::PERIPHERAL;    ///< UART_6エラー
 constexpr ID UART_7 = 37 | cat::PERIPHERAL;    ///< UART_7エラー
 constexpr ID UART_8 = 38 | cat::PERIPHERAL;    ///< UART_8エラー
-constexpr ID SOUND_MEM = 1 | cat::TASK;        ///< SOUND TASKエラー
+constexpr ID SOUND_MEM = 1 | cat::TASK;        ///< SOUND TASK メモリエラー
+constexpr ID SOUND_DAC = 2 | cat::TASK;        ///< SOUND TASK DACエラー
 } // namespace error
 } // namespace msg
 } // namespace satoh

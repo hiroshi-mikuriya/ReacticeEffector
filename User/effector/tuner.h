@@ -7,6 +7,7 @@
 #pragma once
 
 #include "common/alloc.hpp"
+#include "common/dma_mem.h"
 #include "effector_base.h"
 #include "lib/lib_filter.hpp"
 
@@ -26,7 +27,7 @@ class satoh::fx::Tuner : public satoh::fx::EffectorBase
   uint16_t inDataCnt_;               ///< 入力音配列の添字カウント
   UniquePtr<uint32_t> bitStream_[2]; ///< ビットストリーム配列 2つ準備し交互に利用
   uint8_t arraySel_;                 ///< 2つの配列 入れ替え用
-  UniquePtr<uint32_t> corrArray_;    ///< correlation(相間) 配列
+  UniqueDmaPtr<uint32_t> corrArray_; ///< correlation(相間) 配列（メモリ節約のためDMAメモリを使用する）
   uint32_t maxCorr_;                 ///< correlation(相間) 最大値
   uint32_t minCorr_;                 ///< correlation(相間) 最小値
   uint16_t estimatedIndex_;          ///< 推定周期 サンプル数

@@ -7,16 +7,19 @@
 #include "sound_task.h"
 #include "common/alloc.hpp"
 #include "common/dma_mem.h"
+#include "effector/pop_noise_reductor.hpp"
 #include "main.h"
 #include "message/msglib.h"
 #include "user.h"
 
+namespace fx = satoh::fx;
 namespace msg = satoh::msg;
 
 namespace
 {
+/// DAC初期化完了イベント
 constexpr int32_t SIG_INITADC = 1 << 0;
-
+/// 音声信号を整数・浮動小数変換するための係数
 constexpr uint32_t DIV = 0x80000000;
 
 /// @brief float(-1.0f 〜 1.0f)に変換する
@@ -47,12 +50,13 @@ inline void toInt32(float const *left, float const *right, int32_t *dst, uint32_
 }
 /// @brief 音声処理
 /// @param[in] effector エフェクター
+/// @param[in] pop ポップノイズ除去
 /// @param[in] src 音声入力データ
 /// @param[out] dst 音声出力データ
 /// @param[in] left L音声計算用バッファ
 /// @param[in] right R音声計算用バッファ
 /// @param[in] size 音声データ数
-void soundProc(msg::SOUND_EFFECTOR &effector, int32_t const *src, int32_t *dst, float *left, float *right, uint32_t size)
+void soundProc(msg::SOUND_EFFECTOR &effector, fx::PopNoiseReductor &pop, int32_t const *src, int32_t *dst, float *left, float *right, uint32_t size)
 {
   LL_GPIO_SetOutputPin(TP13_GPIO_Port, TP13_Pin);
   toFloat(src, left, right, size);
@@ -63,7 +67,7 @@ void soundProc(msg::SOUND_EFFECTOR &effector, int32_t const *src, int32_t *dst, 
       fx->effect(left, right, size);
     }
   }
-  // TODO ポップノイズ対策
+  pop.reduct(left, right, size);
   toInt32(left, right, dst, size);
   LL_GPIO_ResetOutputPin(TP13_GPIO_Port, TP13_Pin);
 }
@@ -84,7 +88,13 @@ void initPCM3060(satoh::I2C *i2c)
 
 void soundTaskProc(void const *argument)
 {
-  osSignalWait(SIG_INITADC, osWaitForever);
+  osEvent ev = osSignalWait(SIG_INITADC, 500);
+  if (ev.status == osEventTimeout)
+  {
+    msg::ERROR cmd{msg::error::SOUND_DAC};
+    msg::send(appTaskHandle, msg::ERROR_NOTIFY, &cmd, sizeof(cmd));
+    return;
+  }
   if (msg::registerTask(4) != osOK)
   {
     return;
@@ -106,6 +116,7 @@ void soundTaskProc(void const *argument)
   HAL_SAI_Transmit_DMA(&hsai_BlockB1, reinterpret_cast<uint8_t *>(txbuf.get()), BLOCK_SIZE_4);
   HAL_SAI_Receive_DMA(&hsai_BlockA1, reinterpret_cast<uint8_t *>(rxbuf.get()), BLOCK_SIZE_4);
   msg::SOUND_EFFECTOR effector{};
+  fx::PopNoiseReductor pop(satoh::BLOCK_SIZE);
   for (;;)
   {
     auto res = msg::recv();
@@ -117,13 +128,14 @@ void soundTaskProc(void const *argument)
     switch (msg->type)
     {
     case msg::SOUND_DMA_HALF_NOTIFY:
-      soundProc(effector, rxbuf.get(), txbuf.get(), left.get(), right.get(), satoh::BLOCK_SIZE);
+      soundProc(effector, pop, rxbuf.get(), txbuf.get(), left.get(), right.get(), satoh::BLOCK_SIZE);
       break;
     case msg::SOUND_DMA_CPLT_NOTIFY:
-      soundProc(effector, rxbuf.get() + BLOCK_SIZE_2, txbuf.get() + BLOCK_SIZE_2, left.get(), right.get(), satoh::BLOCK_SIZE);
+      soundProc(effector, pop, rxbuf.get() + BLOCK_SIZE_2, txbuf.get() + BLOCK_SIZE_2, left.get(), right.get(), satoh::BLOCK_SIZE);
       break;
     case msg::SOUND_CHANGE_EFFECTOR_REQ:
       effector = *reinterpret_cast<msg::SOUND_EFFECTOR const *>(msg->bytes);
+      pop.init();
       break;
     }
   }
