@@ -74,3 +74,23 @@ void appTimIRQ(void)
 {
   msg::send(appTaskHandle, msg::APP_TIM_NOTIFY);
 }
+
+void spiSramTxEndIRQ(void)
+{
+  // TODO
+}
+
+void spiSramTxErrorIRQ(void)
+{
+  // TODO
+}
+
+void spiSramRxEndIRQ(void)
+{
+  // TODO
+}
+
+void spiSramRxErrorIRQ(void)
+{
+  // TODO
+}

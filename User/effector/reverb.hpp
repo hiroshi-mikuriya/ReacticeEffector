@@ -37,7 +37,7 @@ class satoh::fx::Reverb : public satoh::fx::EffectorBase
 
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
   mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
-  typedef delayBuf<int8_t> Buffer;
+  typedef delayBuf<int16_t> Buffer;
   Buffer del[10];
   lpf lpfIn;
   lpf lpfFB[4];

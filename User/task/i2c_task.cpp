@@ -82,7 +82,7 @@ void ledSimpleProc(satoh::LevelMeter &level, msg::Message const *msg) noexcept
     {
       level.setTapLed(param->level);
     }
-    level.show();
+    // level.show(); レベルメーター更新でこちらも更新されるのでここでは更新しない
   }
 }
 /// @brief エフェクトLED更新処理（LED指定）

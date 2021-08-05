@@ -103,8 +103,8 @@ void soundTaskProc(void const *argument)
   constexpr uint32_t BLOCK_SIZE_4 = satoh::BLOCK_SIZE * 4;
   auto rxbuf = satoh::makeDmaMem<int32_t>(BLOCK_SIZE_4);    // 音声信号受信バッファ配列 Lch前半 Lch後半 Rch前半 Rch後半
   auto txbuf = satoh::makeDmaMem<int32_t>(BLOCK_SIZE_4);    // 音声信号送信バッファ配列
-  auto left = satoh::makeDmaMem<float>(satoh::BLOCK_SIZE);  // RAM節約のやめDMAメモリを使う
-  auto right = satoh::makeDmaMem<float>(satoh::BLOCK_SIZE); // RAM節約のやめDMAメモリを使う
+  auto left = satoh::makeDmaMem<float>(satoh::BLOCK_SIZE);  // RAM節約のためDMAメモリを使う
+  auto right = satoh::makeDmaMem<float>(satoh::BLOCK_SIZE); // RAM節約のためDMAメモリを使う
   if (!rxbuf || !txbuf || !left || !right)
   {
     msg::ERROR e{msg::error::SOUND_MEM};

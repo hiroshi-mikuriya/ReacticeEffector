@@ -23,6 +23,18 @@ extern "C"
   /// @brief APP TIM割り込み
   void appTimIRQ(void);
 
+  /// @brief SPI SRAM送信完了割り込み
+  void spiSramTxEndIRQ(void);
+
+  /// @brief SPI SRAM送信エラー割り込み
+  void spiSramTxErrorIRQ(void);
+
+  /// @brief SPI SRAM受信完了割り込み
+  void spiSramRxEndIRQ(void);
+
+  /// @brief SPI SRAM受信エラー割り込み
+  void spiSramRxErrorIRQ(void);
+
 #ifdef __cplusplus
 }
 #endif

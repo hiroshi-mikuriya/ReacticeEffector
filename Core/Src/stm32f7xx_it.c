@@ -195,7 +195,7 @@ void DMA1_Stream3_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TC3(DMA1))
   {
     LL_DMA_ClearFlag_TC3(DMA1);
-    // TODO SPI2 RX
+    spiSramRxEndIRQ();
   }
   /* USER CODE END DMA1_Stream3_IRQn 0 */
 
@@ -203,7 +203,7 @@ void DMA1_Stream3_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TE3(DMA1))
   {
     LL_DMA_ClearFlag_TE3(DMA1);
-    // TODO SPI2 RX
+    spiSramRxErrorIRQ();
   }
   /* USER CODE END DMA1_Stream3_IRQn 1 */
 }
@@ -217,7 +217,7 @@ void DMA1_Stream4_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TC4(DMA1))
   {
     LL_DMA_ClearFlag_TC4(DMA1);
-    // TODO SPI2 TX
+    spiSramTxEndIRQ();
   }
   /* USER CODE END DMA1_Stream4_IRQn 0 */
 
@@ -225,7 +225,7 @@ void DMA1_Stream4_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TE4(DMA1))
   {
     LL_DMA_ClearFlag_TE4(DMA1);
-    // TODO SPI2 TX
+    spiSramTxErrorIRQ();
   }
   /* USER CODE END DMA1_Stream4_IRQn 1 */
 }
