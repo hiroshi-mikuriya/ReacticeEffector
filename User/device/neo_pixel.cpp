@@ -37,7 +37,7 @@ inline uint32_t getBufferIndex(uint32_t ledNum) noexcept
 satoh::NeoPixel::NeoPixel(SpiMaster *spi, uint32_t ledCount) noexcept //
     : spi_(spi),                                                      //
       ledCount_(ledCount),                                            //
-      buf_(allocArray<uint8_t>(getBufferIndex(ledCount_)))            //
+      buf_(makeDmaMem<uint8_t>(getBufferIndex(ledCount_)))            //
 {
   clear();
 }

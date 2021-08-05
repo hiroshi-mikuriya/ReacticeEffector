@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "common/alloc.hpp"
+#include "common/dma_mem.h"
 #include "common/rgb.h"
 #include "peripheral/spi_master.h"
 
@@ -18,9 +18,9 @@ class NeoPixel;
 /// @brief Neo Pixel 制御クラス
 class satoh::NeoPixel
 {
-  SpiMaster *spi_;          ///< SPI通信クラス
-  const uint32_t ledCount_; ///< LED数
-  UniquePtr<uint8_t> buf_;  ///< 送信バッファ
+  SpiMaster *spi_;            ///< SPI通信クラス
+  const uint32_t ledCount_;   ///< LED数
+  UniqueDmaPtr<uint8_t> buf_; ///< 送信バッファ
 
 public:
   /// @brief コンストラクタ
