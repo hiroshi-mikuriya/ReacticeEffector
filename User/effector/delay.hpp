@@ -34,7 +34,7 @@ class satoh::fx::Delay : public satoh::fx::EffectorBase
 
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
   mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
-  delayBuf<int8_t> del1_;
+  delayBuf<int16_t> del1_;
   lpf2nd lpf2ndTone_;
   float fback_;
   float elevel_;
