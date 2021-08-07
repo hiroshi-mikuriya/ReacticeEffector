@@ -26,7 +26,7 @@ namespace state = satoh::state;
 
 // state::Effectors
 
-state::Effectors::Effectors(uint8_t n) : count_(0)
+state::Effectors::Effectors(uint8_t n, SpiMaster *spi) : count_(0)
 {
   addList<fx::Bypass>(true);
   addList<fx::Booster>(true);
@@ -179,15 +179,15 @@ void state::Property::loadPatch() noexcept
   }
 }
 
-state::Property::Property(PatchTable *patch) //
-    : bankNum_(0),                           //
-      patchNum_(0),                          //
-      effectors_({Effectors(0),              //
-                  Effectors(1),              //
-                  Effectors(2)}),            //
-      patches_(patch),                       //
-      editSelectedFxNum_(0),                 //
-      error_(msg::error::NONE)               //
+state::Property::Property(PatchTable *patch, SpiMaster *spi) //
+    : bankNum_(0),                                           //
+      patchNum_(0),                                          //
+      effectors_({Effectors(0, spi),                         //
+                  Effectors(1, spi),                         //
+                  Effectors(2, spi)}),                       //
+      patches_(patch),                                       //
+      editSelectedFxNum_(0),                                 //
+      error_(msg::error::NONE)                               //
 {
   if (patch->calcCrc() != patch->crc_)
   {

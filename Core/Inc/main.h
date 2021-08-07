@@ -90,6 +90,8 @@ void Error_Handler(void);
 #define SPI4_NSS_Pin LL_GPIO_PIN_11
 #define SPI4_NSS_GPIO_Port GPIOE
 #define SPI4_NSS_EXTI_IRQn EXTI15_10_IRQn
+#define SPI2_NSS_Pin LL_GPIO_PIN_12
+#define SPI2_NSS_GPIO_Port GPIOB
 #define LED_ACT_Pin LL_GPIO_PIN_7
 #define LED_ACT_GPIO_Port GPIOC
 #define PCM_RST_Pin LL_GPIO_PIN_0

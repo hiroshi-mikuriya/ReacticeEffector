@@ -24,7 +24,7 @@ void neoPixelTaskProc(void const *argument)
     return;
   }
   constexpr uint32_t LED_COUNT = 100;
-  s_spi = new satoh::SpiMaster(neoPixelTaskHandle, SPI3, DMA1, LL_DMA_STREAM_5, LED_COUNT * 3 * 8);
+  s_spi = new satoh::SpiMaster(neoPixelTaskHandle, SPI3, DMA1, LL_DMA_STREAM_5);
   satoh::NeoPixel np(s_spi, LED_COUNT);
   msg::NEO_PIXEL_PATTERN ptn{};
   msg::NEO_PIXEL_SPEED speed = {100};

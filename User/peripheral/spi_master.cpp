@@ -6,6 +6,7 @@
 
 #include "spi_master.h"
 #include "stm32f7xx_ll_dma.h"
+#include "stm32f7xx_ll_gpio.h"
 #include "stm32f7xx_ll_spi.h"
 #include <string.h> // memset
 
@@ -39,6 +40,30 @@ void setDmaTransferSize(DMA_TypeDef *dma, uint32_t stream, uint32_t size)
     break;
   }
 }
+/// @brief NSSレベルをコンストラクタ・デストラクタで変更する
+class NSS
+{
+  GPIO_TypeDef *gpio_; ///< GPIO
+  uint32_t pin_;       ///< ピン
+
+public:
+  /// @brief コンストラクタ @param[in] gpio GPIO @param[in] pin ピン
+  explicit NSS(GPIO_TypeDef *gpio, uint32_t pin) : gpio_(gpio), pin_(pin)
+  {
+    if (gpio_)
+    {
+      LL_GPIO_ResetOutputPin(gpio_, pin_);
+    }
+  }
+  /// @brief デストラクタ
+  virtual ~NSS()
+  {
+    if (gpio_)
+    {
+      LL_GPIO_SetOutputPin(gpio_, pin_);
+    }
+  }
+};
 } // namespace
 
 satoh::SpiMaster::SpiMaster()
@@ -47,45 +72,54 @@ satoh::SpiMaster::SpiMaster()
       spi_(0),          //
       dma_(0),          //
       txStream_(0),     //
-      rxStream_(0)      //
+      rxStream_(0),     //
+      nssGpio_(0),      //
+      nssPin_(0)        //
 {
 }
 
-satoh::SpiMaster::SpiMaster(osThreadId threadId,          //
-                            SPI_TypeDef *spi,             //
-                            DMA_TypeDef *dma,             //
-                            uint32_t txStream,            //
-                            uint32_t bufferSize) noexcept //
-    : threadId_(threadId),                                //
-      sendOnly_(true),                                    //
-      spi_(spi),                                          //
-      dma_(dma),                                          //
-      txStream_(txStream),                                //
-      rxStream_(0)                                        //
+satoh::SpiMaster::SpiMaster(osThreadId threadId,        //
+                            SPI_TypeDef *spi,           //
+                            DMA_TypeDef *dma,           //
+                            uint32_t txStream) noexcept //
+    : threadId_(threadId),                              //
+      sendOnly_(true),                                  //
+      spi_(spi),                                        //
+      dma_(dma),                                        //
+      txStream_(txStream),                              //
+      rxStream_(0),                                     //
+      nssGpio_(0),                                      //
+      nssPin_(0)                                        //
 {
   LL_SPI_Enable(spi_);
   LL_DMA_EnableIT_TC(dma_, txStream_);
   LL_DMA_EnableIT_TE(dma_, txStream_);
   LL_SPI_EnableDMAReq_TX(spi_);
 }
-satoh::SpiMaster::SpiMaster(osThreadId threadId,          //
-                            SPI_TypeDef *spi,             //
-                            DMA_TypeDef *dma,             //
-                            uint32_t txStream,            //
-                            uint32_t rxStream,            //
-                            uint32_t bufferSize) noexcept //
-    : threadId_(threadId),                                //
-      sendOnly_(false),                                   //
-      spi_(spi),                                          //
-      dma_(dma),                                          //
-      txStream_(txStream),                                //
-      rxStream_(rxStream)                                 //
+satoh::SpiMaster::SpiMaster(osThreadId threadId,      //
+                            SPI_TypeDef *spi,         //
+                            DMA_TypeDef *dma,         //
+                            uint32_t txStream,        //
+                            uint32_t rxStream,        //
+                            GPIO_TypeDef *nssGpio,    //
+                            uint32_t nssPin) noexcept //
+    : threadId_(threadId),                            //
+      sendOnly_(false),                               //
+      spi_(spi),                                      //
+      dma_(dma),                                      //
+      txStream_(txStream),                            //
+      rxStream_(rxStream),                            //
+      nssGpio_(nssGpio),                              //
+      nssPin_(nssPin)                                 //
 {
   LL_SPI_Enable(spi_);
+  LL_DMA_EnableIT_TC(dma_, txStream_);
+  LL_DMA_EnableIT_TE(dma_, txStream_);
   LL_DMA_EnableIT_TC(dma_, rxStream_);
   LL_DMA_EnableIT_TE(dma_, rxStream_);
   LL_SPI_EnableDMAReq_TX(spi_);
   LL_SPI_EnableDMAReq_RX(spi_);
+  NSS(nssGpio_, nssPin_);
 }
 satoh::SpiMaster::SpiMaster(SpiMaster &&that) //
     : threadId_(that.threadId_),              //
@@ -93,7 +127,9 @@ satoh::SpiMaster::SpiMaster(SpiMaster &&that) //
       spi_(that.spi_),                        //
       dma_(that.dma_),                        //
       txStream_(that.txStream_),              //
-      rxStream_(that.rxStream_)               //
+      rxStream_(that.rxStream_),              //
+      nssGpio_(that.nssGpio_),                //
+      nssPin_(that.nssPin_)                   //
 {
   that.spi_ = 0;
   that.dma_ = 0;
@@ -110,6 +146,8 @@ satoh::SpiMaster &satoh::SpiMaster::operator=(SpiMaster &&that)
     dma_ = that.dma_;
     txStream_ = that.txStream_;
     rxStream_ = that.rxStream_;
+    nssGpio_ = that.nssGpio_;
+    nssPin_ = that.nssPin_;
     that.spi_ = 0;
     that.dma_ = 0;
     that.~SpiMaster();
@@ -125,8 +163,10 @@ satoh::SpiMaster::~SpiMaster()
   {
     LL_DMA_DisableIT_TC(dma_, rxStream_);
     LL_DMA_DisableIT_TE(dma_, rxStream_);
+    LL_DMA_DisableStream(dma_, rxStream_);
     LL_DMA_DisableIT_TC(dma_, txStream_);
     LL_DMA_DisableIT_TE(dma_, txStream_);
+    LL_DMA_DisableStream(dma_, txStream_);
     dma_ = 0;
   }
   rxStream_ = 0;
@@ -138,8 +178,32 @@ satoh::SpiMaster::~SpiMaster()
     LL_SPI_Disable(spi_);
     spi_ = 0;
   }
+  nssGpio_ = 0;
+  nssPin_ = 0;
 }
-satoh::SpiMaster::Result satoh::SpiMaster::send(uint8_t const *bytes, uint32_t size, uint32_t millisec) noexcept
+
+/// @brief DMAを使って通信する
+/// @param[in] dma DMA
+/// @param[in] stream DMAストリーム
+/// @param[in] sigend 通信成功シグナル
+/// @param[in] sigerr 通信失敗シグナル
+/// @param[in] tm 通信タイムアウト（ミリ秒）
+#define TRANSFER(dma, stream, sigend, sigerr, tm)           \
+  do                                                        \
+  {                                                         \
+    LL_DMA_EnableStream((dma), (stream));                   \
+    osEvent ev = osSignalWait((sigend) | (sigerr), (tm));   \
+    if (ev.status == osEventTimeout)                        \
+    {                                                       \
+      return TIMEOUT;                                       \
+    }                                                       \
+    if (ev.status != osOK || (ev.value.signals & (sigerr))) \
+    {                                                       \
+      return ERROR;                                         \
+    }                                                       \
+  } while (0)
+
+satoh::SpiMaster::Result satoh::SpiMaster::send(uint8_t const *bytes, uint32_t size, uint32_t millisec) const noexcept
 {
   if (!spi_)
   {
@@ -156,20 +220,12 @@ satoh::SpiMaster::Result satoh::SpiMaster::send(uint8_t const *bytes, uint32_t s
                          LL_DMA_DIRECTION_MEMORY_TO_PERIPH  //
   );
   clearSignals();
-  LL_DMA_EnableStream(dma_, txStream_);
-  osEvent ev = osSignalWait(satoh::SPI_MASTER_CLS_SIG_MASK, millisec);
-  if (ev.status == osEventTimeout)
-  {
-    return TIMEOUT;
-  }
-  if (ev.status != osOK || (ev.value.signals & SIG_DMATXERR))
-  {
-    return ERROR;
-  }
+  NSS nss(nssGpio_, nssPin_);
+  TRANSFER(dma_, txStream_, SIG_DMATXEND, SIG_DMATXERR, millisec);
   return OK;
 }
 
-satoh::SpiMaster::Result satoh::SpiMaster::sendRecv(uint8_t const *tx, uint8_t *rx, uint32_t size, uint32_t millisec) noexcept
+satoh::SpiMaster::Result satoh::SpiMaster::sendRecv(uint8_t const *tbytes, uint8_t *rbytes, uint32_t size, uint32_t millisec) const noexcept
 {
   if (!spi_)
   {
@@ -181,28 +237,20 @@ satoh::SpiMaster::Result satoh::SpiMaster::sendRecv(uint8_t const *tx, uint8_t *
   }
   setDmaTransferSize(dma_, txStream_, size);
   setDmaTransferSize(dma_, rxStream_, size);
-  LL_DMA_ConfigAddresses(dma_, txStream_,                  //
-                         reinterpret_cast<uint32_t>(tx),   //
-                         LL_SPI_DMA_GetRegAddr(spi_),      //
-                         LL_DMA_DIRECTION_MEMORY_TO_PERIPH //
+  LL_DMA_ConfigAddresses(dma_, txStream_,                    //
+                         reinterpret_cast<uint32_t>(tbytes), //
+                         LL_SPI_DMA_GetRegAddr(spi_),        //
+                         LL_DMA_DIRECTION_MEMORY_TO_PERIPH   //
   );
-  LL_DMA_ConfigAddresses(dma_, rxStream_,                  //
-                         LL_SPI_DMA_GetRegAddr(spi_),      //
-                         reinterpret_cast<uint32_t>(rx),   //
-                         LL_DMA_DIRECTION_PERIPH_TO_MEMORY //
+  LL_DMA_ConfigAddresses(dma_, rxStream_,                    //
+                         LL_SPI_DMA_GetRegAddr(spi_),        //
+                         reinterpret_cast<uint32_t>(rbytes), //
+                         LL_DMA_DIRECTION_PERIPH_TO_MEMORY   //
   );
   clearSignals();
+  NSS nss(nssGpio_, nssPin_);
   LL_DMA_EnableStream(dma_, rxStream_);
-  LL_DMA_EnableStream(dma_, txStream_);
-  osEvent ev = osSignalWait(satoh::SPI_MASTER_CLS_SIG_MASK, millisec);
-  if (ev.status == osEventTimeout)
-  {
-    return TIMEOUT;
-  }
-  if (ev.status != osOK || (ev.value.signals & SIG_DMATXERR))
-  {
-    return ERROR;
-  }
+  TRANSFER(dma_, txStream_, SIG_DMATXEND, SIG_DMATXERR, millisec);
   return OK;
 }
 

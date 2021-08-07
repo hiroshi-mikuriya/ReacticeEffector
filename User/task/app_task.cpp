@@ -6,20 +6,22 @@
 
 #include "task/app_task.h"
 #include "common/alloc.hpp"
+#include "main.h"
+#include "sound_task.h"
 #include "state/effect_edit.h"
 #include "state/error.h"
 #include "state/factory_reset.h"
 #include "state/patch_edit.h"
 #include "state/playing.h"
 #include "state/tuner.h"
-#include "stm32f7xx_ll_bus.h"
-#include "stm32f7xx_ll_pwr.h"
 
 namespace state = satoh::state;
 namespace msg = satoh::msg;
 
 namespace
 {
+/// SPI SRAMと通信するオブジェクト
+satoh::SpiMaster *s_spi = 0;
 /// @brief バックアップ機能初期化
 void initBackup()
 {
@@ -36,13 +38,14 @@ void initBackup()
 
 void appTaskProc(void const *argument)
 {
+  s_spi = new satoh::SpiMaster(soundTaskHandle, SPI2, DMA1, LL_DMA_STREAM_4, LL_DMA_STREAM_3, SPI2_NSS_GPIO_Port, SPI2_NSS_Pin);
   if (msg::registerTask(4) != osOK)
   {
     return;
   }
   initBackup();
   auto *patch = reinterpret_cast<state::PatchTable *>(BKPSRAM_BASE);
-  satoh::UniquePtr<state::Property> prop(satoh::alloc<state::Property>(patch));
+  satoh::UniquePtr<state::Property> prop(satoh::alloc<state::Property>(patch, s_spi));
   state::PatchEdit stPE(*prop);
   state::EffectEdit stEE(*prop);
   state::Playing stPL(*prop);
@@ -77,20 +80,20 @@ void appTimIRQ(void)
 
 void spiSramTxEndIRQ(void)
 {
-  // TODO
+  s_spi->notifyTxEndIRQ();
 }
 
 void spiSramTxErrorIRQ(void)
 {
-  // TODO
+  s_spi->notifyTxErrorIRQ();
 }
 
 void spiSramRxEndIRQ(void)
 {
-  // TODO
+  s_spi->notifyRxEndIRQ();
 }
 
 void spiSramRxErrorIRQ(void)
 {
-  // TODO
+  s_spi->notifyRxErrorIRQ();
 }

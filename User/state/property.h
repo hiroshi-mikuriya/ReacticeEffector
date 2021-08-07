@@ -11,6 +11,7 @@
 #include "effector/effector_base.h"
 #include "effector/tuner.h"
 #include "message/error.h"
+#include "peripheral/spi_master.h"
 #include <memory>
 
 namespace satoh
@@ -58,7 +59,8 @@ class satoh::state::Effectors
 public:
   /// @brief コンストラクタ
   /// @param[in] n FX番号（0, 1, 2）
-  explicit Effectors(uint8_t n) noexcept;
+  /// @param[in] spi SPI SRAM通信オブジェクト
+  explicit Effectors(uint8_t n, SpiMaster *spi) noexcept;
   /// @brief エフェクター取得
   /// @param[in] i インデックス
   /// @return エフェクター
@@ -184,8 +186,9 @@ class satoh::state::Property
 
 public:
   /// @brief コンストラクタ
-  /// @param[in] パッチテーブル
-  explicit Property(PatchTable *patch);
+  /// @param[in] patch パッチテーブル
+  /// @param[in] spi SPI SRAM通信オブジェクト
+  explicit Property(PatchTable *patch, SpiMaster *spi);
   /// @brief エフェクター番号を指定して取得
   /// @param[in] n 0, 1, 2
   /// @return エフェクター
