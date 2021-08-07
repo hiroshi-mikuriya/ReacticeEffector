@@ -32,9 +32,9 @@ class satoh::fx::Oscillator : public satoh::fx::EffectorBase
 
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
   mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
-  sawWave saw;
-  sineWave sin;
-  triangleWave tri;
+  SawWave saw;
+  SinWave sin;
+  TriangleWave tri;
   float level_;
   int type_;
 

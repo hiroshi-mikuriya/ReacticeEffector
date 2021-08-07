@@ -32,7 +32,7 @@ class satoh::fx::Phaser : public satoh::fx::EffectorBase
 
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
   mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
-  triangleWave tri;
+  TriangleWave tri;
   apf apfx[12];
   float level_; ///< レベル
   float stage_; ///< ステージ

@@ -37,7 +37,7 @@ class satoh::fx::Chorus : public satoh::fx::EffectorBase
 
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
   mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
-  sineWave sin1;
+  SinWave sin1;
   delayBuf<float> del1_;
   hpf hpf1;
   lpf2nd lpf2nd1;

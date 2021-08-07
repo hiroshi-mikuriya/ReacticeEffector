@@ -36,7 +36,7 @@ class satoh::fx::Tremolo : public satoh::fx::EffectorBase
   float level_;                ///< レベル
   float wave_;                 ///< 波形
   float depth_;                ///< 深さ
-  triangleWave tri;            ///< 周期
+  TriangleWave tri;            ///< 周期
 
   /// @brief UI表示のパラメータを、エフェクト処理で使用する値へ変換する
   /// @param[in] n 変換対象のパラメータ番号

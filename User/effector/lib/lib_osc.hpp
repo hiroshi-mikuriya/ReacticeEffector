@@ -3,80 +3,68 @@
 #include "constant.h"
 #include "lib_calc.hpp"
 
-// のこぎり波
-class sawWave
+namespace satoh
 {
-private:
-  float y1 = 0.0f, freq = 0.1f; // 前回出力値、周波数
+class SawWave;
+class SinWave;
+class TriangleWave;
+} // namespace satoh
+
+/// @brief のこぎり波
+class satoh::SawWave
+{
+  float phase_ = 0.0f; ///< 位相
+  float freq_ = 0.1f;  ///< 周波数
 
 public:
-  void set(float f) // 周波数設定
+  /// @brief 周波数設定 @param[in] freq 周波数
+  void set(float freq) noexcept { freq_ = freq; }
+  /// @brief 周波数、位相（0～1）設定 @param[in] freq 周波数 @param[in] phase 位相
+  void set(float freq, float phase) noexcept
   {
-    freq = f;
+    freq_ = freq;
+    phase_ = phase;
   }
-
-  void set(float f, float phase) // 周波数、位相（0～1）設定
+  /// @brief のこぎり波出力 0～1 @return 音声波形
+  float output() noexcept
   {
-    freq = f;
-    y1 = phase;
-  }
-
-  float output() // のこぎり波出力 0～1
-  {
-    float y = y1 + freq / satoh::SAMPLING_FREQ;
-    if (y > 1)
-      y = y - 1.0f;
-    y1 = y; // 前回出力値を記録
-    return y;
+    float ph = phase_ + freq_ / satoh::SAMPLING_FREQ;
+    if (1 < ph)
+    {
+      ph -= 1;
+    }
+    return phase_ = ph; // 次回計算のために出力値を保存
   }
 };
 
-// 正弦波
-class sineWave
+/// @brief 正弦波
+class satoh::SinWave
 {
-private:
-  sawWave saw;
+  SawWave saw;
 
 public:
-  void set(float f) // 周波数設定
-  {
-    saw.set(f);
-  }
-
-  void set(float f, float phase) // 周波数、位相（0～1）設定
-  {
-    saw.set(f, phase);
-  }
-
-  float output() // 正弦波出力 -1～1
-  {
-    return sinf(2.0f * satoh::PI * saw.output());
-  }
+  /// @brief 周波数設定 @param[in] freq 周波数
+  void set(float freq) noexcept { saw.set(freq); }
+  /// @brief 周波数、位相（0～1）設定 @param[in] freq 周波数 @param[in] phase 位相
+  void set(float freq, float phase) noexcept { saw.set(freq, phase); }
+  /// @brief 正弦波出力 -1～1 @return 音声波形
+  float output() noexcept { return std::sin(2 * satoh::PI * saw.output()); }
 };
 
-// 三角波
-class triangleWave
+/// @brief 三角波
+class satoh::TriangleWave
 {
-private:
-  sawWave saw;
+  SawWave saw;
 
 public:
-  void set(float f) // 周波数設定
-  {
-    saw.set(f);
-  }
-
-  void set(float f, float phase) // 周波数、位相（0～1）設定
-  {
-    saw.set(f, phase);
-  }
-
-  float output() // 三角波出力 0～1
+  /// @brief 周波数設定 @param[in] freq 周波数
+  void set(float freq) noexcept { saw.set(freq); }
+  /// @brief 周波数、位相（0～1）設定 @param[in] freq 周波数 @param[in] phase 位相
+  void set(float freq, float phase) noexcept { saw.set(freq, phase); }
+  /// @brief 三角波出力 0～1 @return 音声波形
+  float output() noexcept
   {
     float y = 2.0f * saw.output();
-    if (y < 1.0f)
-      return y;
-    else
-      return 2.0f - y;
+    return y < 1.0f ? y : 2.0f - y;
   }
 };
