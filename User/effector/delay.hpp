@@ -7,9 +7,7 @@
 #pragma once
 
 #include "effector_base.h"
-#include "lib/lib_calc.hpp"
 #include "lib/lib_delay.hpp"
-#include "lib/lib_filter.hpp"
 #include <cstdio> // sprintf
 
 namespace satoh

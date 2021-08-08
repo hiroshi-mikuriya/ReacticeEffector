@@ -91,7 +91,7 @@ public:
   /// @retval TIMEOUT タイムアウト
   /// @retval NACK    NACK
   /// @retval ERROR   エラー
-  Result write(uint8_t slaveAddr, uint8_t const *bytes, uint32_t size, bool withSleep) const noexcept;
+  Result write(uint8_t slaveAddr, void const *bytes, uint32_t size, bool withSleep) const noexcept;
   /// @brief データを読み込む
   /// @param[in] slaveAddr スレーブアドレス
   /// @param[in] buf 読み込んだデータを格納するバッファ
@@ -102,5 +102,5 @@ public:
   /// @retval TIMEOUT タイムアウト
   /// @retval NACK    NACK
   /// @retval ERROR   エラー
-  Result read(uint8_t slaveAddr, uint8_t *buffer, uint32_t size, bool withSleep) const noexcept;
+  Result read(uint8_t slaveAddr, void *buffer, uint32_t size, bool withSleep) const noexcept;
 };

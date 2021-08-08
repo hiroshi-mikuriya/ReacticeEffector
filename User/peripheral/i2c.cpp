@@ -268,7 +268,7 @@ void satoh::I2C::notifyTxErrorIRQ() noexcept
     }                                              \
   } while (0)
 
-satoh::I2C::Result satoh::I2C::write(uint8_t slaveAddr, uint8_t const *bytes, uint32_t size, bool withSleep) const noexcept
+satoh::I2C::Result satoh::I2C::write(uint8_t slaveAddr, void const *bytes, uint32_t size, bool withSleep) const noexcept
 {
   std::lock_guard<Mutex> lock(mutex_);
   if (!i2cx_)
@@ -302,7 +302,7 @@ satoh::I2C::Result satoh::I2C::write(uint8_t slaveAddr, uint8_t const *bytes, ui
   return Result::OK;
 }
 
-satoh::I2C::Result satoh::I2C::read(uint8_t slaveAddr, uint8_t *buffer, uint32_t size, bool withSleep) const noexcept
+satoh::I2C::Result satoh::I2C::read(uint8_t slaveAddr, void *buffer, uint32_t size, bool withSleep) const noexcept
 {
   std::lock_guard<Mutex> lock(mutex_);
   if (!i2cx_)

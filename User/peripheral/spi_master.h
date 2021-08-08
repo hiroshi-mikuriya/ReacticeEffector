@@ -77,7 +77,7 @@ public:
   /// @retval BUSY    ビジー
   /// @retval TIMEOUT タイムアウト
   /// @retval ERROR   エラー
-  Result send(uint8_t const *bytes, uint32_t size, uint32_t millisec = osWaitForever) const noexcept;
+  Result send(void const *bytes, uint32_t size, uint32_t millisec = osWaitForever) const noexcept;
   /// @brief 送受信処理
   /// @param[in] tbytes 送信データの先頭ポインタ
   /// @param[in] rbytes 受信データの先頭ポインタ
@@ -87,7 +87,7 @@ public:
   /// @retval BUSY    ビジー
   /// @retval TIMEOUT タイムアウト
   /// @retval ERROR   エラー
-  Result sendRecv(uint8_t const *tbytes, uint8_t *rbytes, uint32_t size, uint32_t millisec = osWaitForever) const noexcept;
+  Result sendRecv(void const *tbytes, void *rbytes, uint32_t size, uint32_t millisec = osWaitForever) const noexcept;
   /// @brief 送信完了割り込みが発生したら呼び出す関数
   void notifyTxEndIRQ() noexcept;
   /// @brief 送信エラー割り込みが発生したら呼び出す関数

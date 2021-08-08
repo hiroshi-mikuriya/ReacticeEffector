@@ -194,7 +194,7 @@ inline float bqAlphaBW(float fc, float bw) // 不使用
 
 inline float bqA(float gain)
 {
-  return sqrtf(dbToGain(gain));
+  return sqrtf(satoh::dbToGain(gain));
 }
 
 inline float bqBeta(float gain, float q)

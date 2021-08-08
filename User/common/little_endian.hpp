@@ -17,42 +17,42 @@ namespace impl
 /// @param[in] src コピー元
 /// @param[out] dst コピー先
 template <uint32_t N>
-void copy(uint8_t const *src, uint8_t *dst);
+void copy(void const *src, void *dst);
 /// @brief 2バイトコピー
 /// @param[in] src コピー元
 /// @param[out] dst コピー先
 template <>
-inline void copy<2>(uint8_t const *src, uint8_t *dst)
+inline void copy<2>(void const *src, void *dst)
 {
-  dst[0] = src[0];
-  dst[1] = src[1];
+  static_cast<uint8_t *>(dst)[0] = static_cast<uint8_t const *>(src)[0];
+  static_cast<uint8_t *>(dst)[1] = static_cast<uint8_t const *>(src)[1];
 }
 /// @brief 4バイトコピー
 /// @param[in] src コピー元
 /// @param[out] dst コピー先
 template <>
-inline void copy<4>(uint8_t const *src, uint8_t *dst)
+inline void copy<4>(void const *src, void *dst)
 {
-  copy<2>(&src[0], &dst[0]);
-  copy<2>(&src[2], &dst[2]);
+  copy<2>(&static_cast<uint8_t const *>(src)[0], &static_cast<uint8_t *>(dst)[0]);
+  copy<2>(&static_cast<uint8_t const *>(src)[2], &static_cast<uint8_t *>(dst)[2]);
 }
 /// @brief 8バイトコピー
 /// @param[in] src コピー元
 /// @param[out] dst コピー先
 template <>
-inline void copy<8>(uint8_t const *src, uint8_t *dst)
+inline void copy<8>(void const *src, void *dst)
 {
-  copy<4>(&src[0], &dst[0]);
-  copy<4>(&src[4], &dst[4]);
+  copy<4>(&static_cast<uint8_t const *>(src)[0], &static_cast<uint8_t *>(dst)[0]);
+  copy<4>(&static_cast<uint8_t const *>(src)[4], &static_cast<uint8_t *>(dst)[4]);
 }
 /// @brief 16バイトコピー
 /// @param[in] src コピー元
 /// @param[out] dst コピー先
 template <>
-inline void copy<16>(uint8_t const *src, uint8_t *dst)
+inline void copy<16>(void const *src, void *dst)
 {
-  copy<8>(&src[0], &dst[0]);
-  copy<8>(&src[8], &dst[8]);
+  copy<8>(&static_cast<uint8_t const *>(src)[0], &static_cast<uint8_t *>(dst)[0]);
+  copy<8>(&static_cast<uint8_t const *>(src)[8], &static_cast<uint8_t *>(dst)[8]);
 }
 /// @tparam T 読み書きする型
 template <typename T>
@@ -69,7 +69,7 @@ public:
   /// @brief バイト列から値を読み出す
   /// @param[in] bytes バイト列
   /// @return 値
-  static T get(uint8_t const *bytes)
+  static T get(void const *bytes)
   {
     U u;
     copy<sizeof(u)>(bytes, u.a);
@@ -78,7 +78,7 @@ public:
   /// @brief バッファへ値を書き込む
   /// @param[in] buffer バッファ
   /// @param[in] v 値
-  static void set(uint8_t *buffer, T v)
+  static void set(void *buffer, T v)
   {
     U u;
     u.v = v;
@@ -95,24 +95,24 @@ template <>
 class LE<bool>
 {
 public:
-  static bool get(uint8_t const *src) { return !!src[0]; }
-  static void set(uint8_t *dst, bool src) { dst[0] = src ? 1 : 0; }
+  static bool get(void const *src) { return !!static_cast<uint8_t const *>(src)[0]; }
+  static void set(void *dst, bool src) { static_cast<uint8_t *>(dst)[0] = src ? 1 : 0; }
 };
 /// @brief リトルエンディアン変換クラス（uint8_t版）
 template <>
 class LE<uint8_t>
 {
 public:
-  static uint8_t get(uint8_t const *src) { return src[0]; }
-  static void set(uint8_t *dst, uint8_t src) { dst[0] = src; }
+  static uint8_t get(void const *src) { return static_cast<uint8_t const *>(src)[0]; }
+  static void set(void *dst, uint8_t src) { static_cast<uint8_t *>(dst)[0] = src; }
 };
 /// @brief リトルエンディアン変換クラス（int8_t版）
 template <>
 class LE<int8_t>
 {
 public:
-  static int8_t get(uint8_t const *src) { return static_cast<int8_t>(LE<uint8_t>::get(src)); }
-  static void set(uint8_t *dst, int8_t src) { LE<uint8_t>::set(dst, static_cast<uint8_t>(src)); }
+  static int8_t get(void const *src) { return static_cast<int8_t>(LE<uint8_t>::get(src)); }
+  static void set(void *dst, int8_t src) { LE<uint8_t>::set(dst, static_cast<uint8_t>(src)); }
 };
 /// @brief リトルエンディアン変換クラス（uint16_t版）
 template <>

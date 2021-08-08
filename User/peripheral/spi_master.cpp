@@ -204,7 +204,7 @@ satoh::SpiMaster::~SpiMaster()
     }                                                       \
   } while (0)
 
-satoh::SpiMaster::Result satoh::SpiMaster::send(uint8_t const *bytes, uint32_t size, uint32_t millisec) const noexcept
+satoh::SpiMaster::Result satoh::SpiMaster::send(void const *bytes, uint32_t size, uint32_t millisec) const noexcept
 {
   std::lock_guard<Mutex> lock(mutex_);
   if (!spi_)
@@ -232,7 +232,7 @@ satoh::SpiMaster::Result satoh::SpiMaster::send(uint8_t const *bytes, uint32_t s
   return OK;
 }
 
-satoh::SpiMaster::Result satoh::SpiMaster::sendRecv(uint8_t const *tbytes, uint8_t *rbytes, uint32_t size, uint32_t millisec) const noexcept
+satoh::SpiMaster::Result satoh::SpiMaster::sendRecv(void const *tbytes, void *rbytes, uint32_t size, uint32_t millisec) const noexcept
 {
   std::lock_guard<Mutex> lock(mutex_);
   if (!spi_ || sendOnly_)
