@@ -166,7 +166,7 @@ void i2cTaskProc(void const *argument)
   {
     return;
   }
-  s_i2c = new satoh::I2C(I2C1, i2cTaskHandle, DMA1, LL_DMA_STREAM_0, LL_DMA_STREAM_7);
+  s_i2c = new satoh::I2C(I2C1, DMA1, LL_DMA_STREAM_0, LL_DMA_STREAM_7);
   initPCM3060(s_i2c);
   satoh::SSD1306 oled(s_i2c);
   satoh::PCA9635 led(s_i2c);

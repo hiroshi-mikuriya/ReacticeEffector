@@ -8,6 +8,7 @@
 #include "stm32f7xx_ll_dma.h"
 #include "stm32f7xx_ll_gpio.h"
 #include "stm32f7xx_ll_spi.h"
+#include <mutex>
 #include <string.h> // memset
 
 namespace
@@ -67,8 +68,7 @@ public:
 } // namespace
 
 satoh::SpiMaster::SpiMaster()
-    : threadId_(0),     //
-      sendOnly_(false), //
+    : sendOnly_(false), //
       spi_(0),          //
       dma_(0),          //
       txStream_(0),     //
@@ -78,11 +78,10 @@ satoh::SpiMaster::SpiMaster()
 {
 }
 
-satoh::SpiMaster::SpiMaster(osThreadId threadId,        //
-                            SPI_TypeDef *spi,           //
+satoh::SpiMaster::SpiMaster(SPI_TypeDef *spi,           //
                             DMA_TypeDef *dma,           //
                             uint32_t txStream) noexcept //
-    : threadId_(threadId),                              //
+    : threadId_(0),                                     //
       sendOnly_(true),                                  //
       spi_(spi),                                        //
       dma_(dma),                                        //
@@ -96,14 +95,13 @@ satoh::SpiMaster::SpiMaster(osThreadId threadId,        //
   LL_DMA_EnableIT_TE(dma_, txStream_);
   LL_SPI_EnableDMAReq_TX(spi_);
 }
-satoh::SpiMaster::SpiMaster(osThreadId threadId,      //
-                            SPI_TypeDef *spi,         //
+satoh::SpiMaster::SpiMaster(SPI_TypeDef *spi,         //
                             DMA_TypeDef *dma,         //
                             uint32_t txStream,        //
                             uint32_t rxStream,        //
                             GPIO_TypeDef *nssGpio,    //
                             uint32_t nssPin) noexcept //
-    : threadId_(threadId),                            //
+    : threadId_(0),                                   //
       sendOnly_(false),                               //
       spi_(spi),                                      //
       dma_(dma),                                      //
@@ -123,6 +121,7 @@ satoh::SpiMaster::SpiMaster(osThreadId threadId,      //
 }
 satoh::SpiMaster::SpiMaster(SpiMaster &&that) //
     : threadId_(that.threadId_),              //
+      mutex_(std::move(that.mutex_)),         //
       sendOnly_(that.sendOnly_),              //
       spi_(that.spi_),                        //
       dma_(that.dma_),                        //
@@ -141,6 +140,7 @@ satoh::SpiMaster &satoh::SpiMaster::operator=(SpiMaster &&that)
   {
     this->~SpiMaster();
     threadId_ = that.threadId_;
+    mutex_ = std::move(that.mutex_);
     sendOnly_ = that.sendOnly_;
     spi_ = that.spi_;
     dma_ = that.dma_;
@@ -158,6 +158,7 @@ satoh::SpiMaster &satoh::SpiMaster::operator=(SpiMaster &&that)
 satoh::SpiMaster::~SpiMaster()
 {
   threadId_ = 0;
+  mutex_.remove();
   sendOnly_ = false;
   if (dma_)
   {
@@ -205,6 +206,7 @@ satoh::SpiMaster::~SpiMaster()
 
 satoh::SpiMaster::Result satoh::SpiMaster::send(uint8_t const *bytes, uint32_t size, uint32_t millisec) const noexcept
 {
+  std::lock_guard<Mutex> lock(mutex_);
   if (!spi_)
   {
     return ERROR;
@@ -212,6 +214,11 @@ satoh::SpiMaster::Result satoh::SpiMaster::send(uint8_t const *bytes, uint32_t s
   if (LL_DMA_IsEnabledStream(dma_, txStream_))
   {
     return BUSY;
+  }
+  threadId_ = osThreadGetId();
+  if (threadId_ == 0)
+  {
+    return Result::ERROR;
   }
   setDmaTransferSize(dma_, txStream_, size);
   LL_DMA_ConfigAddresses(dma_, txStream_,                   //
@@ -227,13 +234,19 @@ satoh::SpiMaster::Result satoh::SpiMaster::send(uint8_t const *bytes, uint32_t s
 
 satoh::SpiMaster::Result satoh::SpiMaster::sendRecv(uint8_t const *tbytes, uint8_t *rbytes, uint32_t size, uint32_t millisec) const noexcept
 {
-  if (!spi_)
+  std::lock_guard<Mutex> lock(mutex_);
+  if (!spi_ || sendOnly_)
   {
     return ERROR;
   }
-  if (LL_DMA_IsEnabledStream(dma_, txStream_))
+  if (LL_DMA_IsEnabledStream(dma_, txStream_) || LL_DMA_IsEnabledStream(dma_, rxStream_))
   {
     return BUSY;
+  }
+  threadId_ = osThreadGetId();
+  if (threadId_ == 0)
+  {
+    return Result::ERROR;
   }
   setDmaTransferSize(dma_, txStream_, size);
   setDmaTransferSize(dma_, rxStream_, size);

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "cmsis_os.h"
+#include "common/mutex.hpp"
 #include "stm32f7xx.h"
 
 namespace satoh
@@ -24,14 +25,15 @@ class satoh::SpiMaster
   /// @brief 代入演算子削除
   SpiMaster &operator=(SpiMaster const &) = delete;
 
-  osThreadId threadId_;   ///< 通信実行するスレッドID
-  bool sendOnly_;         ///< 送信専用
-  SPI_TypeDef *spi_;      ///< SPIペリフェラル
-  DMA_TypeDef *dma_;      ///< DMA
-  uint32_t txStream_;     ///< 送信DMAストリーム
-  uint32_t rxStream_;     ///< 受信DMAストリーム
-  GPIO_TypeDef *nssGpio_; ///< NSS GPIO
-  uint32_t nssPin_;       ///< NSSピン
+  mutable osThreadId threadId_; ///< 通信実行するスレッドID
+  mutable Mutex mutex_;         ///< ミューテックス
+  bool sendOnly_;               ///< 送信専用
+  SPI_TypeDef *spi_;            ///< SPIペリフェラル
+  DMA_TypeDef *dma_;            ///< DMA
+  uint32_t txStream_;           ///< 送信DMAストリーム
+  uint32_t rxStream_;           ///< 受信DMAストリーム
+  GPIO_TypeDef *nssGpio_;       ///< NSS GPIO
+  uint32_t nssPin_;             ///< NSSピン
 
 public:
   /// @brief 関数リターン値定義
@@ -45,20 +47,18 @@ public:
   /// @brief デフォルトコンストラクタ
   SpiMaster();
   /// @brief コンストラクタ（送信専用初期化）
-  /// @param[in] threadId 通信実行するスレッドID
   /// @param[in] spi SPIペリフェラル
   /// @param[in] dma DMA
   /// @param[in] txStream 送信DMAストリーム
-  explicit SpiMaster(osThreadId threadId, SPI_TypeDef *spi, DMA_TypeDef *dma, uint32_t txStream) noexcept;
+  explicit SpiMaster(SPI_TypeDef *spi, DMA_TypeDef *dma, uint32_t txStream) noexcept;
   /// @brief コンストラクタ（送受信用初期化）
-  /// @param[in] threadId 通信実行するスレッドID
   /// @param[in] spi SPIペリフェラル
   /// @param[in] dma DMA
   /// @param[in] txStream 送信DMAストリーム
   /// @param[in] rxStream 受信DMAストリーム
   /// @param[in] nssGpio NSS GPIO
   /// @param[in] nssPin NSSピン
-  explicit SpiMaster(osThreadId threadId, SPI_TypeDef *spi, DMA_TypeDef *dma, uint32_t txStream, uint32_t rxStream, //
+  explicit SpiMaster(SPI_TypeDef *spi, DMA_TypeDef *dma, uint32_t txStream, uint32_t rxStream, //
                      GPIO_TypeDef *nssGpio, uint32_t nssPin) noexcept;
   /// @brief moveコンストラクタ
   /// @param[in] that 移動元

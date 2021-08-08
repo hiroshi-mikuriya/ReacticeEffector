@@ -8,6 +8,7 @@
 
 #include "cmsis_os.h"
 #include "common/dma_mem.h"
+#include "common/mutex.hpp"
 #include "stm32f7xx.h"
 
 namespace satoh
@@ -20,15 +21,14 @@ constexpr int32_t I2C_CLS_SIG_MASK = 0x0000FFFF;
 /// @brief I2C通信クラス
 class satoh::I2C
 {
-  /// @brief デフォルトコンストラクタ削除
-  I2C() = delete;
   /// @brief コピーコンストラクタ削除
   I2C(I2C const &) = delete;
   /// @brief 代入演算子削除
   I2C &operator=(I2C const &) = delete;
 
   I2C_TypeDef *i2cx_;                   ///< I2Cペリフェラル
-  osThreadId threadId_;                 ///< イベント通知先のスレッドID
+  mutable osThreadId threadId_;         ///< I2C通信を実施するスレッドのID
+  mutable Mutex mutex_;                 ///< ミューテックス
   DMA_TypeDef *dma_;                    ///< 送受信DMA
   uint32_t rxStream_;                   ///< 受信DMAストリーム
   uint32_t txStream_;                   ///< 送信DMAストリーム
@@ -54,13 +54,15 @@ public:
     NACK,    ///< NACK
     ERROR,   ///< エラー
   };
+  /// @brief デフォルトコンストラクタ
+  I2C();
   /// @brief コンストラクタ
   /// @param[in] i2cx I2Cペリフェラル
   /// @param[in] threadId イベント通知先のスレッドID
   /// @param[in] dma 送受信DMA
   /// @param[in] rxStream 受信DMAストリーム
   /// @param[in] txStream 送信DMAストリーム
-  explicit I2C(I2C_TypeDef *const i2cx, osThreadId threadId, DMA_TypeDef *const dma, uint32_t rxStream, uint32_t txStream) noexcept;
+  explicit I2C(I2C_TypeDef *const i2cx, DMA_TypeDef *const dma, uint32_t rxStream, uint32_t txStream) noexcept;
   /// @brief moveコンストラクタ @param[in] that 移動元
   I2C(I2C &&that) noexcept;
   /// @brief move演算子 @param[in] that 移動元 @return 自身の参照

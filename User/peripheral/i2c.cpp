@@ -8,6 +8,7 @@
 #include "stm32f7xx_ll_dma.h"
 #include "stm32f7xx_ll_i2c.h"
 #include <cstring> // memcpy
+#include <mutex>
 
 namespace
 {
@@ -102,6 +103,7 @@ void satoh::I2C::deinit() noexcept
 {
   i2cx_ = 0;
   threadId_ = 0;
+  mutex_.remove();
   dma_ = 0;
   rxStream_ = 0;
   txStream_ = 0;
@@ -109,13 +111,21 @@ void satoh::I2C::deinit() noexcept
   txbuf_.reset();
 }
 
+satoh::I2C::I2C()   //
+    : i2cx_(0),     //
+      threadId_(0), //
+      dma_(0),      //
+      rxStream_(0), //
+      txStream_(0)  //
+{
+}
+
 satoh::I2C::I2C(I2C_TypeDef *const i2cx,    //
-                osThreadId threadId,        //
                 DMA_TypeDef *const dma,     //
                 uint32_t rxStream,          //
                 uint32_t txStream) noexcept //
     : i2cx_(i2cx),                          //
-      threadId_(threadId),                  //
+      threadId_(0),                         //
       dma_(dma),                            //
       rxStream_(rxStream),                  //
       txStream_(txStream),                  //
@@ -128,12 +138,14 @@ satoh::I2C::I2C(I2C_TypeDef *const i2cx,    //
 satoh::I2C::I2C(I2C &&that) noexcept
     : i2cx_(that.i2cx_),              //
       threadId_(that.threadId_),      //
+      mutex_(std::move(that.mutex_)), //
       dma_(that.dma_),                //
       rxStream_(that.rxStream_),      //
       txStream_(that.txStream_),      //
       rxbuf_(std::move(that.rxbuf_)), //
       txbuf_(std::move(that.txbuf_))  //
 {
+  that.deinit();
   start();
 }
 
@@ -144,6 +156,7 @@ satoh::I2C &satoh::I2C::operator=(satoh::I2C &&that) noexcept
     stop();
     i2cx_ = that.i2cx_;
     threadId_ = that.threadId_;
+    mutex_ = std::move(that.mutex_);
     dma_ = that.dma_;
     rxStream_ = that.rxStream_;
     txStream_ = that.txStream_;
@@ -257,6 +270,7 @@ void satoh::I2C::notifyTxErrorIRQ() noexcept
 
 satoh::I2C::Result satoh::I2C::write(uint8_t slaveAddr, uint8_t const *bytes, uint32_t size, bool withSleep) const noexcept
 {
+  std::lock_guard<Mutex> lock(mutex_);
   if (!i2cx_)
   {
     return Result::ERROR;
@@ -265,6 +279,11 @@ satoh::I2C::Result satoh::I2C::write(uint8_t slaveAddr, uint8_t const *bytes, ui
   {
     restart();
     return Result::BUSY;
+  }
+  threadId_ = osThreadGetId();
+  if (threadId_ == 0)
+  {
+    return Result::ERROR;
   }
   Finalizer fin(i2cx_);
   LL_I2C_EnableIT_NACK(i2cx_);
@@ -285,6 +304,7 @@ satoh::I2C::Result satoh::I2C::write(uint8_t slaveAddr, uint8_t const *bytes, ui
 
 satoh::I2C::Result satoh::I2C::read(uint8_t slaveAddr, uint8_t *buffer, uint32_t size, bool withSleep) const noexcept
 {
+  std::lock_guard<Mutex> lock(mutex_);
   if (!i2cx_)
   {
     return Result::ERROR;
@@ -293,6 +313,11 @@ satoh::I2C::Result satoh::I2C::read(uint8_t slaveAddr, uint8_t *buffer, uint32_t
   {
     restart();
     return Result::BUSY;
+  }
+  threadId_ = osThreadGetId();
+  if (threadId_ == 0)
+  {
+    return Result::ERROR;
   }
   Finalizer fin(i2cx_);
   LL_I2C_EnableIT_STOP(i2cx_);
