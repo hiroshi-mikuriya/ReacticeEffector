@@ -10,7 +10,8 @@
 #include "effector/bq_filter.hpp"
 #include "effector/bypass.hpp"
 #include "effector/chorus.hpp"
-#include "effector/delay.hpp"
+#include "effector/delay_ram.hpp"
+#include "effector/delay_spi.hpp"
 #include "effector/distortion.hpp"
 #include "effector/oscillator.hpp"
 #include "effector/overdrive.hpp"
@@ -35,7 +36,8 @@ state::Effectors::Effectors(uint8_t n, SpiMaster *spi) : count_(0)
   addList<fx::Chorus>(true);
   addList<fx::Phaser>(true);
   addList<fx::Tremolo>(true);
-  addList<fx::Delay>(0 < n);
+  addList<fx::DelayRam>(1 <= n);
+  // addList<fx::DelaySpi>(n == 2, spi);
   addList<fx::Oscillator>(n == 0);
   addList<fx::BqFilter>(true);
   addList<fx::Reverb>(n == 2);
@@ -347,9 +349,9 @@ void state::Property::factoryReset() noexcept
       {fx::BYPASS},                  //
   }};
   patches_->m_[1][3] = Patch{{
-      {fx::BYPASS},                       //
-      {fx::DELAY, {}, {500, 50, 50, 50}}, //
-      {fx::BYPASS},                       //
+      {fx::BYPASS},                           //
+      {fx::DELAY_RAM, {}, {500, 50, 50, 50}}, //
+      {fx::BYPASS},                           //
   }};
   patches_->m_[2][0] = Patch{{
       {fx::OSCILLATOR, {false, true, false}, {50, 100, 1}}, //
@@ -374,7 +376,7 @@ void state::Property::factoryReset() noexcept
   patches_->m_[3][0] = Patch{{
       {fx::DISTORTION, {}, {75, 75, 50}},         //
       {fx::CHORUS, {}, {50, 50, 50, 50, 50, 50}}, //
-      {fx::DELAY, {}, {200, 30, 49, 50}},         //
+      {fx::DELAY_RAM, {}, {200, 30, 49, 50}},     //
   }};
   patches_->m_[3][1] = Patch{{
       {fx::OVERDRIVE, {}, {75, 75, 50, 50}}, //
@@ -387,9 +389,9 @@ void state::Property::factoryReset() noexcept
       {fx::BYPASS},                               //
   }};
   patches_->m_[3][3] = Patch{{
-      {fx::OVERDRIVE, {}, {50, 50, 50, 50}}, //
-      {fx::DELAY, {}, {320, 50, 50, 50}},    //
-      {fx::DELAY, {}, {890, 50, 50, 50}},    //
+      {fx::OVERDRIVE, {}, {50, 50, 50, 50}},  //
+      {fx::DELAY_RAM, {}, {320, 50, 50, 50}}, //
+      {fx::DELAY_RAM, {}, {890, 50, 50, 50}}, //
   }};
   patches_->crc_ = patches_->calcCrc();
   loadPatch();

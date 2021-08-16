@@ -73,9 +73,6 @@ public:
   /// @retval true 成功
   /// @retval false 失敗
   explicit operator bool() const noexcept { return static_cast<bool>(buf_); }
-  /// @brief 要素数を取得
-  /// @return 要素数
-  uint32_t size() const noexcept { return maxSize_; }
   /// @brief インターバルを設定する @param[in] ms 時間（ミリ秒）
   void setInterval(float ms) noexcept { interval_ = std::min(static_cast<float>(maxSize_), getInterval(std::max(1.0f, ms))); }
   /// @brief バッファ配列書き込み、書込位置を進める

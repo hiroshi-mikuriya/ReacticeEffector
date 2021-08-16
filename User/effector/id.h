@@ -37,10 +37,12 @@ constexpr ID CHORUS = 1 | cat::SPACE;
 constexpr ID PHASER = 2 | cat::SPACE;
 /// トレモロ
 constexpr ID TREMOLO = 3 | cat::SPACE;
-/// ディレイ
-constexpr ID DELAY = 4 | cat::SPACE;
+/// RAMディレイ
+constexpr ID DELAY_RAM = 4 | cat::SPACE;
+/// SPIディレイ
+constexpr ID DELAY_SPI = 5 | cat::SPACE;
 /// リバーブ
-constexpr ID REVERB = 5 | cat::SPACE;
+constexpr ID REVERB = 6 | cat::SPACE;
 /// BQフィルター
 constexpr ID BQ_FILTER = 1 | cat::FILTER;
 /// バイパス

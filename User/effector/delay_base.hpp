@@ -1,4 +1,4 @@
-/// @file      effector/delay.hpp
+/// @file      effector/delay_base.hpp
 /// @author    SATOH GADGET
 /// @copyright Copyright© 2021 SATOH GADGET
 ///
@@ -7,20 +7,20 @@
 #pragma once
 
 #include "effector_base.h"
-#include "lib/lib_delay.hpp"
 #include <cstdio> // sprintf
 
 namespace satoh
 {
 namespace fx
 {
-class Delay;
+class DelayBase;
 }
 } // namespace satoh
 
-/// @brief Sodiumから拝借したディレイ
-class satoh::fx::Delay : public satoh::fx::EffectorBase
+/// @brief ディレイ基底クラス
+class satoh::fx::DelayBase : public satoh::fx::EffectorBase
 {
+protected:
   enum
   {
     DTIME,
@@ -32,10 +32,13 @@ class satoh::fx::Delay : public satoh::fx::EffectorBase
 
   EffectParameterF ui_[COUNT]; ///< UIから設定するパラメータ
   mutable char valueTxt_[8];   ///< パラメータ文字列格納バッファ
-  delayBuf<int16_t> del1_;
   lpf2nd lpf2ndTone_;
   float fback_;
   float elevel_;
+
+private:
+  /// @brief DTIMEを更新する
+  virtual void updateDtime() noexcept = 0;
 
   /// @brief UI表示のパラメータを、エフェクト処理で使用する値へ変換する
   /// @param[in] n 変換対象のパラメータ番号
@@ -44,7 +47,7 @@ class satoh::fx::Delay : public satoh::fx::EffectorBase
     switch (n)
     {
     case DTIME:
-      del1_.setInterval(ui_[DTIME].getValue());
+      updateDtime();
       break;
     case ELEVEL:
       elevel_ = logPot(ui_[ELEVEL].getValue(), -20.0f, 20.0f); // EFFECT LEVEL -20 ～ +20dB
@@ -80,41 +83,22 @@ class satoh::fx::Delay : public satoh::fx::EffectorBase
 
 public:
   /// @brief コンストラクタ
-  Delay()                                                          //
-      : EffectorBase(DELAY, "Delay", "DL", RGB{0x20, 0x00, 0x20}), //
+  /// @param[in] id エフェクターID
+  /// @param[in] name エフェクター名
+  /// @param[in] shortName エフェクター名（短縮）
+  /// @param[in] ledColor アクティブ時のLED色
+  DelayBase(ID id, const char *name, const char *shortName, RGB const &ledColor) //
+      : EffectorBase(id, name, shortName, ledColor),                             //
         ui_({
             EffectParameterF(10, 900, 100, 5, "TIME"), //
             EffectParameterF(0, 100, 1, "E.LV"),       //
             EffectParameterF(0, 99, 1, "F.BACK"),      //
             EffectParameterF(0, 100, 1, "TONE"),       //
         }),
-        del1_(ui_[DTIME].getMax()), //
-        fback_(0),                  //
-        elevel_(0)                  //
+        fback_(0), //
+        elevel_(0) //
   {
-    if (del1_)
-    {
-      init(ui_, COUNT);
-    }
   }
   /// @brief デストラクタ
-  virtual ~Delay() {}
-  /// @brief エフェクターセットアップ成功・失敗
-  /// @retval true 成功
-  /// @retval false 失敗
-  explicit operator bool() const noexcept override { return static_cast<bool>(del1_); }
-  /// @brief エフェクト処理実行
-  /// @param[inout] left L音声データ
-  /// @param[inout] right R音声データ
-  /// @param[in] size 音声データ数
-  void effect(float *left, float *right, uint32_t size) noexcept override
-  {
-    for (uint32_t i = 0; i < size; ++i)
-    {
-      float fx = del1_.read();
-      fx = lpf2ndTone_.process(fx);
-      del1_.write(fback_ * fx + right[i]);
-      right[i] += fx * elevel_;
-    }
-  }
+  virtual ~DelayBase() {}
 };
