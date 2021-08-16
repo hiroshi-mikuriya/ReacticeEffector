@@ -20,5 +20,7 @@ constexpr size_t EFFECT_BUTTON_COUNT = 4;          ///< エフェクトボタン
 constexpr float SAMPLING_FREQ = 44.433f * 1000.0f; ///< サンプリング周期
 constexpr float PI = 3.141592653589793f;           ///< 円周率
 constexpr uint32_t BLOCK_SIZE = 96;                ///< 音声信号ブロックサイズ
+constexpr uint8_t EXP_NONE = 0;                    ///< EXP無効
+constexpr uint8_t EXP_GYRO = 2;                    ///< ジャイロセンサーのEXP番号
 
 } // namespace satoh

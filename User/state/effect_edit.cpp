@@ -69,12 +69,12 @@ state::ID state::EffectEdit::run(msg::ROTARY_ENCODER const *src) noexcept
     modSelectedParam(false);
   }
   int8_t paramKnob = src->angleDiff[1];
-  if (0 < paramKnob && !fx->isGyroEnabled(selectedParamNum_))
+  if (0 < paramKnob && fx->getExp(selectedParamNum_) == EXP_NONE)
   {
     fx->incrementParam(selectedParamNum_);
     showFx();
   }
-  if (paramKnob < 0 && !fx->isGyroEnabled(selectedParamNum_))
+  if (paramKnob < 0 && fx->getExp(selectedParamNum_) == EXP_NONE)
   {
     fx->decrementParam(selectedParamNum_);
     showFx();
@@ -82,12 +82,12 @@ state::ID state::EffectEdit::run(msg::ROTARY_ENCODER const *src) noexcept
   int8_t gyroKnob = src->angleDiff[2];
   if (0 < gyroKnob)
   {
-    fx->setGyroEnable(selectedParamNum_, true);
+    fx->setExp(selectedParamNum_, EXP_GYRO);
     showFx();
   }
   if (gyroKnob < 0)
   {
-    fx->setGyroEnable(selectedParamNum_, false);
+    fx->setExp(selectedParamNum_, EXP_NONE);
     showFx();
   }
   return id();

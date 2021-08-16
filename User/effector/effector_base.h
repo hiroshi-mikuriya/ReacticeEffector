@@ -50,12 +50,12 @@ inline bool compress(float min, float &v, float max) noexcept
 template <typename T>
 class satoh::fx::EffectParameter
 {
-  const T min_;        ///< 最小値
-  const T max_;        ///< 最大値
-  T v_;                ///< 値
-  const T step_;       ///< 目盛り
-  const char *name_;   ///< パラメータ名
-  bool isGyroEnabled_; ///< ジャイロ制御有無 @arg true 制御あり @arg false 制御なし
+  const T min_;      ///< 最小値
+  const T max_;      ///< 最大値
+  T v_;              ///< 値
+  const T step_;     ///< 目盛り
+  const char *name_; ///< パラメータ名
+  uint8_t expNum_;   ///< 有効なエクスプレッションペダル番号 @arg 正値 EXP番号 @arg 0 無効
 
   /// @brief データ圧縮
   /// @retval true 圧縮した
@@ -70,7 +70,7 @@ public:
   /// @param[in] step 目盛り
   /// @param[in] name パラメータ名
   explicit EffectParameter(T min, T max, T v, T step, const char *name) noexcept //
-      : min_(min), max_(max), v_(v), step_(step), name_(name), isGyroEnabled_(false)
+      : min_(min), max_(max), v_(v), step_(step), name_(name), expNum_(0)
   {
   }
   /// @brief コンストラクタ（初期値は最大と最小の中間値にする）
@@ -124,13 +124,13 @@ public:
   /// @retval true 設定された
   /// @retval false 元々の値と同じだったため設定されなかった
   bool setValueRatio(float ratio) noexcept { return setValue((max_ - min_) * ratio + min_); }
-  /// @brief ジャイロ制御有無を設定する
-  /// @param[in] enable ジャイロ制御有無
-  void setGyroEnable(bool enable) noexcept { isGyroEnabled_ = enable; }
-  /// @brief ジャイロ制御有無を取得する
-  /// @retval true ジャイロ制御あり
-  /// @retval false ジャイロ制御なし
-  bool isGyroEnabled() const noexcept { return isGyroEnabled_; }
+  /// @brief エクスプレッションペダル番号を指定する
+  /// @param[in] n @arg 正値 EXP番号 @arg 0 無効
+  void setExp(uint8_t n) noexcept { expNum_ = n; }
+  /// @brief エクスプレッションペダル番号を取得する
+  /// @retval 正値 EXP番号
+  /// @retval 0 無効
+  uint8_t getExp() const noexcept { return expNum_; }
 };
 
 /// @brief エフェクター基底クラス
@@ -255,39 +255,40 @@ public:
     }
     return false;
   }
-  /// @brief ジャイロ連携有無取得
+  /// @brief エクスプレッションペダル番号を取得する
   /// @param[in] n パラメータ番号
-  /// @retval true ジャイロ連携あり
-  /// @retval false ジャイロ連携なし
-  virtual bool isGyroEnabled(uint8_t n) const noexcept
+  /// @retval 正値 EXP番号
+  /// @retval 0 無効
+  virtual uint8_t getExp(uint8_t n) const noexcept
   {
     if (n < paramCount_)
     {
-      return uiParam_[n].isGyroEnabled();
+      return uiParam_[n].getExp();
     }
-    return false;
+    return 0;
   }
-  /// @brief ジャイロ連携設定
-  /// @param[in] n パラメータ番号
-  /// @param[in] enable
-  ///    @arg true ジャイロ連携あり
-  ///    @arg false ジャイロ連携なし
-  virtual void setGyroEnable(uint8_t n, bool enable) noexcept
+  /// @brief エクスプレッションペダル番号を指定する
+  /// @param[in] paramNum パラメータ番号
+  /// @param[in] expNum @arg 正値 EXP番号 @arg 0 無効
+  virtual void setExp(uint8_t paramNum, uint8_t expNum) noexcept
   {
-    if (n < paramCount_)
+    if (paramNum < paramCount_)
     {
-      uiParam_[n].setGyroEnable(enable);
+      uiParam_[paramNum].setExp(expNum);
     }
   }
-  /// @brief ジャイロセンサーの加速度値からパラメータを設定する
-  /// @param[in] acc 加速度値
-  /// @note setGyroEnable(true)にした値のみが設定される
-  virtual void setGyroParam(int16_t const (&acc)[3]) noexcept
+  /// @brief エクスプレッションペダルの踏み具合をパラメータに反映させる
+  /// @param[in] expNum EXP番号
+  /// @param[in] ratio 比率（最小値 0.0f 〜 1.0f 最大値）
+  virtual void setExpParam(uint8_t expNum, float ratio) noexcept
   {
-    float ratio = (acc[1] + 0x8000) / 65536.0f; // TODO 暫定
+    if (expNum == 0)
+    {
+      return;
+    }
     for (uint8_t n = 0; n < paramCount_; ++n)
     {
-      if (uiParam_[n].isGyroEnabled())
+      if (uiParam_[n].getExp() == expNum)
       {
         setParamRatio(n, ratio);
       }
@@ -360,9 +361,9 @@ public:
   {
     if (n < paramCount_)
     {
-      if (uiParam_[n].isGyroEnabled())
+      if (uiParam_[n].getExp() != 0)
       {
-        return "GY";
+        return "EX";
       }
       return getValueTxtImpl(n);
     }

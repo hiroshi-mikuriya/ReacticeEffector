@@ -83,9 +83,10 @@ void changeNeoPixelPattern() noexcept
 
 void state::proc(Property &prop, msg::ACC_GYRO const *src) noexcept
 {
+  float ratio = (src->acc[1] + 0x8000) / 65536.0f;
   for (size_t i = 0; i < MAX_EFFECTOR_COUNT; ++i)
   {
-    prop.getFx(i)->setGyroParam(src->acc);
+    prop.getFx(i)->setExpParam(EXP_GYRO, ratio);
   }
 }
 

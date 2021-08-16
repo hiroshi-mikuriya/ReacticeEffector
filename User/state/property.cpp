@@ -111,7 +111,7 @@ void state::EffectParam::read(fx::EffectorBase const *fx) noexcept
   id = fx->getID();
   for (size_t n = 0; n < countof(value); ++n)
   {
-    gyro[n] = fx->isGyroEnabled(n);
+    exp[n] = fx->getExp(n);
     value[n] = fx->getParam(n);
   }
 }
@@ -120,7 +120,7 @@ void state::EffectParam::write(fx::EffectorBase *fx) const noexcept
 {
   for (size_t n = 0; n < countof(value); ++n)
   {
-    fx->setGyroEnable(n, gyro[n]);
+    fx->setExp(n, exp[n]);
     fx->setParam(n, value[n]);
   }
 }
@@ -354,9 +354,9 @@ void state::Property::factoryReset() noexcept
       {fx::BYPASS},                           //
   }};
   patches_->m_[2][0] = Patch{{
-      {fx::OSCILLATOR, {false, true, false}, {50, 100, 1}}, //
-      {fx::BYPASS},                                         //
-      {fx::BYPASS},                                         //
+      {fx::OSCILLATOR, {EXP_NONE, EXP_GYRO, EXP_NONE}, {50, 100, 1}}, //
+      {fx::BYPASS},                                                   //
+      {fx::BYPASS},                                                   //
   }};
   patches_->m_[2][1] = Patch{{
       {fx::BOOSTER, {}, {7, 5, 5}},          //

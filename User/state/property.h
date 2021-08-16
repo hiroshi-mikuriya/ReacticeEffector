@@ -99,7 +99,7 @@ public:
 struct satoh::state::EffectParam
 {
   fx::ID id;      ///< エフェクターID
-  bool gyro[6];   ///< ジャイロ有効・無効
+  uint8_t exp[6]; ///< エクスプレッションペダル有効・無効
   float value[6]; ///< パラメータ値
   /// @brief FXからパラメータを読み込む
   /// @param[in] fx 読み込み先
