@@ -74,6 +74,21 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define SRAM_SPI SPI2
+#define NP_SPI SPI3
+#define RPI_SPI SPI4
+#define RPI_UART USART1
+#define IR_UART USART2
+#define RPI_SPI_MOSI_Pin LL_GPIO_PIN_6
+#define RPI_SPI_MOSI_GPIO_Port GPIOE
+#define SRAM_SPI_MISO_Pin LL_GPIO_PIN_2
+#define SRAM_SPI_MISO_GPIO_Port GPIOC
+#define SRAM_SPI_MOSI_Pin LL_GPIO_PIN_3
+#define SRAM_SPI_MOSI_GPIO_Port GPIOC
+#define LEFT_VOL_ADC_Pin LL_GPIO_PIN_1
+#define LEFT_VOL_ADC_GPIO_Port GPIOA
+#define RIGHT_VOL_ADC_Pin LL_GPIO_PIN_2
+#define RIGHT_VOL_ADC_GPIO_Port GPIOA
 #define TP13_Pin LL_GPIO_PIN_3
 #define TP13_GPIO_Port GPIOA
 #define TP14_Pin LL_GPIO_PIN_4
@@ -87,15 +102,33 @@ void Error_Handler(void);
 #define GPIO_IN_INT_SW_N_Pin LL_GPIO_PIN_7
 #define GPIO_IN_INT_SW_N_GPIO_Port GPIOA
 #define GPIO_IN_INT_SW_N_EXTI_IRQn EXTI9_5_IRQn
-#define SPI4_NSS_Pin LL_GPIO_PIN_11
-#define SPI4_NSS_GPIO_Port GPIOE
-#define SPI4_NSS_EXTI_IRQn EXTI15_10_IRQn
-#define SPI2_NSS_Pin LL_GPIO_PIN_12
-#define SPI2_NSS_GPIO_Port GPIOB
+#define RPI_SPI_NSS_Pin LL_GPIO_PIN_11
+#define RPI_SPI_NSS_GPIO_Port GPIOE
+#define RPI_SPI_NSS_EXTI_IRQn EXTI15_10_IRQn
+#define RPI_SPI_SCK_Pin LL_GPIO_PIN_12
+#define RPI_SPI_SCK_GPIO_Port GPIOE
+#define RPI_SPI_MISO_Pin LL_GPIO_PIN_13
+#define RPI_SPI_MISO_GPIO_Port GPIOE
+#define SRAM_SPI_SCK_Pin LL_GPIO_PIN_10
+#define SRAM_SPI_SCK_GPIO_Port GPIOB
+#define SRAM_SPI_NSS_Pin LL_GPIO_PIN_12
+#define SRAM_SPI_NSS_GPIO_Port GPIOB
 #define LED_ACT_Pin LL_GPIO_PIN_7
 #define LED_ACT_GPIO_Port GPIOC
+#define RPI_UART_TX_Pin LL_GPIO_PIN_9
+#define RPI_UART_TX_GPIO_Port GPIOA
+#define UNUSED_SPI_SCK_Pin LL_GPIO_PIN_10
+#define UNUSED_SPI_SCK_GPIO_Port GPIOC
+#define NEOPIXEL_DT_Pin LL_GPIO_PIN_12
+#define NEOPIXEL_DT_GPIO_Port GPIOC
 #define PCM_RST_Pin LL_GPIO_PIN_0
 #define PCM_RST_GPIO_Port GPIOD
+#define IR_UART_TX_Pin LL_GPIO_PIN_5
+#define IR_UART_TX_GPIO_Port GPIOD
+#define IR_UART_RX_Pin LL_GPIO_PIN_6
+#define IR_UART_RX_GPIO_Port GPIOD
+#define RPI_UART_RX_Pin LL_GPIO_PIN_7
+#define RPI_UART_RX_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

@@ -38,7 +38,7 @@ void initBackup()
 
 void appTaskProc(void const *argument)
 {
-  s_spi = new satoh::SpiMaster(SPI2, DMA1, LL_DMA_STREAM_4, LL_DMA_STREAM_3, SPI2_NSS_GPIO_Port, SPI2_NSS_Pin);
+  s_spi = new satoh::SpiMaster(SRAM_SPI, DMA1, LL_DMA_STREAM_4, LL_DMA_STREAM_3, SRAM_SPI_NSS_GPIO_Port, SRAM_SPI_NSS_Pin);
   if (msg::registerTask(4) != osOK)
   {
     return;

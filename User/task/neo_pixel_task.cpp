@@ -7,8 +7,8 @@
 #include "neo_pixel_task.h"
 #include "cmsis_os.h"
 #include "device/neo_pixel.h"
+#include "main.h"
 #include "message/msglib.h"
-#include "stm32f7xx_ll_dma.h"
 
 namespace msg = satoh::msg;
 
@@ -24,7 +24,7 @@ void neoPixelTaskProc(void const *argument)
     return;
   }
   constexpr uint32_t LED_COUNT = 100;
-  s_spi = new satoh::SpiMaster(SPI3, DMA1, LL_DMA_STREAM_5);
+  s_spi = new satoh::SpiMaster(NP_SPI, DMA1, LL_DMA_STREAM_5);
   satoh::NeoPixel np(s_spi, LED_COUNT);
   msg::NEO_PIXEL_PATTERN ptn{};
   msg::NEO_PIXEL_SPEED speed = {100};
