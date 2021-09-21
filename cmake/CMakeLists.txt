@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.6)
- 
+
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 set(CMAKE_SYSTEM_NAME Generic)
 
 ##########

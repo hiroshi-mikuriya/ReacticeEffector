@@ -7,7 +7,8 @@
 #include "dma_mem.h"
 #include <cstdint>
 
-#define DTCM_MEM __attribute__((section(".dtcm"))) __attribute__((aligned(4)))
+#define DMA_MEM_ALIGNMENT_SIZE 8
+#define DTCM_MEM __attribute__((section(".dtcm"))) __attribute__((aligned(DMA_MEM_ALIGNMENT_SIZE)))
 
 namespace
 {
@@ -21,7 +22,7 @@ size_t s_pos = 0;
 
 void *satoh::allocDmaMem(std::size_t size) noexcept
 {
-  size = (size + 3) / 4 * 4;
+  size = (size + DMA_MEM_ALIGNMENT_SIZE - 1) & ~(DMA_MEM_ALIGNMENT_SIZE - 1);
   if (size + s_pos <= TOTAL_SIZE)
   {
     auto res = &s_dmaMem[s_pos];
