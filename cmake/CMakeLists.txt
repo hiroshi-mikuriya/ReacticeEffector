@@ -4,6 +4,16 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 set(CMAKE_SYSTEM_NAME Generic)
 
 ##########
+# tool chain
+##########
+set(CMAKE_C_COMPILER   arm-none-eabi-gcc)
+set(CMAKE_ASM_COMPILER arm-none-eabi-gcc)
+set(CMAKE_CXX_COMPILER arm-none-eabi-g++)
+set(CMAKE_EXE_LINKER   arm-none-eabi-g++)
+set(OBJCOPY            arm-none-eabi-objcopy)
+set(SIZE               arm-none-eabi-size)
+
+##########
 # architecture
 ##########
 set(CPU       cortex-m7)
@@ -23,19 +33,9 @@ set(BIN_FILE ${PROJECT_NAME}.bin)
 set(MAP_FILE ${PROJECT_NAME}.map)
 
 ##########
-# compiler
-##########
-execute_process(COMMAND which arm-none-eabi-gcc     OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE CMAKE_C_COMPILER)
-execute_process(COMMAND which arm-none-eabi-gcc     OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE CMAKE_ASM_COMPILER)
-execute_process(COMMAND which arm-none-eabi-g++     OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE CMAKE_CXX_COMPILER)
-execute_process(COMMAND which arm-none-eabi-g++     OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE CMAKE_EXE_LINKER)
-execute_process(COMMAND which arm-none-eabi-objcopy OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE OBJCOPY)
-execute_process(COMMAND which arm-none-eabi-size    OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE SIZE)
-
-##########
 # compiler options
 ##########
-add_compile_options(-O3)
+add_compile_options(-Os)
 add_compile_options(-Wall)
 add_compile_options(-ffunction-sections)
 add_compile_options(-fdata-sections)
