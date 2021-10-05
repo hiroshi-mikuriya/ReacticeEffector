@@ -36,7 +36,7 @@ class satoh::state::Error : public satoh::state::Base
 
 public:
   /// @brief コンストラクタ
-  /// @param[in] prop プロパティ
+  /// @param [in] prop プロパティ
   explicit Error(Property &prop) : m_(prop) {}
   /// @brief デストラクタ
   ~Error() {}

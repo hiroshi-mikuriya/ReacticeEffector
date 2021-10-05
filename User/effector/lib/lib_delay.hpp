@@ -30,7 +30,7 @@ class satoh::delayBuf
   /// @brief 書込位置と読出位置の間隔を計算 @param[in] ms 時間
   static constexpr float getInterval(float ms) { return 0.001f * ms * satoh::SAMPLING_FREQ; }
   /// @brief バッファサイズ取得
-  /// @param[in] ms 最大保持時間（ミリ秒）
+  /// @param [in] ms 最大保持時間（ミリ秒）
   /// @return バッファサイズ
   static constexpr uint32_t getBufferSize(float ms) { return 1 + static_cast<uint32_t>(getInterval(ms)); }
 
@@ -40,11 +40,11 @@ class satoh::delayBuf
   uint32_t wpos_;    ///< 書き込み位置
 
   /// @brief float値を変換して保存する
-  /// @param[in] pos 格納先のインデックス
-  /// @param[in] v 値
+  /// @param [in] pos 格納先のインデックス
+  /// @param [in] v 値
   void setFloat(uint32_t pos, float v) noexcept { buf_.get()[pos] = fromFloat<T>(v); }
   /// @brief 値を読み出して、floatへ変換して取得する
-  /// @param[in] pos 読み出し先のインデックス
+  /// @param [in] pos 読み出し先のインデックス
   /// @return float値
   float getFloat(uint32_t pos) const noexcept { return toFloat<T>(buf_.get()[pos]); }
   /// @brief 読み込み位置を取得する @return 読み込み位置
@@ -54,7 +54,7 @@ public:
   /// @brief コンストラクタ
   delayBuf() noexcept : maxSize_(0), interval_(1), wpos_(0) {}
   /// @brief コンストラクタ
-  /// @param[in] maxTime 最大保持時間（ミリ秒）
+  /// @param [in] maxTime 最大保持時間（ミリ秒）
   explicit delayBuf(float maxTime) noexcept //
       : maxSize_(getBufferSize(maxTime)),   //
         interval_(1),                       //
@@ -76,7 +76,7 @@ public:
   /// @brief インターバルを設定する @param[in] ms 時間（ミリ秒）
   void setInterval(float ms) noexcept { interval_ = std::min(static_cast<float>(maxSize_), getInterval(std::max(1.0f, ms))); }
   /// @brief バッファ配列書き込み、書込位置を進める
-  /// @param[in] v 書き込むデータ
+  /// @param [in] v 書き込むデータ
   void write(float v) noexcept
   {
     setFloat(wpos_, v);

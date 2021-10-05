@@ -20,12 +20,12 @@ class EffectorBase;
 template <typename T>
 class EffectParameter;
 /// エフェクトパラメータ型（float版）
-typedef EffectParameter<float> EffectParameterF;
+using EffectParameterF = EffectParameter<float>;
 
 /// @brief データ圧縮
-/// @param[in] min 最小値
+/// @param [in] min 最小値
 /// @param[inout] v 圧縮対象データ
-/// @param[in] max 最大値
+/// @param [in] max 最大値
 /// @retval true 圧縮した
 /// @retval false 圧縮しなかった
 inline bool compress(float min, float &v, float max) noexcept
@@ -64,20 +64,20 @@ class satoh::fx::EffectParameter
 
 public:
   /// @brief コンストラクタ
-  /// @param[in] min 最小値
-  /// @param[in] max 最大値
-  /// @param[in] v 初期値
-  /// @param[in] step 目盛り
-  /// @param[in] name パラメータ名
+  /// @param [in] min 最小値
+  /// @param [in] max 最大値
+  /// @param [in] v 初期値
+  /// @param [in] step 目盛り
+  /// @param [in] name パラメータ名
   explicit EffectParameter(T min, T max, T v, T step, const char *name) noexcept //
       : min_(min), max_(max), v_(v), step_(step), name_(name), expNum_(0)
   {
   }
   /// @brief コンストラクタ（初期値は最大と最小の中間値にする）
-  /// @param[in] min 最小値
-  /// @param[in] max 最大値
-  /// @param[in] step 目盛り
-  /// @param[in] name パラメータ名
+  /// @param [in] min 最小値
+  /// @param [in] max 最大値
+  /// @param [in] step 目盛り
+  /// @param [in] name パラメータ名
   explicit EffectParameter(T min, T max, T step, const char *name) noexcept //
       : EffectParameter(min, max, (max + min) / 2, step, name)
   {
@@ -106,7 +106,7 @@ public:
   /// @retval false 最小値に到達しているため減算されなかった
   bool decrement() noexcept { return setValue(v_ - step_); }
   /// @brief 値を設定する
-  /// @param[in] v 値
+  /// @param [in] v 値
   /// @retval true 設定された
   /// @retval false 元々の値と同じだったため設定されなかった
   bool setValue(T v) noexcept
@@ -120,12 +120,12 @@ public:
     return true;
   }
   /// @brief 値を比率で設定する
-  /// @param[in] ratio 比率（最小値 0.0f 〜 1.0f 最大値）
+  /// @param [in] ratio 比率（最小値 0.0f 〜 1.0f 最大値）
   /// @retval true 設定された
   /// @retval false 元々の値と同じだったため設定されなかった
   bool setValueRatio(float ratio) noexcept { return setValue((max_ - min_) * ratio + min_); }
   /// @brief エクスプレッションペダル番号を指定する
-  /// @param[in] n @arg 正値 EXP番号 @arg 0 無効
+  /// @param [in] n @arg 正値 EXP番号 @arg 0 無効
   void setExp(uint8_t n) noexcept { expNum_ = n; }
   /// @brief エクスプレッションペダル番号を取得する
   /// @retval 正値 EXP番号
@@ -152,17 +152,17 @@ class satoh::fx::EffectorBase
   const RGB ledColor_;
 
   /// @brief UI表示のパラメータを、エフェクト処理で使用する値へ変換する
-  /// @param[in] n 変換対象のパラメータ番号
+  /// @param [in] n 変換対象のパラメータ番号
   virtual void convUiToFx(uint8_t n) noexcept = 0;
   /// @brief パラメータ値文字列取得
-  /// @param[in] n パラメータ番号
+  /// @param [in] n パラメータ番号
   /// @return 文字列のポインタ
   virtual const char *getValueTxtImpl(uint8_t n) const noexcept = 0;
 
 protected:
   /// @brief 属性初期化
-  /// @param[in] uiParam UIパラメータ
-  /// @param[in] paramCount パラメータ総数
+  /// @param [in] uiParam UIパラメータ
+  /// @param [in] paramCount パラメータ総数
   /// @note 継承先のコンストラクタから呼び出すこと
   void init(EffectParameterF *uiParam, uint8_t paramCount)
   {
@@ -177,10 +177,10 @@ protected:
 
 public:
   /// @brief コンストラクタ
-  /// @param[in] id エフェクターID
-  /// @param[in] name エフェクター名
-  /// @param[in] shortName エフェクター名（短縮）
-  /// @param[in] ledColor アクティブ時のLED色
+  /// @param [in] id エフェクターID
+  /// @param [in] name エフェクター名
+  /// @param [in] shortName エフェクター名（短縮）
+  /// @param [in] ledColor アクティブ時のLED色
   explicit EffectorBase(ID id, const char *name, const char *shortName, RGB const &ledColor) //
       : id_(id), name_(name), shortName_(shortName), ledColor_(ledColor)
   {
@@ -190,7 +190,7 @@ public:
   /// @brief エフェクト処理実行
   /// @param[inout] left L音声データ
   /// @param[inout] right R音声データ
-  /// @param[in] size 音声データ数
+  /// @param [in] size 音声データ数
   virtual void effect(float *left, float *right, uint32_t size) noexcept = 0;
   /// @brief エフェクターセットアップ成功・失敗
   /// @retval true 成功
@@ -209,7 +209,7 @@ public:
   /// @return パラメータ数
   virtual uint8_t getParamCount() const noexcept { return paramCount_; }
   /// @brief デフォルト値を取得
-  /// @param[in] n 取得対象のパラメータ番号
+  /// @param [in] n 取得対象のパラメータ番号
   /// @return デフォルト値
   virtual float getDefaultParam(uint8_t n) const noexcept
   {
@@ -220,7 +220,7 @@ public:
     return 0;
   }
   /// @brief パラメータ取得
-  /// @param[in] n 取得対象のパラメータ番号
+  /// @param [in] n 取得対象のパラメータ番号
   /// @return パラメータ
   virtual float getParam(uint8_t n) const noexcept
   {
@@ -239,8 +239,8 @@ public:
     }
   }
   /// @brief パラメータ設定
-  /// @param[in] n 設定対象のパラメータ番号
-  /// @param[in] v 値
+  /// @param [in] n 設定対象のパラメータ番号
+  /// @param [in] v 値
   /// @retval true 設定された
   /// @retval false 元々の値と同じだったため設定されなかった
   virtual bool setParam(uint8_t n, float v) noexcept
@@ -256,7 +256,7 @@ public:
     return false;
   }
   /// @brief エクスプレッションペダル番号を取得する
-  /// @param[in] n パラメータ番号
+  /// @param [in] n パラメータ番号
   /// @retval 正値 EXP番号
   /// @retval 0 無効
   virtual uint8_t getExp(uint8_t n) const noexcept
@@ -268,8 +268,8 @@ public:
     return 0;
   }
   /// @brief エクスプレッションペダル番号を指定する
-  /// @param[in] paramNum パラメータ番号
-  /// @param[in] expNum @arg 正値 EXP番号 @arg 0 無効
+  /// @param [in] paramNum パラメータ番号
+  /// @param [in] expNum @arg 正値 EXP番号 @arg 0 無効
   virtual void setExp(uint8_t paramNum, uint8_t expNum) noexcept
   {
     if (paramNum < paramCount_)
@@ -278,8 +278,8 @@ public:
     }
   }
   /// @brief エクスプレッションペダルの踏み具合をパラメータに反映させる
-  /// @param[in] expNum EXP番号
-  /// @param[in] ratio 比率（最小値 0.0f 〜 1.0f 最大値）
+  /// @param [in] expNum EXP番号
+  /// @param [in] ratio 比率（最小値 0.0f 〜 1.0f 最大値）
   virtual void setExpParam(uint8_t expNum, float ratio) noexcept
   {
     if (expNum == 0)
@@ -295,7 +295,7 @@ public:
     }
   }
   /// @brief パラメータ加算
-  /// @param[in] n 加算対象のパラメータ番号
+  /// @param [in] n 加算対象のパラメータ番号
   /// @retval true 加算した
   /// @retval false 最大値に到達しているため加算しなかった
   virtual bool incrementParam(uint8_t n) noexcept
@@ -311,7 +311,7 @@ public:
     return false;
   }
   /// @brief パラメータ減算
-  /// @param[in] n 減算対象のパラメータ番号
+  /// @param [in] n 減算対象のパラメータ番号
   /// @retval true 減算した
   /// @retval false 最小値に到達しているため減算しなかった
   virtual bool decrementParam(uint8_t n) noexcept
@@ -327,8 +327,8 @@ public:
     return false;
   }
   /// @brief パラメータ比率設定
-  /// @param[in] n 設定対象のパラメータ番号
-  /// @param[in] ratio 比率（最小値 0.0f 〜 1.0f 最大値）
+  /// @param [in] n 設定対象のパラメータ番号
+  /// @param [in] ratio 比率（最小値 0.0f 〜 1.0f 最大値）
   /// @retval true 設定された
   /// @retval false 元々の値と同じだったため設定されなかった
   virtual bool setParamRatio(uint8_t n, float ratio) noexcept
@@ -344,7 +344,7 @@ public:
     return false;
   }
   /// @brief パラメータ名文字列取得
-  /// @param[in] n パラメータ番号
+  /// @param [in] n パラメータ番号
   /// @return 文字列のポインタ
   virtual const char *getParamName(uint8_t n) const noexcept
   {
@@ -355,7 +355,7 @@ public:
     return 0;
   }
   /// @brief パラメータ値文字列取得
-  /// @param[in] n パラメータ番号
+  /// @param [in] n パラメータ番号
   /// @return 文字列のポインタ
   virtual const char *getValueTxt(uint8_t n) const noexcept
   {
@@ -370,7 +370,7 @@ public:
     return 0;
   }
   /// @brief タップ間隔を設定する
-  /// @param[in] ms タップ間隔（ミリ秒）
+  /// @param [in] ms タップ間隔（ミリ秒）
   virtual void setTapInterval(uint32_t ms) noexcept {}
   /// @brief LED色を取得
   /// @return LED色

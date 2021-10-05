@@ -24,14 +24,14 @@ class satoh::NeoPixel
 
 public:
   /// @brief コンストラクタ
-  /// @param[in] spi SPI通信クラス
-  /// @param[in] ledCount LED数
+  /// @param [in] spi SPI通信クラス
+  /// @param [in] ledCount LED数
   NeoPixel(SpiMaster *spi, uint32_t ledCount) noexcept;
   /// @brief デストラクタ
   virtual ~NeoPixel();
   /// @brief 色値を設定する（この関数を呼んだだけでは光らない）
-  /// @param[in] rgb 色値
-  /// @param[in] n LED番号
+  /// @param [in] rgb 色値
+  /// @param [in] n LED番号
   void set(RGB const &rgb, uint32_t n) noexcept;
   /// @brief 色値を全てクリアする（この関数を呼んだだけでは光らない）
   void clear() noexcept;

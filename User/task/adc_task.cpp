@@ -6,7 +6,7 @@
 
 #include "task/adc_task.h"
 #include "common/dma_mem.h"
-#include "message/msglib.h"
+#include "message/type.h"
 #include "stm32f7xx_ll_adc.h"
 #include "stm32f7xx_ll_dma.h"
 #include "task/i2c_task.h"
@@ -34,7 +34,7 @@ public:
     max_ = 0;
   }
   /// @brief 上限・下限を更新
-  /// @param[in] v 更新値
+  /// @param [in] v 更新値
   void update(uint16_t v) noexcept
   {
     min_ = std::min(v, min_);
@@ -45,7 +45,7 @@ public:
   uint16_t getRange() const noexcept { return min_ < max_ ? max_ - min_ : 0; }
 };
 /// @brief 振幅をレベルに変換する
-/// @param[in] v 振幅
+/// @param [in] v 振幅
 /// @return レベル
 uint8_t getLevel(uint16_t v)
 {
@@ -92,7 +92,7 @@ void adcTaskProc(void const *argument)
       satoh::msg::LED_LEVEL level{};
       level.left = getLevel(left.getRange());
       level.right = getLevel(right.getRange());
-      satoh::msg::send(i2cTaskHandle, satoh::msg::LED_LEVEL_UPDATE_REQ, &level, sizeof(level));
+      satoh::msg::send(i2cTaskHandle, satoh::msg::LED_LEVEL_UPDATE_REQ, level);
       left.reset();
       right.reset();
     }

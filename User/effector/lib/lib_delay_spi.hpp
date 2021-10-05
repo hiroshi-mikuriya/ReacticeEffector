@@ -50,9 +50,9 @@ class satoh::delaySpiBuf
   uint32_t wpos_;               ///< 書き込み位置
 
   /// @brief データをfloatからT型に変換し、SRAMへの書き込みをおこなう
-  /// @param[in] floats 書き込みデータ（T型へ変換する前のfloatデータ）
-  /// @param[in] size floatデータ数
-  /// @param[in] pos 書き込み位置
+  /// @param [in] floats 書き込みデータ（T型へ変換する前のfloatデータ）
+  /// @param [in] size floatデータ数
+  /// @param [in] pos 書き込み位置
   /// @retval true 書き込み成功
   /// @retval false 書き込み失敗
   bool writeSram(float const *floats, size_t size, uint32_t pos) const noexcept
@@ -72,9 +72,9 @@ class satoh::delaySpiBuf
     return spi_->send(t, getCommandSize(size)) == SpiMaster::OK;
   }
   /// @brief SPI SRAMからT型のデータを読み出し、floatに変換する
-  /// @param[in] buffer 読み込み先のバッファ
-  /// @param[in] size 読み込みデータ数
-  /// @param[in] pos 読み込み位置
+  /// @param [in] buffer 読み込み先のバッファ
+  /// @param [in] size 読み込みデータ数
+  /// @param [in] pos 読み込み位置
   /// @retval true 読み込み成功
   /// @retval false 読み込み失敗
   bool readSram(float *buffer, size_t size, uint32_t pos) const noexcept
@@ -106,9 +106,9 @@ public:
   /// @brief デフォルトコンストラクタ
   delaySpiBuf() noexcept : spi_(0), blockSize_(0), endPos_(0), interval_(1), wpos_(0) {}
   /// @brief コンストラクタ
-  /// @param[in] spi SPI通信オブジェクト
-  /// @param[in] blockSize ブロックサイズ
-  /// @param[in] maxTime 最大保持時間（ミリ秒）
+  /// @param [in] spi SPI通信オブジェクト
+  /// @param [in] blockSize ブロックサイズ
+  /// @param [in] maxTime 最大保持時間（ミリ秒）
   explicit delaySpiBuf(SpiMaster *spi, uint32_t blockSize, float maxTime) noexcept //
       : spi_(spi),                                                                 //
         blockSize_(blockSize),                                                     //
@@ -130,7 +130,7 @@ public:
   /// @brief インターバルを設定する @param[in] ms 時間（ミリ秒）
   void setInterval(float ms) noexcept { interval_ = std::min(endPos_, getInterval(std::max(1.0f, ms))); }
   /// @brief 今回処理した音声信号をSRAMに書き込む
-  /// @param[in] floats 音声データ（ブロックサイズ分）
+  /// @param [in] floats 音声データ（ブロックサイズ分）
   void write(float const *floats) noexcept
   {
     const uint32_t dpos = endPos_ - wpos_;
@@ -146,7 +146,7 @@ public:
     wpos_ = (wpos_ + blockSize_) % endPos_;
   }
   /// @brief 今回使用する音声をSRAMから読み出す
-  /// @param[in] buffer 格納先のバッファ（ブロックサイズ分）
+  /// @param [in] buffer 格納先のバッファ（ブロックサイズ分）
   void read(float *buffer) const noexcept
   {
     const uint32_t rpos = (wpos_ + endPos_ - interval_) % endPos_;

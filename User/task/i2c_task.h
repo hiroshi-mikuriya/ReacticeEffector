@@ -17,7 +17,7 @@ extern "C"
   extern osThreadId i2cTaskHandle;
 
   /// @brief i2cTask内部処理
-  /// @param[in] argument タスク引数
+  /// @param [in] argument タスク引数
   void i2cTaskProc(void const *argument);
 
   /// @brief I2Cイベント割り込み

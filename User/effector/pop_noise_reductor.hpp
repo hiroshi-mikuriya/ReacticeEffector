@@ -33,7 +33,7 @@ public:
   /// @brief ポップノイズ除去処理
   /// @param[inout] left L音声データ
   /// @param[inout] right R音声データ
-  /// @param[in] size 音声データ数
+  /// @param [in] size 音声データ数
   void reduct(float *left, float *right, uint32_t size) noexcept
   {
     for (uint32_t i = 0; i < size; ++i)

@@ -38,26 +38,26 @@ class satoh::Gyro : public satoh::I2CDeviceBase
 
 public:
   /// @brief コンストラクタ
-  /// @param[in] i2c I2C通信オブジェクト
-  /// @param[in] slaveAddr ジャイロセンサのスレーブアドレス
+  /// @param [in] i2c I2C通信オブジェクト
+  /// @param [in] slaveAddr ジャイロセンサのスレーブアドレス
   explicit Gyro(I2C *i2c, uint8_t slaveAddr) noexcept;
   /// @brief デストラクタ
   virtual ~Gyro() {}
   /// @brief デバイス状態を取得する @retval true 正常 @retval false 異常あり
   explicit operator bool() const noexcept override { return ok_; };
   /// @brief 加速度値取得
-  /// @param[out] acc 加速度値格納先
+  /// @param [out] acc 加速度値格納先
   /// @retval true 取得成功
   /// @retval false 取得失敗
   bool getAccel(int16_t (&acc)[3]) const noexcept;
   /// @brief ジャイロ値取得
-  /// @param[out] gyro ジャイロ値格納先
+  /// @param [out] gyro ジャイロ値格納先
   /// @retval true 取得成功
   /// @retval false 取得失敗
   bool isGyroEnabled(int16_t (&gyro)[3]) const noexcept;
   /// @brief 加速度値とジャイロ値取得
-  /// @param[out] acc 加速度値格納先
-  /// @param[out] gyro ジャイロ値格納先
+  /// @param [out] acc 加速度値格納先
+  /// @param [out] gyro ジャイロ値格納先
   /// @retval true 取得成功
   /// @retval false 取得失敗
   bool getAccelGyro(int16_t (&acc)[3], int16_t (&gyro)[3]) const noexcept;

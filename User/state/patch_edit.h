@@ -36,19 +36,19 @@ class satoh::state::PatchEdit : public satoh::state::Base
   /// @brief 表示更新
   void updateDisplay() noexcept;
   /// @brief 選択中のFX番号更新
-  /// @param[in] up
+  /// @param [in] up
   ///   @arg true カウントアップ
   ///   @arg false カウントダウン
   void modSelectedFxNum(bool up) noexcept;
   /// @brief 選択中のFX番号のFXを変更
-  /// @param[in] next
+  /// @param [in] next
   ///   @arg true 1つ次へ
   ///   @arg false 1つ前へ
   void modFxList(bool next) noexcept;
 
 public:
   /// @brief コンストラクタ
-  /// @param[in] prop プロパティ
+  /// @param [in] prop プロパティ
   explicit PatchEdit(Property &prop) : m_(prop) {}
   /// @brief デストラクタ
   ~PatchEdit() {}

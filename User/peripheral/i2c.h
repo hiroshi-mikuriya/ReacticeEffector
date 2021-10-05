@@ -57,11 +57,11 @@ public:
   /// @brief デフォルトコンストラクタ
   I2C();
   /// @brief コンストラクタ
-  /// @param[in] i2cx I2Cペリフェラル
-  /// @param[in] threadId イベント通知先のスレッドID
-  /// @param[in] dma 送受信DMA
-  /// @param[in] rxStream 受信DMAストリーム
-  /// @param[in] txStream 送信DMAストリーム
+  /// @param [in] i2cx I2Cペリフェラル
+  /// @param [in] threadId イベント通知先のスレッドID
+  /// @param [in] dma 送受信DMA
+  /// @param [in] rxStream 受信DMAストリーム
+  /// @param [in] txStream 送信DMAストリーム
   explicit I2C(I2C_TypeDef *const i2cx, DMA_TypeDef *const dma, uint32_t rxStream, uint32_t txStream) noexcept;
   /// @brief moveコンストラクタ @param[in] that 移動元
   I2C(I2C &&that) noexcept;
@@ -82,10 +82,10 @@ public:
   /// @brief 送信エラー割り込みが発生したら呼び出す関数
   void notifyTxErrorIRQ() noexcept;
   /// @brief データを書き込む
-  /// @param[in] slaveAddr スレーブアドレス
-  /// @param[in] bytes 書き込みデータの先頭ポインタ
-  /// @param[in] size 書き込むバイト数
-  /// @param[in] withSleep 通信完了後の1ミリ秒スリープ有無
+  /// @param [in] slaveAddr スレーブアドレス
+  /// @param [in] bytes 書き込みデータの先頭ポインタ
+  /// @param [in] size 書き込むバイト数
+  /// @param [in] withSleep 通信完了後の1ミリ秒スリープ有無
   /// @retval OK      成功
   /// @retval BUSY    ビジー
   /// @retval TIMEOUT タイムアウト
@@ -93,10 +93,10 @@ public:
   /// @retval ERROR   エラー
   Result write(uint8_t slaveAddr, void const *bytes, uint32_t size, bool withSleep) const noexcept;
   /// @brief データを読み込む
-  /// @param[in] slaveAddr スレーブアドレス
-  /// @param[in] buf 読み込んだデータを格納するバッファ
-  /// @param[in] size 読み込むバイト数
-  /// @param[in] withSleep 通信完了後の1ミリ秒スリープ有無
+  /// @param [in] slaveAddr スレーブアドレス
+  /// @param [in] buf 読み込んだデータを格納するバッファ
+  /// @param [in] size 読み込むバイト数
+  /// @param [in] withSleep 通信完了後の1ミリ秒スリープ有無
   /// @retval OK      成功
   /// @retval BUSY    ビジー
   /// @retval TIMEOUT タイムアウト

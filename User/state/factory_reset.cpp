@@ -22,7 +22,7 @@ void resetParams(state::Property &prop)
   msg::OLED_DISP_TEXT cmd{};
   sprintf(cmd.msg1, "FACTORY RESET");
   sprintf(cmd.msg2, "DONE!!");
-  msg::send(i2cTaskHandle, msg::OLED_DISP_TEXT_REQ, &cmd, sizeof(cmd));
+  msg::send(i2cTaskHandle, msg::OLED_DISP_TEXT_REQ, cmd);
   osDelay(1000);
 }
 } // namespace
@@ -109,7 +109,7 @@ void state::FactoryReset::dispConfirm() const noexcept
   strcpy(cmd.msg1, "RESET TO FACTOORY");
   strcpy(cmd.msg2, "ARE YOU SURE?");
   cmd.yes = yes_;
-  msg::send(i2cTaskHandle, msg::OLED_DISP_CONFIRM_REQ, &cmd, sizeof(cmd));
+  msg::send(i2cTaskHandle, msg::OLED_DISP_CONFIRM_REQ, cmd);
 }
 
 void state::FactoryReset::init() noexcept

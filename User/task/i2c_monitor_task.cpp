@@ -5,7 +5,7 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "i2c_monitor_task.h"
-#include "message/msglib.h"
+#include "message/type.h"
 #include "task/i2c_task.h"
 
 namespace

@@ -17,7 +17,7 @@ extern "C"
   extern osThreadId adcTaskHandle;
 
   /// @brief adcTask内部処理
-  /// @param[in] argument タスク引数
+  /// @param [in] argument タスク引数
   void adcTaskProc(void const *argument);
 
   /// @brief ADC変換完了DMA割り込み

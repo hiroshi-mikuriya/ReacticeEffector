@@ -59,21 +59,21 @@ void changeNeoPixelPattern() noexcept
   switch (n)
   {
   case 0:
-    msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_PATTERN, &RAINBOW_PTN, sizeof(RAINBOW_PTN));
+    msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_PATTERN, RAINBOW_PTN);
     break;
   case 1:
-    msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_PATTERN, &RED_PTN, sizeof(RED_PTN));
+    msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_PATTERN, RED_PTN);
     break;
   case 2:
-    msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_PATTERN, &GREEN_PTN, sizeof(GREEN_PTN));
+    msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_PATTERN, GREEN_PTN);
     break;
   case 3:
-    msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_PATTERN, &BLUE_PTN, sizeof(BLUE_PTN));
+    msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_PATTERN, BLUE_PTN);
     break;
   case 4:
   {
     msg::NEO_PIXEL_PATTERN ptn{};
-    msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_PATTERN, &ptn, sizeof(ptn));
+    msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_PATTERN, ptn);
     break;
   }
   }
@@ -104,7 +104,7 @@ void state::tapProc(Property &prop) noexcept
     prop.getFx(i)->setTapInterval(interval);
   }
   msg::NEO_PIXEL_SPEED speed = {interval};
-  msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_SPEED, &speed, sizeof(speed));
+  msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_SPEED, speed);
 }
 
 void state::re1Proc(Property &prop) noexcept
@@ -119,5 +119,5 @@ void state::timerProc(Property &prop) noexcept
   msg::LED_SIMPLE cmd{};
   cmd.led = 1;
   cmd.level = tap->getLedLevel();
-  msg::send(i2cTaskHandle, msg::LED_SIMPLE_REQ, &cmd, sizeof(cmd));
+  msg::send(i2cTaskHandle, msg::LED_SIMPLE_REQ, cmd);
 }

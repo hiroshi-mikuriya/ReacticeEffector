@@ -47,42 +47,42 @@ public:
   /// @brief デフォルトコンストラクタ
   SpiMaster();
   /// @brief コンストラクタ（送信専用初期化）
-  /// @param[in] spi SPIペリフェラル
-  /// @param[in] dma DMA
-  /// @param[in] txStream 送信DMAストリーム
+  /// @param [in] spi SPIペリフェラル
+  /// @param [in] dma DMA
+  /// @param [in] txStream 送信DMAストリーム
   explicit SpiMaster(SPI_TypeDef *spi, DMA_TypeDef *dma, uint32_t txStream) noexcept;
   /// @brief コンストラクタ（送受信用初期化）
-  /// @param[in] spi SPIペリフェラル
-  /// @param[in] dma DMA
-  /// @param[in] txStream 送信DMAストリーム
-  /// @param[in] rxStream 受信DMAストリーム
-  /// @param[in] nssGpio NSS GPIO
-  /// @param[in] nssPin NSSピン
+  /// @param [in] spi SPIペリフェラル
+  /// @param [in] dma DMA
+  /// @param [in] txStream 送信DMAストリーム
+  /// @param [in] rxStream 受信DMAストリーム
+  /// @param [in] nssGpio NSS GPIO
+  /// @param [in] nssPin NSSピン
   explicit SpiMaster(SPI_TypeDef *spi, DMA_TypeDef *dma, uint32_t txStream, uint32_t rxStream, //
                      GPIO_TypeDef *nssGpio, uint32_t nssPin) noexcept;
   /// @brief moveコンストラクタ
-  /// @param[in] that 移動元
+  /// @param [in] that 移動元
   SpiMaster(SpiMaster &&that);
   /// @brief move演算子
-  /// @param[in] that 移動元
+  /// @param [in] that 移動元
   /// @return 自身の参照
   SpiMaster &operator=(SpiMaster &&that);
   /// @brief デストラクタ
   virtual ~SpiMaster();
   /// @brief 送信処理
-  /// @param[in] bytes 送信データの先頭ポインタ
-  /// @param[in] size 送信データサイズ
-  /// @param[in] millisec タイムアウト（ミリ秒）
+  /// @param [in] bytes 送信データの先頭ポインタ
+  /// @param [in] size 送信データサイズ
+  /// @param [in] millisec タイムアウト（ミリ秒）
   /// @retval OK      成功
   /// @retval BUSY    ビジー
   /// @retval TIMEOUT タイムアウト
   /// @retval ERROR   エラー
   Result send(void const *bytes, uint32_t size, uint32_t millisec = osWaitForever) const noexcept;
   /// @brief 送受信処理
-  /// @param[in] tbytes 送信データの先頭ポインタ
-  /// @param[in] rbytes 受信データの先頭ポインタ
-  /// @param[in] size 送受信データサイズ
-  /// @param[in] millisec タイムアウト（ミリ秒）
+  /// @param [in] tbytes 送信データの先頭ポインタ
+  /// @param [in] rbytes 受信データの先頭ポインタ
+  /// @param [in] size 送受信データサイズ
+  /// @param [in] millisec タイムアウト（ミリ秒）
   /// @retval OK      成功
   /// @retval BUSY    ビジー
   /// @retval TIMEOUT タイムアウト

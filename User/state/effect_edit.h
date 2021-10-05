@@ -36,7 +36,7 @@ class satoh::state::EffectEdit : public satoh::state::Base
   /// @brief タイマー通知を処理する @return 次の状態ID
   ID timer() noexcept override;
   /// @brief 選択中のパラメータを変更
-  /// @param[in] up
+  /// @param [in] up
   ///   @arg true アップ
   ///   @arg false ダウン
   void modSelectedParam(bool up) noexcept;
@@ -45,7 +45,7 @@ class satoh::state::EffectEdit : public satoh::state::Base
 
 public:
   /// @brief コンストラクタ
-  /// @param[in] prop プロパティ
+  /// @param [in] prop プロパティ
   explicit EffectEdit(Property &prop) : m_(prop) {}
   /// @brief デストラクタ
   ~EffectEdit() {}

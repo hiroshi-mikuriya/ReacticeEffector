@@ -38,7 +38,7 @@ class satoh::state::Playing : public satoh::state::Base
 
 public:
   /// @brief コンストラクタ
-  /// @param[in] prop プロパティ
+  /// @param [in] prop プロパティ
   explicit Playing(Property &prop) : m_(prop) {}
   /// @brief デストラクタ
   ~Playing() {}

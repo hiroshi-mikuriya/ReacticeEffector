@@ -97,22 +97,22 @@ void state::Playing::modBank() noexcept
   {
     disp.fx[i] = m_.getFx(i);
   }
-  msg::send(i2cTaskHandle, msg::OLED_DISP_BANK_REQ, &disp, sizeof(disp));
+  msg::send(i2cTaskHandle, msg::OLED_DISP_BANK_REQ, disp);
   msg::SOUND_EFFECTOR sound{};
   for (size_t i = 0; i < countof(sound.fx); ++i)
   {
     sound.fx[i] = disp.fx[i];
   }
-  msg::send(soundTaskHandle, msg::SOUND_CHANGE_EFFECTOR_REQ, &sound, sizeof(sound));
+  msg::send(soundTaskHandle, msg::SOUND_CHANGE_EFFECTOR_REQ, sound);
   msg::LED_ALL_EFFECT led{};
   led.rgb[m_.getPatchNum()] = m_.getCurrentColor();
-  msg::send(i2cTaskHandle, msg::LED_ALL_EFFECT_REQ, &led, sizeof(led));
+  msg::send(i2cTaskHandle, msg::LED_ALL_EFFECT_REQ, led);
 }
 void state::Playing::init() noexcept
 {
   modBank();
   m_.initEditSelectedFxNum();
   msg::LED_SIMPLE led{0, true};
-  msg::send(i2cTaskHandle, msg::LED_SIMPLE_REQ, &led, sizeof(led));
+  msg::send(i2cTaskHandle, msg::LED_SIMPLE_REQ, led);
 }
 void state::Playing::deinit() noexcept {}

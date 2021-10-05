@@ -18,7 +18,7 @@ float toFloat(T v);
 } // namespace satoh
 
 /// @brief floatからの変換（int8_t版）
-/// @param[in] v -1.0f 〜 1.0f
+/// @param [in] v -1.0f 〜 1.0f
 /// @return 変換値
 template <>
 inline int8_t satoh::fromFloat<int8_t>(float v)
@@ -27,7 +27,7 @@ inline int8_t satoh::fromFloat<int8_t>(float v)
 }
 
 /// @brief floatへの変換（int8_t版）
-/// @param[in] v 値
+/// @param [in] v 値
 /// @return -1.0f 〜 1.0f
 template <>
 inline float satoh::toFloat<int8_t>(int8_t v)
@@ -36,7 +36,7 @@ inline float satoh::toFloat<int8_t>(int8_t v)
 }
 
 /// @brief floatからの変換（int16_t版）
-/// @param[in] v -1.0f 〜 1.0f
+/// @param [in] v -1.0f 〜 1.0f
 /// @return 変換値
 template <>
 inline int16_t satoh::fromFloat<int16_t>(float v)
@@ -45,7 +45,7 @@ inline int16_t satoh::fromFloat<int16_t>(float v)
 }
 
 /// @brief floatへの変換（int16_t版）
-/// @param[in] v 値
+/// @param [in] v 値
 /// @return -1.0f 〜 1.0f
 template <>
 inline float satoh::toFloat<int16_t>(int16_t v)
@@ -54,7 +54,7 @@ inline float satoh::toFloat<int16_t>(int16_t v)
 }
 
 /// @brief floatからの変換（float版）
-/// @param[in] v -1.0f 〜 1.0f
+/// @param [in] v -1.0f 〜 1.0f
 /// @return 変換値
 template <>
 inline float satoh::fromFloat<float>(float v)
@@ -63,7 +63,7 @@ inline float satoh::fromFloat<float>(float v)
 }
 
 /// @brief floatへの変換（float版）
-/// @param[in] v 値
+/// @param [in] v 値
 /// @return -1.0f 〜 1.0f
 template <>
 inline float satoh::toFloat<float>(float v)

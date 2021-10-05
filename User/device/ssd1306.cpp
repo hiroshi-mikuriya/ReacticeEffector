@@ -38,10 +38,10 @@ constexpr uint8_t HEIGHT = 64;
 constexpr uint8_t PAGE = 8;
 constexpr uint32_t BUF_SIZE = WIDTH * HEIGHT / 8;
 /// @brief １ピクセル書き込む
-/// @param[in] color 色
-/// @param[in] x X位置
-/// @param[in] y Y位置
-/// @param[out] dst 書き込み先
+/// @param [in] color 色
+/// @param [in] x X位置
+/// @param [in] y Y位置
+/// @param [out] dst 書き込み先
 void drawPixel(uint8_t color, uint8_t x, uint8_t y, uint8_t *dst) noexcept
 {
   if (x < WIDTH && y < HEIGHT)
@@ -57,12 +57,12 @@ void drawPixel(uint8_t color, uint8_t x, uint8_t y, uint8_t *dst) noexcept
   }
 }
 /// @brief １文字書き込む
-/// @param[in] ch １文字
-/// @param[in] font フォントデータ
-/// @param[in] invert 反転有無
-/// @param[in] x X位置
-/// @param[in] y Y位置
-/// @param[out] dst 書き込み先
+/// @param [in] ch １文字
+/// @param [in] font フォントデータ
+/// @param [in] invert 反転有無
+/// @param [in] x X位置
+/// @param [in] y Y位置
+/// @param [out] dst 書き込み先
 void drawChar(char ch, satoh::FontDef const &font, bool invert, uint8_t x, uint8_t y, uint8_t *dst) noexcept
 {
   for (uint8_t dy = 0; dy < font.height; ++dy)
@@ -80,12 +80,12 @@ void drawChar(char ch, satoh::FontDef const &font, bool invert, uint8_t x, uint8
   }
 }
 /// @brief 文字列を書き込む
-/// @param[in] str 文字列
-/// @param[in] font フォントデータ
-/// @param[in] invert 反転有無
-/// @param[in] x X位置
-/// @param[in] y Y位置
-/// @param[out] dst 書き込み先
+/// @param [in] str 文字列
+/// @param [in] font フォントデータ
+/// @param [in] invert 反転有無
+/// @param [in] x X位置
+/// @param [in] y Y位置
+/// @param [out] dst 書き込み先
 void drawString(char const *str, satoh::FontDef const &font, bool invert, uint8_t x, uint8_t y, uint8_t *dst) noexcept
 {
   for (char const *p = str; *p; ++p)

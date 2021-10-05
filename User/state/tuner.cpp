@@ -142,19 +142,19 @@ state::ID state::Tuner::timer() noexcept
   {
     cmd = analyze(tuner->getEstimatedFreq());
   }
-  msg::send(i2cTaskHandle, msg::OLED_DISP_TUNER_REQ, &cmd, sizeof(cmd));
+  msg::send(i2cTaskHandle, msg::OLED_DISP_TUNER_REQ, cmd);
   return id();
 }
 void state::Tuner::init() noexcept
 {
   {
     msg::LED_ALL_EFFECT cmd{};
-    msg::send(i2cTaskHandle, msg::LED_ALL_EFFECT_REQ, &cmd, sizeof(cmd));
+    msg::send(i2cTaskHandle, msg::LED_ALL_EFFECT_REQ, cmd);
   }
   {
     msg::SOUND_EFFECTOR cmd{};
     cmd.fx[0] = m_.getTuner();
-    msg::send(soundTaskHandle, msg::SOUND_CHANGE_EFFECTOR_REQ, &cmd, sizeof(cmd));
+    msg::send(soundTaskHandle, msg::SOUND_CHANGE_EFFECTOR_REQ, cmd);
   }
 }
 void state::Tuner::deinit() noexcept {}

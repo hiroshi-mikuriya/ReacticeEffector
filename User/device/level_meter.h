@@ -40,7 +40,7 @@ class satoh::LevelMeter : public satoh::I2CDeviceBase
 
 public:
   /// @brief コンストラクタ
-  /// @param[in] i2c I2C通信オブジェクト
+  /// @param [in] i2c I2C通信オブジェクト
   explicit LevelMeter(I2C *i2c) noexcept;
   /// @brief デストラクタ
   virtual ~LevelMeter() {}
@@ -48,21 +48,21 @@ public:
   explicit operator bool() const noexcept override { return ok_; };
   /// @brief レベルメーター（左）のレベルを設定する
   /// @note この関数を呼んだだけでは点灯状態は変化しない
-  /// @param[in] level レベル（0 - 7）
+  /// @param [in] level レベル（0 - 7）
   void setLeft(uint8_t level) noexcept;
   /// @brief レベルメーター（右）のレベルを設定する
   /// @note この関数を呼んだだけでは点灯状態は変化しない
-  /// @param[in] level レベル（0 - 7）
+  /// @param [in] level レベル（0 - 7）
   void setRight(uint8_t level) noexcept;
   /// @brief POWER LEDの点灯・消灯を設定する
   /// @note この関数を呼んだだけでは点灯状態は変化しない
-  /// @param[in] level
+  /// @param [in] level
   ///    @arg true 点灯
   ///    @arg false 消灯
   void setPowerLed(bool level) noexcept;
   /// @brief TAP LEDの点灯・消灯を設定する
   /// @note この関数を呼んだだけでは点灯状態は変化しない
-  /// @param[in] level
+  /// @param [in] level
   ///    @arg true 点灯
   ///    @arg false 消灯
   void setTapLed(bool level) noexcept;

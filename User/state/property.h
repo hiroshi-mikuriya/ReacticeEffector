@@ -41,8 +41,8 @@ class satoh::state::Effectors
   /// @brief エフェクターを一覧に追加する
   /// @tparam FX エフェクター種類
   /// @tparam Args エフェクタークラスコンストラクタ引数型
-  /// @param[in] cond 追加条件（trueならば追加する）
-  /// @param[in] args エフェクタークラスコンストラクタ引数
+  /// @param [in] cond 追加条件（trueならば追加する）
+  /// @param [in] args エフェクタークラスコンストラクタ引数
   template <typename FX, class... Args>
   void addList(bool cond, Args... args)
   {
@@ -58,37 +58,37 @@ class satoh::state::Effectors
 
 public:
   /// @brief コンストラクタ
-  /// @param[in] n FX番号（0, 1, 2）
-  /// @param[in] spi SPI SRAM通信オブジェクト
+  /// @param [in] n FX番号（0, 1, 2）
+  /// @param [in] spi SPI SRAM通信オブジェクト
   explicit Effectors(uint8_t n, SpiMaster *spi) noexcept;
   /// @brief エフェクター取得
-  /// @param[in] i インデックス
+  /// @param [in] i インデックス
   /// @return エフェクター
   fx::EffectorBase *getFx(size_t i) noexcept;
   /// @brief エフェクター取得
-  /// @param[in] i インデックス
+  /// @param [in] i インデックス
   /// @return エフェクター
   fx::EffectorBase const *getFx(size_t i) const noexcept;
   /// @brief エフェクター取得
-  /// @param[in] id エフェクターID
+  /// @param [in] id エフェクターID
   /// @return エフェクター
   fx::EffectorBase *getFxById(fx::ID id) noexcept;
   /// @brief エフェクター取得
-  /// @param[in] id エフェクターID
+  /// @param [in] id エフェクターID
   /// @return エフェクター
   fx::EffectorBase const *getFxById(fx::ID id) const noexcept;
   /// @brief エフェクター数を取得
   /// @return エフェクター数
   size_t count() const noexcept;
   /// @brief エフェクター一覧から検索してインデックスを返す
-  /// @param[in] fx 検索対象のエフェクター
+  /// @param [in] fx 検索対象のエフェクター
   /// @retval 0以上 インデックス
   /// @retval -1 見つからない
   /// @retval -2 引数がNULL
   int find(fx::EffectorBase const *fx);
   /// @brief 次のエフェクターを取得
-  /// @param[in] cur 現在選択中のエフェクター
-  /// @param[in] next
+  /// @param [in] cur 現在選択中のエフェクター
+  /// @param [in] next
   ///   @arg true 次のエフェクターを検索
   ///   @arg false 前のエフェクターを検索
   /// @return 次 or 前のエフェクター
@@ -102,10 +102,10 @@ struct satoh::state::EffectParam
   uint8_t exp[6]; ///< エクスプレッションペダル有効・無効
   float value[6]; ///< パラメータ値
   /// @brief FXからパラメータを読み込む
-  /// @param[in] fx 読み込み先
+  /// @param [in] fx 読み込み先
   void read(fx::EffectorBase const *fx) noexcept;
   /// @brief エフェクターにパラメータを書き込む
-  /// @param[in] fx 書き込み先
+  /// @param [in] fx 書き込み先
   void write(fx::EffectorBase *fx) const noexcept;
 };
 
@@ -186,15 +186,15 @@ class satoh::state::Property
 
 public:
   /// @brief コンストラクタ
-  /// @param[in] patch パッチテーブル
-  /// @param[in] spi SPI SRAM通信オブジェクト
+  /// @param [in] patch パッチテーブル
+  /// @param [in] spi SPI SRAM通信オブジェクト
   explicit Property(PatchTable *patch, SpiMaster *spi);
   /// @brief エフェクター番号を指定して取得
-  /// @param[in] n 0, 1, 2
+  /// @param [in] n 0, 1, 2
   /// @return エフェクター
   fx::EffectorBase *getFx(uint8_t n) noexcept;
   /// @brief エフェクター番号を指定して取得
-  /// @param[in] n 0, 1, 2
+  /// @param [in] n 0, 1, 2
   /// @return エフェクター
   fx::EffectorBase const *getFx(uint8_t n) const noexcept;
   /// @brief 選択中のエフェクターを取得
@@ -204,13 +204,13 @@ public:
   /// @return エフェクター
   fx::EffectorBase const *getEditSelectedFx() const noexcept;
   /// @brief バンク番号更新
-  /// @param[in] up
+  /// @param [in] up
   ///   @arg true +1
   ///   @arg false -1
   /// @note 変更前のパッチを保存し、変更後のパッチを読み出す
   void changeBank(bool up) noexcept;
   /// @brief パッチ番号更新
-  /// @param[in] n パッチ番号
+  /// @param [in] n パッチ番号
   /// @note 変更前のパッチを保存し、変更後のパッチを読み出す
   void changePatch(uint8_t n) noexcept;
   /// @brief バンク番号取得
@@ -231,12 +231,12 @@ public:
   /// @brief パッチを保存する
   void savePatch() noexcept;
   /// @brief 選択中のFX1-3のエフェクタを変更する
-  /// @param[in] up
+  /// @param [in] up
   ///   @arg true +1
   ///   @arg false -1
   void updateNextFx(bool up) noexcept;
   /// @brief 編集中のエフェクト番号更新
-  /// @param[in] up
+  /// @param [in] up
   ///   @arg true +1
   ///   @arg false -1
   void updateEditSelectedFxNum(bool up) noexcept;

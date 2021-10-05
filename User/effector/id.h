@@ -13,7 +13,7 @@ namespace satoh
 namespace fx
 {
 /// @brief エフェクターID
-typedef uint16_t ID;
+using ID = uint16_t;
 /// @brief エフェクターカテゴリ
 namespace cat
 {

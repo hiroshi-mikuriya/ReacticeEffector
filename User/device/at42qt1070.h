@@ -34,14 +34,14 @@ class satoh::AT42QT1070 : public satoh::I2CDeviceBase
 
 public:
   /// @brief コンストラクタ
-  /// @param[in] i2c I2C通信オブジェクト
+  /// @param [in] i2c I2C通信オブジェクト
   explicit AT42QT1070(I2C *i2c) noexcept;
   /// @brief デストラクタ
   virtual ~AT42QT1070() {}
   /// @brief デバイス状態を取得する @retval true 正常 @retval false 異常あり
   explicit operator bool() const noexcept override { return ok_; };
   /// @brief キー状態取得
-  /// @param[out] keys キー状態格納先
+  /// @param [out] keys キー状態格納先
   ///   @arg 0 TAP
   ///   @arg 1 RE1
   ///   @arg 2 DOWN

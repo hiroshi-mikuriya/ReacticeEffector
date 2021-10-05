@@ -6,9 +6,10 @@
 
 #include "neo_pixel_task.h"
 #include "cmsis_os.h"
+#include "common/alloc.hpp"
 #include "device/neo_pixel.h"
 #include "main.h"
-#include "message/msglib.h"
+#include "message/type.h"
 
 namespace msg = satoh::msg;
 
@@ -19,12 +20,12 @@ satoh::SpiMaster *s_spi = 0;
 
 void neoPixelTaskProc(void const *argument)
 {
-  if (msg::registerTask(2) != osOK)
+  if (msg::registerThread(2) != osOK)
   {
     return;
   }
   constexpr uint32_t LED_COUNT = 100;
-  s_spi = new satoh::SpiMaster(NP_SPI, DMA1, LL_DMA_STREAM_5);
+  s_spi = satoh::alloc<satoh::SpiMaster>(NP_SPI, DMA1, LL_DMA_STREAM_5);
   satoh::NeoPixel np(s_spi, LED_COUNT);
   msg::NEO_PIXEL_PATTERN ptn{};
   msg::NEO_PIXEL_SPEED speed = {100};

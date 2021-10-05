@@ -41,7 +41,7 @@ private:
   virtual void updateDtime() noexcept = 0;
 
   /// @brief UI表示のパラメータを、エフェクト処理で使用する値へ変換する
-  /// @param[in] n 変換対象のパラメータ番号
+  /// @param [in] n 変換対象のパラメータ番号
   void convUiToFx(uint8_t n) noexcept override
   {
     switch (n)
@@ -64,7 +64,7 @@ private:
     }
   }
   /// @brief パラメータ値文字列取得
-  /// @param[in] n パラメータ番号
+  /// @param [in] n パラメータ番号
   /// @return 文字列のポインタ
   const char *getValueTxtImpl(uint8_t n) const noexcept override
   {
@@ -83,10 +83,10 @@ private:
 
 public:
   /// @brief コンストラクタ
-  /// @param[in] id エフェクターID
-  /// @param[in] name エフェクター名
-  /// @param[in] shortName エフェクター名（短縮）
-  /// @param[in] ledColor アクティブ時のLED色
+  /// @param [in] id エフェクターID
+  /// @param [in] name エフェクター名
+  /// @param [in] shortName エフェクター名（短縮）
+  /// @param [in] ledColor アクティブ時のLED色
   DelayBase(ID id, const char *name, const char *shortName, RGB const &ledColor) //
       : EffectorBase(id, name, shortName, ledColor),                             //
         ui_({

@@ -40,7 +40,7 @@ class satoh::state::FactoryReset : public satoh::state::Base
 
 public:
   /// @brief コンストラクタ
-  /// @param[in] prop プロパティ
+  /// @param [in] prop プロパティ
   explicit FactoryReset(Property &prop) : m_(prop) {}
   /// @brief デストラクタ
   ~FactoryReset() {}

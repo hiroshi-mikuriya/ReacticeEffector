@@ -10,13 +10,12 @@
 #include "constant.h"
 #include "effector/effector_base.h"
 #include "error.h"
+#include "msglib.h"
 
 namespace satoh
 {
 namespace msg
 {
-/// @brief メッセージID型
-typedef uint16_t ID;
 /// @brief メッセージカテゴリ定義
 namespace cat
 {
@@ -33,56 +32,31 @@ constexpr ID APP = 9 << SHIFT;
 constexpr ID ERROR = 15 << SHIFT;
 } // namespace cat
 
-/// ジャイロ - 取得依頼
-constexpr ID GYRO_GET_REQ = 1 | cat::GYRO;
-/// ジャイロ - 加速度・ジャイロ値通知
-constexpr ID GYRO_NOTIFY = 2 | cat::GYRO;
-/// LED - レベルメーター（左右）更新依頼
-constexpr ID LED_LEVEL_UPDATE_REQ = 1 | cat::LED;
-/// LED - Power/Tap LED点灯状態変更依頼
-constexpr ID LED_SIMPLE_REQ = 2 | cat::LED;
-/// LED - EFFECT LED点灯状態変更依頼（LED指定）
-constexpr ID LED_EFFECT_REQ = 3 | cat::LED;
-/// LED - EFFECT LED点灯状態変更依頼（全LED）
-constexpr ID LED_ALL_EFFECT_REQ = 4 | cat::LED;
-/// ENCODER - エンコーダ値取得依頼
-constexpr ID ENCODER_GET_REQ = 1 | cat::ENCODER;
-/// ENCODER - ロータリーエンコーダ値通知
-constexpr ID ROTARY_ENCODER_NOTIFY = 2 | cat::ENCODER;
-/// ENCODER - エフェクトキー変化通知
-constexpr ID EFFECT_KEY_CHANGED_NOTIFY = 3 | cat::ENCODER;
-/// キー入力 - 取得依頼
-constexpr ID MODE_KEY_GET_REQ = 1 | cat::KEY;
-/// キー入力 - キー取得値通知
-constexpr ID MODE_KEY_NOTIFY = 2 | cat::KEY;
-/// OLED - エフェクターパラメータ一一覧表示依頼
-constexpr ID OLED_DISP_EFFECTOR_REQ = 1 | cat::OLED;
-/// OLED - バンク画面表示依頼
-constexpr ID OLED_DISP_BANK_REQ = 2 | cat::OLED;
-/// OLED - コンファーム画面表示依頼
-constexpr ID OLED_DISP_CONFIRM_REQ = 3 | cat::OLED;
-/// OLED - テキスト表示依頼
-constexpr ID OLED_DISP_TEXT_REQ = 4 | cat::OLED;
-/// OLED - チューナー表示依頼
-constexpr ID OLED_DISP_TUNER_REQ = 5 | cat::OLED;
-/// USB - 送信依頼
-constexpr ID USB_TX_REQ = 1 | cat::USB;
-/// USB - 受信通知
-constexpr ID USB_RX_NOTIFY = 2 | cat::USB;
-/// NeoPixel - 点灯パターン指定
-constexpr ID NEO_PIXEL_SET_PATTERN = 1 | cat::NEOPIXEL;
-/// NeoPixel - 点灯スピード指定
-constexpr ID NEO_PIXEL_SET_SPEED = 2 | cat::NEOPIXEL;
-/// Sound - DMA半分受信完了通知
-constexpr ID SOUND_DMA_HALF_NOTIFY = 1 | cat::SOUND;
-/// Sound - DMA全部受信完了通知
-constexpr ID SOUND_DMA_CPLT_NOTIFY = 2 | cat::SOUND;
-/// Sound - エフェクター変更要求
-constexpr ID SOUND_CHANGE_EFFECTOR_REQ = 3 | cat::SOUND;
-/// App - タイマー通知
-constexpr ID APP_TIM_NOTIFY = 1 | cat::APP;
-/// Error - エラー通知
-constexpr ID ERROR_NOTIFY = 1 | cat::ERROR;
+constexpr ID GYRO_GET_REQ = 1 | cat::GYRO;                 ///< ジャイロ - 取得依頼
+constexpr ID GYRO_NOTIFY = 2 | cat::GYRO;                  ///< ジャイロ - 加速度・ジャイロ値通知
+constexpr ID LED_LEVEL_UPDATE_REQ = 1 | cat::LED;          ///< LED - レベルメーター（左右）更新依頼
+constexpr ID LED_SIMPLE_REQ = 2 | cat::LED;                ///< LED - Power/Tap LED点灯状態変更依頼
+constexpr ID LED_EFFECT_REQ = 3 | cat::LED;                ///< LED - EFFECT LED点灯状態変更依頼（LED指定）
+constexpr ID LED_ALL_EFFECT_REQ = 4 | cat::LED;            ///< LED - EFFECT LED点灯状態変更依頼（全LED）
+constexpr ID ENCODER_GET_REQ = 1 | cat::ENCODER;           ///< ENCODER - エンコーダ値取得依頼
+constexpr ID ROTARY_ENCODER_NOTIFY = 2 | cat::ENCODER;     ///< ENCODER - ロータリーエンコーダ値通知
+constexpr ID EFFECT_KEY_CHANGED_NOTIFY = 3 | cat::ENCODER; ///< ENCODER - エフェクトキー変化通知
+constexpr ID MODE_KEY_GET_REQ = 1 | cat::KEY;              ///< キー入力 - 取得依頼
+constexpr ID MODE_KEY_NOTIFY = 2 | cat::KEY;               ///< キー入力 - キー取得値通知
+constexpr ID OLED_DISP_EFFECTOR_REQ = 1 | cat::OLED;       ///< OLED - エフェクターパラメータ一一覧表示依頼
+constexpr ID OLED_DISP_BANK_REQ = 2 | cat::OLED;           ///< OLED - バンク画面表示依頼
+constexpr ID OLED_DISP_CONFIRM_REQ = 3 | cat::OLED;        ///< OLED - コンファーム画面表示依頼
+constexpr ID OLED_DISP_TEXT_REQ = 4 | cat::OLED;           ///< OLED - テキスト表示依頼
+constexpr ID OLED_DISP_TUNER_REQ = 5 | cat::OLED;          ///< OLED - チューナー表示依頼
+constexpr ID USB_TX_REQ = 1 | cat::USB;                    ///< USB - 送信依頼
+constexpr ID USB_RX_NOTIFY = 2 | cat::USB;                 ///< USB - 受信通知
+constexpr ID NEO_PIXEL_SET_PATTERN = 1 | cat::NEOPIXEL;    ///< NeoPixel - 点灯パターン指定
+constexpr ID NEO_PIXEL_SET_SPEED = 2 | cat::NEOPIXEL;      ///< NeoPixel - 点灯スピード指定
+constexpr ID SOUND_DMA_HALF_NOTIFY = 1 | cat::SOUND;       ///< Sound - DMA半分受信完了通知
+constexpr ID SOUND_DMA_CPLT_NOTIFY = 2 | cat::SOUND;       ///< Sound - DMA全部受信完了通知
+constexpr ID SOUND_CHANGE_EFFECTOR_REQ = 3 | cat::SOUND;   ///< Sound - エフェクター変更要求
+constexpr ID APP_TIM_NOTIFY = 1 | cat::APP;                ///< App - タイマー通知
+constexpr ID ERROR_NOTIFY = 1 | cat::ERROR;                ///< Error - エラー通知
 
 struct ACC_GYRO;
 struct LED_LEVEL;

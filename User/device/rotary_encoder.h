@@ -38,17 +38,17 @@ class satoh::RotaryEncoder : public satoh::I2CDeviceBase
 
 public:
   /// @brief コンストラクタ
-  /// @param[in] i2c I2C通信オブジェクト
+  /// @param [in] i2c I2C通信オブジェクト
   explicit RotaryEncoder(I2C *i2c) noexcept;
   /// @brief デストラクタ
   virtual ~RotaryEncoder() {}
   /// @brief デバイス状態を取得する @retval true 正常 @retval false 異常あり
   explicit operator bool() const noexcept override { return ok_; };
   /// @brief デバイスからレジスタを読み出す
-  /// @param[out] button ボタン状態
+  /// @param [out] button ボタン状態
   ///   @arg BUTTON_UP ボタン離し中
   ///   @arg BUTTON_DOWN ボタン押下中
-  /// @param[out] angleDiff 角度変化量
+  /// @param [out] angleDiff 角度変化量
   /// @retval -1 通信失敗
   /// @retval 0 前回から変更なし
   /// @retval 1 ロータリーエンコーダ状態に変化あり

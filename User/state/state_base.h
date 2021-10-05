@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "message/msglib.h"
+#include "message/type.h"
 #include "property.h"
 
 namespace satoh
@@ -53,7 +53,7 @@ public:
   /// @brief この状態が終了するときに行う終了処理
   virtual void deinit() noexcept = 0;
   /// @brief メッセージ処理
-  /// @param[in] msg メッセージ
+  /// @param [in] msg メッセージ
   /// @return 次の状態ID
   ID run(msg::Message const *msg) noexcept
   {

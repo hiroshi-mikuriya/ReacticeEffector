@@ -17,7 +17,7 @@ extern "C"
   extern osThreadId appTaskHandle;
 
   /// @brief appTask内部処理
-  /// @param[in] argument タスク引数
+  /// @param [in] argument タスク引数
   void appTaskProc(void const *argument);
 
   /// @brief APP TIM割り込み

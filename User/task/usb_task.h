@@ -17,17 +17,17 @@ extern "C"
   extern osThreadId usbTxTaskHandle;
 
   /// @brief USB送信Task内部処理
-  /// @param[in] argument タスク引数
+  /// @param [in] argument タスク引数
   void usbTxTaskProc(void const *argument);
 
   /// @brief USB受信割り込み
-  /// @param[in] bytes 受信データの先頭ポインタ
-  /// @param[in] size 受信データサイズ
+  /// @param [in] bytes 受信データの先頭ポインタ
+  /// @param [in] size 受信データサイズ
   void usbRxIRQ(uint8_t const *bytes, uint32_t size);
 
   /// @brief USB送信完了割り込み
-  /// @param[in] bytes 受信データの先頭ポインタ
-  /// @param[in] size 受信データサイズ
+  /// @param [in] bytes 受信データの先頭ポインタ
+  /// @param [in] size 受信データサイズ
   void usbTxEndIRQ(uint8_t const *bytes, uint32_t size);
 
 #ifdef __cplusplus

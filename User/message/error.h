@@ -15,7 +15,7 @@ namespace msg
 namespace error
 {
 /// @brief エラーID型
-typedef uint16_t ID;
+using ID = uint16_t;
 /// @brief メッセージカテゴリ定義
 namespace cat
 {

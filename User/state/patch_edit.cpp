@@ -104,7 +104,7 @@ void state::PatchEdit::updateDisplay() noexcept
   {
     cmd.fx[i] = m_.getFx(i);
   }
-  msg::send(i2cTaskHandle, msg::OLED_DISP_BANK_REQ, &cmd, sizeof(cmd));
+  msg::send(i2cTaskHandle, msg::OLED_DISP_BANK_REQ, cmd);
 }
 void state::PatchEdit::modSelectedFxNum(bool up) noexcept
 {
@@ -120,7 +120,7 @@ void state::PatchEdit::modFxList(bool next) noexcept
   {
     sound.fx[i] = m_.getFx(i);
   }
-  msg::send(soundTaskHandle, msg::SOUND_CHANGE_EFFECTOR_REQ, &sound, sizeof(sound));
+  msg::send(soundTaskHandle, msg::SOUND_CHANGE_EFFECTOR_REQ, sound);
 }
 void state::PatchEdit::init() noexcept
 {

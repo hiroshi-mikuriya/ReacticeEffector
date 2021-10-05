@@ -45,7 +45,7 @@ class Finalizer
 
 public:
   /// @brief コンストラクタ
-  /// @param[in] i2cx I2Cペリフェラル
+  /// @param [in] i2cx I2Cペリフェラル
   explicit Finalizer(I2C_TypeDef *const i2cx) noexcept : i2cx_(i2cx) { clearSignals(); }
   /// @brief デストラクタ
   virtual ~Finalizer()
@@ -245,8 +245,8 @@ void satoh::I2C::notifyTxErrorIRQ() noexcept
 }
 
 /// @brief シグナルを待機し、エラーが発生したらリターンする
-/// @param[in] sigs 待機するシグナルの種類
-/// @param[in] timeout タイムアウト時間（ミリ秒）
+/// @param [in] sigs 待機するシグナルの種類
+/// @param [in] timeout タイムアウト時間（ミリ秒）
 #define WAIT_SIGNAL(sigs, timeout)                 \
   do                                               \
   {                                                \

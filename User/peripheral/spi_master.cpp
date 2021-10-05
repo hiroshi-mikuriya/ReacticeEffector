@@ -23,9 +23,9 @@ void clearSignals()
   osSignalWait(satoh::SPI_MASTER_CLS_SIG_MASK, 0);
 }
 /// @brief DMA通信サイズを設定する
-/// @param[in] dma DMA
-/// @param[in] stream DMAストリーム
-/// @param[in] size 通信データ量
+/// @param [in] dma DMA
+/// @param [in] stream DMAストリーム
+/// @param [in] size 通信データ量
 void setDmaTransferSize(DMA_TypeDef *dma, uint32_t stream, uint32_t size)
 {
   switch (LL_DMA_GetPeriphSize(dma, stream))
@@ -184,11 +184,11 @@ satoh::SpiMaster::~SpiMaster()
 }
 
 /// @brief DMAを使って通信する
-/// @param[in] dma DMA
-/// @param[in] stream DMAストリーム
-/// @param[in] sigend 通信成功シグナル
-/// @param[in] sigerr 通信失敗シグナル
-/// @param[in] tm 通信タイムアウト（ミリ秒）
+/// @param [in] dma DMA
+/// @param [in] stream DMAストリーム
+/// @param [in] sigend 通信成功シグナル
+/// @param [in] sigerr 通信失敗シグナル
+/// @param [in] tm 通信タイムアウト（ミリ秒）
 #define TRANSFER(dma, stream, sigend, sigerr, tm)           \
   do                                                        \
   {                                                         \

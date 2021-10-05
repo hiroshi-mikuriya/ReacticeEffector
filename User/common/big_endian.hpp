@@ -14,13 +14,13 @@ namespace impl
 {
 /// @brief Nバイトコピー
 /// @tparam N コピーバイト数
-/// @param[in] src コピー元
-/// @param[out] dst コピー先
+/// @param [in] src コピー元
+/// @param [out] dst コピー先
 template <uint32_t N>
 void rcopy(void const *src, void *dst);
 /// @brief 2バイトコピー
-/// @param[in] src コピー元
-/// @param[out] dst コピー先
+/// @param [in] src コピー元
+/// @param [out] dst コピー先
 template <>
 inline void rcopy<2>(void const *src, void *dst)
 {
@@ -28,8 +28,8 @@ inline void rcopy<2>(void const *src, void *dst)
   static_cast<uint8_t *>(dst)[1] = static_cast<uint8_t const *>(src)[0];
 }
 /// @brief 4バイトコピー
-/// @param[in] src コピー元
-/// @param[out] dst コピー先
+/// @param [in] src コピー元
+/// @param [out] dst コピー先
 template <>
 inline void rcopy<4>(void const *src, void *dst)
 {
@@ -37,8 +37,8 @@ inline void rcopy<4>(void const *src, void *dst)
   rcopy<2>(&static_cast<uint8_t const *>(src)[2], &static_cast<uint8_t *>(dst)[0]);
 }
 /// @brief 8バイトコピー
-/// @param[in] src コピー元
-/// @param[out] dst コピー先
+/// @param [in] src コピー元
+/// @param [out] dst コピー先
 template <>
 inline void rcopy<8>(void const *src, void *dst)
 {
@@ -46,8 +46,8 @@ inline void rcopy<8>(void const *src, void *dst)
   rcopy<4>(&static_cast<uint8_t const *>(src)[4], &static_cast<uint8_t *>(dst)[0]);
 }
 /// @brief 16バイトコピー
-/// @param[in] src コピー元
-/// @param[out] dst コピー先
+/// @param [in] src コピー元
+/// @param [out] dst コピー先
 template <>
 inline void rcopy<16>(void const *src, void *dst)
 {
@@ -67,7 +67,7 @@ class BE
 
 public:
   /// @brief バイト列から値を読み出す
-  /// @param[in] bytes バイト列
+  /// @param [in] bytes バイト列
   /// @return 値
   static T get(void const *bytes)
   {
@@ -76,8 +76,8 @@ public:
     return u.v;
   }
   /// @brief バッファへ値を書き込む
-  /// @param[in] buffer バッファ
-  /// @param[in] v 値
+  /// @param [in] buffer バッファ
+  /// @param [in] v 値
   static void set(void *buffer, T v)
   {
     U u;

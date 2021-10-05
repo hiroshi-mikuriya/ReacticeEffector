@@ -17,7 +17,7 @@ extern "C"
   extern osThreadId i2cMonitorTaskHandle;
 
   /// @brief i2cMonitorTask内部処理
-  /// @param[in] argument タスク引数
+  /// @param [in] argument タスク引数
   void i2cMonitorTaskProc(void const *argument);
 
   /// @brief GPIO_IN_INT_SW_N 割り込み

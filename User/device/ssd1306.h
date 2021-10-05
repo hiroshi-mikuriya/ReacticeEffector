@@ -41,7 +41,7 @@ class satoh::SSD1306 : public satoh::I2CDeviceBase
   /// @brief リセット処理 @retval true 通信成功 @retval false 通信失敗
   bool reset() const noexcept;
   /// @brief ページ分のバッファをOLEDに書き込む
-  /// @param[in] page ページ番号（0〜7）
+  /// @param [in] page ページ番号（0〜7）
   /// @retval true 通信成功
   /// @retval false 通信失敗
   bool sendBufferToDevice(uint8_t page) noexcept;
@@ -50,7 +50,7 @@ class satoh::SSD1306 : public satoh::I2CDeviceBase
 
 public:
   /// @brief コンストラクタ
-  /// @param[in] i2c I2C通信オブジェクト
+  /// @param [in] i2c I2C通信オブジェクト
   explicit SSD1306(I2C *i2c) noexcept;
   /// @brief デストラクタ
   virtual ~SSD1306() {}

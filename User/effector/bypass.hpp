@@ -21,13 +21,13 @@ class Bypass;
 class satoh::fx::Bypass : public satoh::fx::EffectorBase
 {
   /// @brief UI表示のパラメータを、エフェクト処理で使用する値へ変換する
-  /// @param[in] n 変換対象のパラメータ番号
+  /// @param [in] n 変換対象のパラメータ番号
   void convUiToFx(uint8_t n) noexcept override
   {
     // do nothing
   }
   /// @brief パラメータ値文字列取得
-  /// @param[in] n パラメータ番号
+  /// @param [in] n パラメータ番号
   /// @return 文字列のポインタ
   const char *getValueTxtImpl(uint8_t n) const noexcept override { return 0; }
 
@@ -42,7 +42,7 @@ public:
   /// @brief エフェクト処理実行
   /// @param[inout] left L音声データ
   /// @param[inout] right R音声データ
-  /// @param[in] size 音声データ数
+  /// @param [in] size 音声データ数
   void effect(float *left, float *right, uint32_t size) noexcept override
   {
     // do nothing

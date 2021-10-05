@@ -17,7 +17,7 @@ extern "C"
   extern osThreadId neoPixelTaskHandle;
 
   /// @brief neoPixelTask内部処理
-  /// @param[in] argument タスク引数
+  /// @param [in] argument タスク引数
   void neoPixelTaskProc(void const *argument);
 
   /// @brief NeoPixel DMA送信完了割り込み

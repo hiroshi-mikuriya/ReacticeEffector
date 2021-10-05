@@ -30,7 +30,7 @@ class satoh::fx::DelaySpi : public satoh::fx::DelayBase
 
 public:
   /// @brief コンストラクタ
-  /// @param[in] spi SPI通信オブジェクト
+  /// @param [in] spi SPI通信オブジェクト
   explicit DelaySpi(SpiMaster *spi)                                     //
       : DelayBase(DELAY_SPI, "DelaySpi", "DLS", RGB{0x20, 0x00, 0x20}), //
         delayBuf_(spi, BLOCK_SIZE, ui_[DTIME].getMax()),                //
@@ -53,7 +53,7 @@ public:
   /// @brief エフェクト処理実行
   /// @param[inout] left L音声データ
   /// @param[inout] right R音声データ
-  /// @param[in] size 音声データ数
+  /// @param [in] size 音声データ数
   void effect(float *left, float *right, uint32_t size) noexcept override
   {
     float *r = rbuf_.get();

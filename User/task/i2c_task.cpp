@@ -5,6 +5,7 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "i2c_task.h"
+#include "common/alloc.hpp"
 #include "device/at42qt1070.h"
 #include "device/gyro.h"
 #include "device/level_meter.h"
@@ -27,11 +28,11 @@ satoh::I2C *s_i2c = 0; ///< I2C通信オブジェクト
 void sendError(msg::error::ID cause)
 {
   msg::ERROR e{cause};
-  msg::send(appTaskHandle, msg::ERROR_NOTIFY, &e, sizeof(e));
+  msg::send(appTaskHandle, msg::ERROR_NOTIFY, e);
 }
 /// @brief ジャイロ値取得処理
-/// @param[in] mpu6050 MPU6050と通信するオブジェクト
-/// @param[in] icm20602 ICM20602と通信するオブジェクト
+/// @param [in] mpu6050 MPU6050と通信するオブジェクト
+/// @param [in] icm20602 ICM20602と通信するオブジェクト
 void gyroGetProc(satoh::Gyro const &mpu6050, satoh::Gyro const &icm20602) noexcept
 {
   if (mpu6050)
@@ -39,7 +40,7 @@ void gyroGetProc(satoh::Gyro const &mpu6050, satoh::Gyro const &icm20602) noexce
     msg::ACC_GYRO ag{};
     if (mpu6050.getAccelGyro(ag.acc, ag.gyro))
     {
-      msg::send(appTaskHandle, msg::GYRO_NOTIFY, &ag, sizeof(ag));
+      msg::send(appTaskHandle, msg::GYRO_NOTIFY, ag);
     }
     return;
   }
@@ -48,14 +49,14 @@ void gyroGetProc(satoh::Gyro const &mpu6050, satoh::Gyro const &icm20602) noexce
     msg::ACC_GYRO ag{};
     if (icm20602.getAccelGyro(ag.acc, ag.gyro))
     {
-      msg::send(appTaskHandle, msg::GYRO_NOTIFY, &ag, sizeof(ag));
+      msg::send(appTaskHandle, msg::GYRO_NOTIFY, ag);
     }
     return;
   }
 }
 /// @brief レベルメーター更新処理
-/// @param[in] level レベルメーターと通信するオブジェクト
-/// @param[in] msg リクエストメッセージ
+/// @param [in] level レベルメーターと通信するオブジェクト
+/// @param [in] msg リクエストメッセージ
 void ledLevelUpdateProc(satoh::LevelMeter &level, msg::Message const *msg) noexcept
 {
   if (level)
@@ -67,8 +68,8 @@ void ledLevelUpdateProc(satoh::LevelMeter &level, msg::Message const *msg) noexc
   }
 }
 /// @brief Power/Tap LED点灯・消灯処理
-/// @param[in] level レベルメーターと通信するオブジェクト
-/// @param[in] msg リクエストメッセージ
+/// @param [in] level レベルメーターと通信するオブジェクト
+/// @param [in] msg リクエストメッセージ
 void ledSimpleProc(satoh::LevelMeter &level, msg::Message const *msg) noexcept
 {
   if (level)
@@ -86,8 +87,8 @@ void ledSimpleProc(satoh::LevelMeter &level, msg::Message const *msg) noexcept
   }
 }
 /// @brief エフェクトLED更新処理（LED指定）
-/// @param[in] led エフェクトLEDと通信するオブジェクト
-/// @param[in] msg リクエストメッセージ
+/// @param [in] led エフェクトLEDと通信するオブジェクト
+/// @param [in] msg リクエストメッセージ
 void ledEffectProc(satoh::PCA9635 &led, msg::Message const *msg) noexcept
 {
   if (led)
@@ -97,8 +98,8 @@ void ledEffectProc(satoh::PCA9635 &led, msg::Message const *msg) noexcept
   }
 }
 /// @brief エフェクトLED更新処理（全LED）
-/// @param[in] led エフェクトLEDと通信するオブジェクト
-/// @param[in] msg リクエストメッセージ
+/// @param [in] led エフェクトLEDと通信するオブジェクト
+/// @param [in] msg リクエストメッセージ
 void ledAllEffectProc(satoh::PCA9635 &led, msg::Message const *msg) noexcept
 {
   if (led)
@@ -124,7 +125,7 @@ void keyUpdateProc(satoh::AT42QT1070 &modeKey)
     msg.ok = keys[3];
     msg.up = keys[4];
     msg.rtn = keys[5];
-    msg::send(appTaskHandle, msg::MODE_KEY_NOTIFY, &msg, sizeof(msg));
+    msg::send(appTaskHandle, msg::MODE_KEY_NOTIFY, msg);
   }
 }
 /// @brief エンコーダ状態取得処理
@@ -137,18 +138,18 @@ void encoderGetProc(satoh::RotaryEncoder &encoder)
     int res = encoder.read(key.button, enc.angleDiff);
     if (res & 1)
     {
-      msg::send(appTaskHandle, msg::ROTARY_ENCODER_NOTIFY, &enc, sizeof(enc));
+      msg::send(appTaskHandle, msg::ROTARY_ENCODER_NOTIFY, enc);
     }
     if (res & 2)
     {
-      msg::send(appTaskHandle, msg::EFFECT_KEY_CHANGED_NOTIFY, &key, sizeof(key));
+      msg::send(appTaskHandle, msg::EFFECT_KEY_CHANGED_NOTIFY, key);
     }
   }
 }
 /// @brief OLED更新
 /// @tparam T 更新データ型
-/// @param[in] oled OLED通信オブジェクト
-/// @param[in] msg リクエストメッセージ
+/// @param [in] oled OLED通信オブジェクト
+/// @param [in] msg リクエストメッセージ
 template <typename T>
 void oledUpdate(satoh::SSD1306 &oled, msg::Message const *msg)
 {
@@ -162,11 +163,11 @@ void oledUpdate(satoh::SSD1306 &oled, msg::Message const *msg)
 
 void i2cTaskProc(void const *argument)
 {
-  if (msg::registerTask(12) != osOK)
+  if (msg::registerThread(12) != osOK)
   {
     return;
   }
-  s_i2c = new satoh::I2C(I2C1, DMA1, LL_DMA_STREAM_0, LL_DMA_STREAM_7);
+  s_i2c = satoh::alloc<satoh::I2C>(I2C1, DMA1, LL_DMA_STREAM_0, LL_DMA_STREAM_7);
   initPCM3060(s_i2c);
   satoh::SSD1306 oled(s_i2c);
   satoh::PCA9635 led(s_i2c);

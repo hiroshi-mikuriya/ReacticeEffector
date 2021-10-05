@@ -12,12 +12,12 @@
 namespace satoh
 {
 /// @brief DMA転送に使うメモリを確保する
-/// @param[in] size 確保するバイト数
+/// @param [in] size 確保するバイト数
 /// @retval 0以外 確保したメモリのポインタ
 /// @retval 0 確保失敗（容量不足）
 void *allocDmaMem(std::size_t size) noexcept;
 /// @brief DMA転送に使うメモリを開放する
-/// @param[in] ptr 開放するメモリ
+/// @param [in] ptr 開放するメモリ
 /// @note 現在は開放できない
 void freeDmaMem(void *ptr) noexcept;
 /// @brief DMA転送に使うメモリの残量を取得する
@@ -33,7 +33,7 @@ template <typename T>
 using UniqueDmaPtr = std::unique_ptr<T, DmaMemDeleter<T>>;
 /// @brief DMA転送メモリを管理するユニークポインタを作る
 /// @tparam T データ型
-/// @param[in] size 要素数
+/// @param [in] size 要素数
 template <typename T>
 UniqueDmaPtr<T> makeDmaMem(std::size_t size) noexcept;
 } // namespace satoh
@@ -52,7 +52,7 @@ public:
   {
   }
   /// @brief オブジェクト破棄
-  /// @param[in] ptr オブジェクトのポインタ
+  /// @param [in] ptr オブジェクトのポインタ
   void operator()(T *ptr) const { freeDmaMem(ptr); }
 };
 

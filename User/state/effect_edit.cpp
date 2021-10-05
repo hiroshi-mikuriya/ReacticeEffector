@@ -116,7 +116,7 @@ void state::EffectEdit::showFx() const noexcept
   cmd.fx = fx;
   cmd.patch = m_.getEditSelectedFxNum() + 1;
   cmd.selectedParam = selectedParamNum_;
-  msg::send(i2cTaskHandle, msg::OLED_DISP_EFFECTOR_REQ, &cmd, sizeof(cmd));
+  msg::send(i2cTaskHandle, msg::OLED_DISP_EFFECTOR_REQ, cmd);
 }
 void state::EffectEdit::init() noexcept
 {

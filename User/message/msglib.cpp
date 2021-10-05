@@ -7,6 +7,10 @@
 #include "msglib.h"
 #include <cstring> // memcpy
 
+#ifndef MAX_MAIL_INFO_COUNT
+#define MAX_MAIL_INFO_COUNT 16 ///< 登録できる最大スレッド数
+#endif
+
 namespace msg = satoh::msg;
 
 namespace
@@ -14,15 +18,13 @@ namespace
 /// @brief メール情報
 struct MailInfo
 {
-  osThreadId threadId; ///< タスクID
+  osThreadId threadId; ///< スレッドID
   osMailQId mailId;    ///< メールID
 };
-/// 最大メール数
-constexpr uint32_t MAX_MAIL_INFO_COUNT = 16;
 /// メール情報実態
 MailInfo s_mails[MAX_MAIL_INFO_COUNT] = {};
-/// @brief 指定したタスクIDと一致するメール情報取得
-/// @param[in] threadId タスクID
+/// @brief 指定したスレッドIDと一致するメール情報取得
+/// @param [in] threadId スレッドID
 /// @retval 0以外　メール情報のポインタ
 /// @retval 0 見つからない
 MailInfo *find(osThreadId threadId)
@@ -39,7 +41,7 @@ MailInfo *find(osThreadId threadId)
 }
 } // namespace
 
-osStatus msg::registerTask(uint32_t msgCount) noexcept
+osStatus msg::registerThread(uint32_t msgCount) noexcept
 {
   osThreadId threadId = osThreadGetId();
   if (threadId == 0)
@@ -56,24 +58,26 @@ osStatus msg::registerTask(uint32_t msgCount) noexcept
     return osErrorNoMemory;
   }
   info->threadId = threadId;
-  osMailQDef_t mail{};
-  mail.item_sz = sizeof(Message);
-  mail.queue_sz = msgCount;
-  info->mailId = osMailCreate(&mail, threadId);
+  osMailQDef(mail, msgCount, Message);
+  info->mailId = osMailCreate(osMailQ(mail), threadId);
   return info->mailId ? osOK : osErrorResource;
 }
 
-osStatus msg::send(osThreadId threadId, msg::ID type) noexcept
+osStatus msg::send(osThreadId threadId, ID type) noexcept
 {
-  return msg::send(threadId, type, 0, 0);
+  return send(threadId, type, 0, 0);
 }
 
-osStatus msg::send(osThreadId threadId, msg::ID type, void const *bytes, uint16_t size) noexcept
+osStatus msg::send(osThreadId threadId, ID type, void const *bytes, uint16_t size) noexcept
 {
   MailInfo *info = find(threadId);
   if (info == 0)
   {
     return osErrorParameter;
+  }
+  if (sizeof(Message::bytes) <= size)
+  {
+    return osErrorValue;
   }
   Message *m = static_cast<Message *>(osMailAlloc(info->mailId, 0));
   if (m == 0)

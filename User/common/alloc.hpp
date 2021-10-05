@@ -28,7 +28,7 @@ using UniquePtr = std::unique_ptr<T, Deleter<T>>;
 /// @brief RTOSからメモリ確保し、コンストラクタを呼び出しポインタを返す
 /// @tparam T メモリ確保する型
 /// @tparam Args コンストラクタ引数型
-/// @param[in] args コンストラクタ引数
+/// @param [in] args コンストラクタ引数
 template <typename T, class... Args>
 T *satoh::alloc(Args... args) noexcept
 {
@@ -38,7 +38,7 @@ T *satoh::alloc(Args... args) noexcept
 
 /// @brief RTOSからメモリ確保し、コンストラクタを呼ばずにポインタを返す
 /// @tparam T メモリ確保する型
-/// @param[in] size メモリ確保する数
+/// @param [in] size メモリ確保する数
 template <typename T>
 T *satoh::allocArray(std::size_t size) noexcept
 {
@@ -59,7 +59,7 @@ public:
   {
   }
   /// @brief オブジェクト破棄
-  /// @param[in] ptr オブジェクトのポインタ
+  /// @param [in] ptr オブジェクトのポインタ
   void operator()(T *ptr) const
   {
     ptr->~T(); // 配置newしているので意図的にデストラクタを呼び出す必要がある
@@ -81,6 +81,6 @@ public:
   {
   }
   /// @brief オブジェクト破棄
-  /// @param[in] ptr オブジェクトのポインタ
+  /// @param [in] ptr オブジェクトのポインタ
   void operator()(T *ptr) const { vPortFree(ptr); }
 };

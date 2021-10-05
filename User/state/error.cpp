@@ -112,6 +112,6 @@ void state::Error::init() noexcept
     strcpy(txt.msg2, "UART");
     break;
   }
-  msg::send(i2cTaskHandle, msg::OLED_DISP_TEXT_REQ, &txt, sizeof(txt));
+  msg::send(i2cTaskHandle, msg::OLED_DISP_TEXT_REQ, txt);
 }
 void state::Error::deinit() noexcept {}

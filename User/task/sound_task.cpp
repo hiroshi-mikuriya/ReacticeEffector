@@ -9,7 +9,7 @@
 #include "common/dma_mem.h"
 #include "effector/pop_noise_reductor.hpp"
 #include "main.h"
-#include "message/msglib.h"
+#include "message/type.h"
 #include "user.h"
 
 namespace fx = satoh::fx;
@@ -23,10 +23,10 @@ constexpr int32_t SIG_INITADC = 1 << 0;
 constexpr uint32_t DIV = 0x80000000;
 
 /// @brief float(-1.0f 〜 1.0f)に変換する
-/// @param[in] src 入力音声
-/// @param[out] left Left音声
-/// @param[out] right Right音声
-/// @param[in] size LRそれぞれの音声データ数
+/// @param [in] src 入力音声
+/// @param [out] left Left音声
+/// @param [out] right Right音声
+/// @param [in] size LRそれぞれの音声データ数
 inline void toFloat(int32_t const *src, float *left, float *right, uint32_t size)
 {
   for (uint32_t i = 0; i < size; ++i)
@@ -36,10 +36,10 @@ inline void toFloat(int32_t const *src, float *left, float *right, uint32_t size
   }
 }
 /// @brief int32に変換する
-/// @param[in] left Left音声
-/// @param[in] right Right音声
-/// @param[out] dst 出力音声
-/// @param[in] size LRそれぞれの音声データ数
+/// @param [in] left Left音声
+/// @param [in] right Right音声
+/// @param [out] dst 出力音声
+/// @param [in] size LRそれぞれの音声データ数
 inline void toInt32(float const *left, float const *right, int32_t *dst, uint32_t size)
 {
   for (uint32_t i = 0; i < size; ++i)
@@ -49,13 +49,13 @@ inline void toInt32(float const *left, float const *right, int32_t *dst, uint32_
   }
 }
 /// @brief 音声処理
-/// @param[in] effector エフェクター
-/// @param[in] pop ポップノイズ除去
-/// @param[in] src 音声入力データ
-/// @param[out] dst 音声出力データ
-/// @param[in] left L音声計算用バッファ
-/// @param[in] right R音声計算用バッファ
-/// @param[in] size 音声データ数
+/// @param [in] effector エフェクター
+/// @param [in] pop ポップノイズ除去
+/// @param [in] src 音声入力データ
+/// @param [out] dst 音声出力データ
+/// @param [in] left L音声計算用バッファ
+/// @param [in] right R音声計算用バッファ
+/// @param [in] size 音声データ数
 void soundProc(msg::SOUND_EFFECTOR &effector, fx::PopNoiseReductor &pop, int32_t const *src, int32_t *dst, float *left, float *right, uint32_t size)
 {
   LL_GPIO_SetOutputPin(TP13_GPIO_Port, TP13_Pin);
@@ -92,10 +92,10 @@ void soundTaskProc(void const *argument)
   if (ev.status == osEventTimeout)
   {
     msg::ERROR cmd{msg::error::SOUND_DAC};
-    msg::send(appTaskHandle, msg::ERROR_NOTIFY, &cmd, sizeof(cmd));
+    msg::send(appTaskHandle, msg::ERROR_NOTIFY, cmd);
     return;
   }
-  if (msg::registerTask(4) != osOK)
+  if (msg::registerThread(4) != osOK)
   {
     return;
   }
@@ -108,7 +108,7 @@ void soundTaskProc(void const *argument)
   if (!rxbuf || !txbuf || !left || !right)
   {
     msg::ERROR e{msg::error::SOUND_MEM};
-    msg::send(appTaskHandle, msg::ERROR_NOTIFY, &e, sizeof(e));
+    msg::send(appTaskHandle, msg::ERROR_NOTIFY, e);
     return;
   }
   extern SAI_HandleTypeDef hsai_BlockA1;
@@ -144,9 +144,9 @@ void soundTaskProc(void const *argument)
 extern "C"
 {
   /// @brief DMA半分受信コールバック
-  /// @param[in] hsai SAI
+  /// @param [in] hsai SAI
   void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai) { msg::send(soundTaskHandle, msg::SOUND_DMA_HALF_NOTIFY); }
   /// @brief DMA全部受信コールバック
-  /// @param[in] hsai SAI
+  /// @param [in] hsai SAI
   void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai) { msg::send(soundTaskHandle, msg::SOUND_DMA_CPLT_NOTIFY); }
 }

@@ -13,7 +13,7 @@ namespace satoh
 /// @brief 配列要素数を返す
 /// @tparam T 配列要素型
 /// @tparam N 配列要素数
-/// @param[in] a 配列
+/// @param [in] a 配列
 /// @return 配列要素数
 /// @note C++17のstd::sizeと同等
 template <typename T, size_t N>
