@@ -45,6 +45,8 @@ constexpr ID DELAY_SPI = 5 | cat::SPACE;
 constexpr ID REVERB = 6 | cat::SPACE;
 /// BQフィルター
 constexpr ID BQ_FILTER = 1 | cat::FILTER;
+/// オートワウ
+constexpr ID AUTO_WAH = 2 | cat::FILTER;
 /// バイパス
 constexpr ID BYPASS = 1 | cat::OTHER;
 /// テンプレート

@@ -6,6 +6,7 @@
 
 #include "property.h"
 #include "common/utils.h"
+#include "effector/autowah.hpp"
 #include "effector/booster.hpp"
 #include "effector/bq_filter.hpp"
 #include "effector/bypass.hpp"
@@ -39,6 +40,7 @@ state::Effectors::Effectors(uint8_t n, SpiMaster *spi) : count_(0)
   addList<fx::DelayRam>(1 <= n);
   // addList<fx::DelaySpi>(n == 2, spi);
   addList<fx::Oscillator>(n == 0);
+  addList<fx::AutoWah>(n == 0);
   addList<fx::BqFilter>(true);
   addList<fx::Reverb>(n == 2);
 }
