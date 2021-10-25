@@ -11,6 +11,7 @@
 #include "effector/bq_filter.hpp"
 #include "effector/bypass.hpp"
 #include "effector/chorus.hpp"
+#include "effector/compressor.hpp"
 #include "effector/delay_ram.hpp"
 #include "effector/delay_spi.hpp"
 #include "effector/distortion.hpp"
@@ -37,6 +38,7 @@ state::Effectors::Effectors(uint8_t n, SpiMaster *spi) : count_(0)
   addList<fx::Chorus>(true);
   addList<fx::Phaser>(true);
   addList<fx::Tremolo>(true);
+  addList<fx::Compressor>(true);
   addList<fx::DelayRam>(1 <= n);
   // addList<fx::DelaySpi>(n == 2, spi);
   addList<fx::Oscillator>(n == 0);

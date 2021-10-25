@@ -31,6 +31,8 @@ constexpr ID DISTORTION = 1 | cat::DIST;
 constexpr ID OVERDRIVE = 2 | cat::DIST;
 /// ブースター
 constexpr ID BOOSTER = 3 | cat::DIST;
+/// コンプレッサー
+constexpr ID COMPRESSOR = 4 | cat::DIST;
 /// コーラス
 constexpr ID CHORUS = 1 | cat::SPACE;
 /// フェイザー
