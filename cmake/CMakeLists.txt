@@ -35,7 +35,7 @@ set(MAP_FILE ${PROJECT_NAME}.map)
 ##########
 # compiler options
 ##########
-add_compile_options(-Os)
+add_compile_options(-O2)
 add_compile_options(-Wall)
 add_compile_options(-ffunction-sections)
 add_compile_options(-fdata-sections)
