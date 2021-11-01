@@ -58,14 +58,14 @@ add_definitions(-DUSE_HAL_DRIVER)
 ##########
 # directory name
 ##########
-set(ROOT ..)
-set(CORE ${ROOT}/Core)
-set(USER ${ROOT}/User)
+set(ROOT   .)
+set(CORE   ${ROOT}/Core)
+set(USER   ${ROOT}/User)
 set(DRIVER ${ROOT}/Drivers/STM32F7xx_HAL_Driver)
-set(CMSIS ${ROOT}/Drivers/CMSIS)
-set(RTOS ${ROOT}/Middlewares/Third_Party/FreeRTOS/Source)
-set(USB ${ROOT}/USB_DEVICE)
-set(USBD ${ROOT}/Middlewares/ST/STM32_USB_Device_Library)
+set(CMSIS  ${ROOT}/Drivers/CMSIS)
+set(RTOS   ${ROOT}/Middlewares/Third_Party/FreeRTOS/Source)
+set(USB    ${ROOT}/USB_DEVICE)
+set(USBD   ${ROOT}/Middlewares/ST/STM32_USB_Device_Library)
 
 ##########
 # header include path
