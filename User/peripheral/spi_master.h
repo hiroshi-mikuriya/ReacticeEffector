@@ -8,7 +8,7 @@
 
 #include "cmsis_os.h"
 #include "common/mutex.hpp"
-#include "stm32f7xx.h"
+#include "main.h"
 
 namespace satoh
 {

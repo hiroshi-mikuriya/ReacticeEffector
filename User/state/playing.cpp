@@ -8,7 +8,6 @@
 #include "common.h"
 #include "common/dma_mem.h"
 #include "common/utils.h"
-#include "user.h"
 
 namespace msg = satoh::msg;
 namespace state = satoh::state;

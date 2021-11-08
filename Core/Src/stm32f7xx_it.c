@@ -23,7 +23,7 @@
 #include "stm32f7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "user.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -173,6 +173,7 @@ void DMA1_Stream0_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TC0(DMA1))
   {
     LL_DMA_ClearFlag_TC0(DMA1);
+    extern void i2cRxEndIRQ(void);
     i2cRxEndIRQ();
   }
   /* USER CODE END DMA1_Stream0_IRQn 0 */
@@ -181,6 +182,7 @@ void DMA1_Stream0_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TE0(DMA1))
   {
     LL_DMA_ClearFlag_TE0(DMA1);
+    extern void i2cRxErrorIRQ(void);
     i2cRxErrorIRQ();
   }
   /* USER CODE END DMA1_Stream0_IRQn 1 */
@@ -195,6 +197,7 @@ void DMA1_Stream3_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TC3(DMA1))
   {
     LL_DMA_ClearFlag_TC3(DMA1);
+    extern void spiSramRxEndIRQ(void);
     spiSramRxEndIRQ();
   }
   /* USER CODE END DMA1_Stream3_IRQn 0 */
@@ -203,6 +206,7 @@ void DMA1_Stream3_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TE3(DMA1))
   {
     LL_DMA_ClearFlag_TE3(DMA1);
+    extern void spiSramRxErrorIRQ(void);
     spiSramRxErrorIRQ();
   }
   /* USER CODE END DMA1_Stream3_IRQn 1 */
@@ -217,6 +221,7 @@ void DMA1_Stream4_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TC4(DMA1))
   {
     LL_DMA_ClearFlag_TC4(DMA1);
+    extern void spiSramTxEndIRQ(void);
     spiSramTxEndIRQ();
   }
   /* USER CODE END DMA1_Stream4_IRQn 0 */
@@ -225,6 +230,7 @@ void DMA1_Stream4_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TE4(DMA1))
   {
     LL_DMA_ClearFlag_TE4(DMA1);
+    extern void spiSramTxErrorIRQ(void);
     spiSramTxErrorIRQ();
   }
   /* USER CODE END DMA1_Stream4_IRQn 1 */
@@ -239,6 +245,7 @@ void DMA1_Stream5_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TC5(DMA1))
   {
     LL_DMA_ClearFlag_TC5(DMA1);
+    extern void neoPixelTxEndIRQ(void);
     neoPixelTxEndIRQ();
   }
   /* USER CODE END DMA1_Stream5_IRQn 0 */
@@ -247,6 +254,7 @@ void DMA1_Stream5_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TE5(DMA1))
   {
     LL_DMA_ClearFlag_TE5(DMA1);
+    extern void neoPixelTxErrorIRQ(void);
     neoPixelTxErrorIRQ();
   }
   /* USER CODE END DMA1_Stream5_IRQn 1 */
@@ -261,6 +269,7 @@ void DMA1_Stream6_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TC6(DMA1))
   {
     LL_DMA_ClearFlag_TC6(DMA1);
+    extern void uart2TxEndIRQ(void);
     uart2TxEndIRQ();
   }
   /* USER CODE END DMA1_Stream6_IRQn 0 */
@@ -269,6 +278,7 @@ void DMA1_Stream6_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TE6(DMA1))
   {
     LL_DMA_ClearFlag_TE6(DMA1);
+    extern void uart2TxErrorIRQ(void);
     uart2TxErrorIRQ();
   }
   /* USER CODE END DMA1_Stream6_IRQn 1 */
@@ -286,6 +296,7 @@ void EXTI9_5_IRQHandler(void)
   {
     LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_5);
     /* USER CODE BEGIN LL_EXTI_LINE_5 */
+    extern void extiSw2IRQ(void);
     extiSw2IRQ();
     /* USER CODE END LL_EXTI_LINE_5 */
   }
@@ -293,6 +304,7 @@ void EXTI9_5_IRQHandler(void)
   {
     LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_6);
     /* USER CODE BEGIN LL_EXTI_LINE_6 */
+    extern void extiMpuIRQ(void);
     extiMpuIRQ();
     /* USER CODE END LL_EXTI_LINE_6 */
   }
@@ -300,6 +312,7 @@ void EXTI9_5_IRQHandler(void)
   {
     LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_7);
     /* USER CODE BEGIN LL_EXTI_LINE_7 */
+    extern void extiSwIRQ(void);
     extiSwIRQ();
     /* USER CODE END LL_EXTI_LINE_7 */
   }
@@ -317,6 +330,8 @@ void TIM1_UP_TIM10_IRQHandler(void)
   if (LL_TIM_IsActiveFlag_UPDATE(TIM10))
   {
     LL_TIM_ClearFlag_UPDATE(TIM10);
+    extern void adc1TimIRQ(void);
+    extern void appTimIRQ(void);
     adc1TimIRQ();
     appTimIRQ();
   }
@@ -333,6 +348,7 @@ void TIM1_UP_TIM10_IRQHandler(void)
 void I2C1_EV_IRQHandler(void)
 {
   /* USER CODE BEGIN I2C1_EV_IRQn 0 */
+  extern void i2cEvIRQ(void);
   i2cEvIRQ();
   /* USER CODE END I2C1_EV_IRQn 0 */
 
@@ -347,6 +363,7 @@ void I2C1_EV_IRQHandler(void)
 void I2C1_ER_IRQHandler(void)
 {
   /* USER CODE BEGIN I2C1_ER_IRQn 0 */
+  extern void i2cErIRQ(void);
   i2cErIRQ();
   /* USER CODE END I2C1_ER_IRQn 0 */
 
@@ -361,6 +378,7 @@ void I2C1_ER_IRQHandler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
+  extern void uart1RxIRQ(void);
   uart1RxIRQ();
   /* USER CODE END USART1_IRQn 0 */
   /* USER CODE BEGIN USART1_IRQn 1 */
@@ -374,6 +392,7 @@ void USART1_IRQHandler(void)
 void USART2_IRQHandler(void)
 {
   /* USER CODE BEGIN USART2_IRQn 0 */
+  extern void uart2RxIRQ(void);
   uart2RxIRQ();
   /* USER CODE END USART2_IRQn 0 */
   /* USER CODE BEGIN USART2_IRQn 1 */
@@ -393,7 +412,7 @@ void EXTI15_10_IRQHandler(void)
   {
     LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_11);
     /* USER CODE BEGIN LL_EXTI_LINE_11 */
-
+    // RPI SPI NSS
     /* USER CODE END LL_EXTI_LINE_11 */
   }
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
@@ -410,6 +429,7 @@ void DMA1_Stream7_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TC7(DMA1))
   {
     LL_DMA_ClearFlag_TC7(DMA1);
+    extern void i2cTxEndIRQ(void);
     i2cTxEndIRQ();
   }
   /* USER CODE END DMA1_Stream7_IRQn 0 */
@@ -418,6 +438,7 @@ void DMA1_Stream7_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TE7(DMA1))
   {
     LL_DMA_ClearFlag_TE7(DMA1);
+    extern void i2cTxErrorIRQ(void);
     i2cTxErrorIRQ();
   }
   /* USER CODE END DMA1_Stream7_IRQn 1 */
@@ -522,6 +543,7 @@ void DMA2_Stream4_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TC4(DMA2))
   {
     LL_DMA_ClearFlag_TC4(DMA2);
+    extern void adc1CpltIRQ(void);
     adc1CpltIRQ();
   }
   /* USER CODE END DMA2_Stream4_IRQn 0 */
@@ -530,6 +552,7 @@ void DMA2_Stream4_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TE4(DMA2))
   {
     LL_DMA_ClearFlag_TE4(DMA2);
+    extern void adc1ErrorIRQ(void);
     adc1ErrorIRQ();
   }
   /* USER CODE END DMA2_Stream4_IRQn 1 */
@@ -572,6 +595,7 @@ void DMA2_Stream7_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TC7(DMA2))
   {
     LL_DMA_ClearFlag_TC7(DMA2);
+    extern void uart1TxEndIRQ(void);
     uart1TxEndIRQ();
   }
   /* USER CODE END DMA2_Stream7_IRQn 0 */
@@ -580,6 +604,7 @@ void DMA2_Stream7_IRQHandler(void)
   if (LL_DMA_IsActiveFlag_TE7(DMA2))
   {
     LL_DMA_ClearFlag_TE7(DMA2);
+    extern void uart1TxErrorIRQ(void);
     uart1TxErrorIRQ();
   }
   /* USER CODE END DMA2_Stream7_IRQn 1 */

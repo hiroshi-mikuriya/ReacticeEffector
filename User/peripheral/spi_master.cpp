@@ -5,9 +5,6 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "spi_master.h"
-#include "stm32f7xx_ll_dma.h"
-#include "stm32f7xx_ll_gpio.h"
-#include "stm32f7xx_ll_spi.h"
 #include <mutex>
 #include <string.h> // memset
 

@@ -5,8 +5,6 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "i2c.h"
-#include "stm32f7xx_ll_dma.h"
-#include "stm32f7xx_ll_i2c.h"
 #include <cstring> // memcpy
 #include <mutex>
 

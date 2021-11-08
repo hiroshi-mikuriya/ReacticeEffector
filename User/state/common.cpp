@@ -6,7 +6,6 @@
 
 #include "common.h"
 #include "message/type.h"
-#include "user.h"
 
 namespace msg = satoh::msg;
 namespace state = satoh::state;

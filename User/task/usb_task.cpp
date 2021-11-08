@@ -4,7 +4,6 @@
 ///
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
-#include "usb_task.h"
 #include "cmsis_os.h"
 #include "message/type.h"
 #include "usbd_cdc_if.h"
@@ -16,43 +15,57 @@ namespace
 constexpr int32_t SIG_USBTXEND = 1 << 0;
 }
 
-void usbTxTaskProc(void const *argument)
+extern "C"
 {
-  if (msg::registerThread(2) != osOK)
+  /// @brief USB送信Task内部処理
+  /// @param [in] argument タスク引数
+  void usbTxTaskProc(void const *argument)
   {
-    return;
+    if (msg::registerThread(2) != osOK)
+    {
+      return;
+    }
+    for (;;)
+    {
+      auto res = msg::recv();
+      if (res.status() != osOK)
+      {
+        continue;
+      }
+      auto *msg = res.msg();
+      if (msg == 0)
+      {
+        continue;
+      }
+      if (msg->type != msg::USB_TX_REQ)
+      {
+        continue;
+      }
+      if (CDC_Transmit_FS(const_cast<uint8_t *>(msg->bytes), msg->size) != USBD_OK)
+      {
+        continue;
+      }
+      res.reset();
+      osSignalWait(SIG_USBTXEND, 10);
+    }
   }
-  for (;;)
+  /// @brief USB受信割り込み
+  /// @param [in] bytes 受信データの先頭ポインタ
+  /// @param [in] size 受信データサイズ
+  void usbRxIRQ(uint8_t const *bytes, uint32_t size)
   {
-    auto res = msg::recv();
-    if (res.status() != osOK)
-    {
-      continue;
-    }
-    auto *msg = res.msg();
-    if (msg == 0)
-    {
-      continue;
-    }
-    if (msg->type != msg::USB_TX_REQ)
-    {
-      continue;
-    }
-    if (CDC_Transmit_FS(const_cast<uint8_t *>(msg->bytes), msg->size) != USBD_OK)
-    {
-      continue;
-    }
-    res.reset();
-    osSignalWait(SIG_USBTXEND, 10);
+    UNUSED(bytes);
+    UNUSED(size);
   }
-}
-
-void usbRxIRQ(uint8_t const *bytes, uint32_t size)
-{
-  // TODO
-}
-
-void usbTxEndIRQ(uint8_t const *bytes, uint32_t size)
-{
-  osSignalSet(usbTxTaskHandle, SIG_USBTXEND);
-}
+  /// @brief USB送信完了割り込み
+  /// @param [in] bytes 受信データの先頭ポインタ
+  /// @param [in] size 受信データサイズ
+  /// @param [in] epnum エンドポイント
+  void usbTxEndIRQ(uint8_t const *bytes, uint32_t size, uint8_t epnum)
+  {
+    UNUSED(bytes);
+    UNUSED(size);
+    UNUSED(epnum);
+    osSignalSet(usbTxTaskHandle, SIG_USBTXEND);
+  }
+} // extern "C"

@@ -4,7 +4,6 @@
 ///
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
-#include "i2c_task.h"
 #include "common/alloc.hpp"
 #include "device/at42qt1070.h"
 #include "device/gyro.h"
@@ -12,11 +11,8 @@
 #include "device/pca9635.h"
 #include "device/rotary_encoder.h"
 #include "device/ssd1306.h"
+#include "main.h"
 #include "message/msglib.h"
-#include "stm32f7xx_ll_dma.h"
-#include "task/app_task.h"
-#include "task/i2c_monitor_task.h"
-#include "task/sound_task.h"
 
 namespace msg = satoh::msg;
 
@@ -161,145 +157,132 @@ void oledUpdate(satoh::SSD1306 &oled, msg::Message const *msg)
 }
 } // namespace
 
-void i2cTaskProc(void const *argument)
+extern "C"
 {
-  if (msg::registerThread(12) != osOK)
+  /// @brief i2cTask内部処理
+  /// @param [in] argument タスク引数
+  void i2cTaskProc(void const *argument)
   {
-    return;
-  }
-  s_i2c = satoh::alloc<satoh::I2C>(I2C1, DMA1, LL_DMA_STREAM_0, LL_DMA_STREAM_7);
-  initPCM3060(s_i2c);
-  satoh::SSD1306 oled(s_i2c);
-  satoh::PCA9635 led(s_i2c);
-  satoh::LevelMeter level(s_i2c);
-  satoh::RotaryEncoder encoder(s_i2c);
-  satoh::AT42QT1070 modeKey(s_i2c);
-  satoh::Gyro mpu6050(s_i2c, satoh::MPU6050);
-  satoh::Gyro icm20602(s_i2c, satoh::ICM20602);
-  if (!mpu6050 && !icm20602)
-  {
-    sendError(msg::error::GYRO);
-  }
-  if (!modeKey)
-  {
-    sendError(msg::error::MODE_KEY);
-  }
-  if (!level)
-  {
-    sendError(msg::error::LEVEL_METER);
-  }
-  if (!led)
-  {
-    sendError(msg::error::EFFECT_LED);
-  }
-  if (!encoder)
-  {
-    sendError(msg::error::ROTARY_ENCODER);
-  }
-  if (!oled)
-  {
-    sendError(msg::error::OLED);
-  }
-  for (;;)
-  {
-    auto res = msg::recv();
-    if (res.status() != osOK)
+    if (msg::registerThread(12) != osOK)
     {
-      continue;
+      return;
     }
-    auto *msg = res.msg();
-    if (msg == 0)
+    s_i2c = satoh::alloc<satoh::I2C>(I2C1, DMA1, LL_DMA_STREAM_0, LL_DMA_STREAM_7);
+    extern void initPCM3060(satoh::I2C * i2c);
+    initPCM3060(s_i2c);
+    satoh::SSD1306 oled(s_i2c);
+    satoh::PCA9635 led(s_i2c);
+    satoh::LevelMeter level(s_i2c);
+    satoh::RotaryEncoder encoder(s_i2c);
+    satoh::AT42QT1070 modeKey(s_i2c);
+    satoh::Gyro mpu6050(s_i2c, satoh::MPU6050);
+    satoh::Gyro icm20602(s_i2c, satoh::ICM20602);
+    if (!mpu6050 && !icm20602)
     {
-      continue;
+      sendError(msg::error::GYRO);
     }
-    switch (msg->type)
+    if (!modeKey)
     {
-    case msg::LED_LEVEL_UPDATE_REQ:
-      ledLevelUpdateProc(level, msg);
-      break;
-    case msg::LED_SIMPLE_REQ:
-      ledSimpleProc(level, msg);
-      break;
-    case msg::LED_EFFECT_REQ:
-      ledEffectProc(led, msg);
-      break;
-    case msg::LED_ALL_EFFECT_REQ:
-      ledAllEffectProc(led, msg);
-      break;
-    case msg::GYRO_GET_REQ:
-      res.reset();
-      gyroGetProc(mpu6050, icm20602);
-      break;
-    case msg::MODE_KEY_GET_REQ:
-      res.reset();
-      keyUpdateProc(modeKey);
-      break;
-    case msg::ENCODER_GET_REQ:
-      res.reset();
-      encoderGetProc(encoder);
-      break;
-    case msg::OLED_DISP_EFFECTOR_REQ:
-      oledUpdate<msg::OLED_DISP_EFFECTOR>(oled, msg);
-      break;
-    case msg::OLED_DISP_BANK_REQ:
-      oledUpdate<msg::OLED_DISP_BANK>(oled, msg);
-      break;
-    case msg::OLED_DISP_CONFIRM_REQ:
-      oledUpdate<msg::OLED_DISP_CONFIRM>(oled, msg);
-      break;
-    case msg::OLED_DISP_TEXT_REQ:
-      oledUpdate<msg::OLED_DISP_TEXT>(oled, msg);
-      break;
-    case msg::OLED_DISP_TUNER_REQ:
-      oledUpdate<msg::OLED_DISP_TUNER>(oled, msg);
-      break;
+      sendError(msg::error::MODE_KEY);
+    }
+    if (!level)
+    {
+      sendError(msg::error::LEVEL_METER);
+    }
+    if (!led)
+    {
+      sendError(msg::error::EFFECT_LED);
+    }
+    if (!encoder)
+    {
+      sendError(msg::error::ROTARY_ENCODER);
+    }
+    if (!oled)
+    {
+      sendError(msg::error::OLED);
+    }
+    for (;;)
+    {
+      auto res = msg::recv();
+      if (res.status() != osOK)
+      {
+        continue;
+      }
+      auto *msg = res.msg();
+      if (msg == 0)
+      {
+        continue;
+      }
+      switch (msg->type)
+      {
+      case msg::LED_LEVEL_UPDATE_REQ:
+        ledLevelUpdateProc(level, msg);
+        break;
+      case msg::LED_SIMPLE_REQ:
+        ledSimpleProc(level, msg);
+        break;
+      case msg::LED_EFFECT_REQ:
+        ledEffectProc(led, msg);
+        break;
+      case msg::LED_ALL_EFFECT_REQ:
+        ledAllEffectProc(led, msg);
+        break;
+      case msg::GYRO_GET_REQ:
+        res.reset();
+        gyroGetProc(mpu6050, icm20602);
+        break;
+      case msg::MODE_KEY_GET_REQ:
+        res.reset();
+        keyUpdateProc(modeKey);
+        break;
+      case msg::ENCODER_GET_REQ:
+        res.reset();
+        encoderGetProc(encoder);
+        break;
+      case msg::OLED_DISP_EFFECTOR_REQ:
+        oledUpdate<msg::OLED_DISP_EFFECTOR>(oled, msg);
+        break;
+      case msg::OLED_DISP_BANK_REQ:
+        oledUpdate<msg::OLED_DISP_BANK>(oled, msg);
+        break;
+      case msg::OLED_DISP_CONFIRM_REQ:
+        oledUpdate<msg::OLED_DISP_CONFIRM>(oled, msg);
+        break;
+      case msg::OLED_DISP_TEXT_REQ:
+        oledUpdate<msg::OLED_DISP_TEXT>(oled, msg);
+        break;
+      case msg::OLED_DISP_TUNER_REQ:
+        oledUpdate<msg::OLED_DISP_TUNER>(oled, msg);
+        break;
+      }
     }
   }
-}
-
-void i2cEvIRQ(void)
-{
-  s_i2c->notifyEvIRQ();
-}
-
-void i2cErIRQ(void)
-{
-  s_i2c->notifyErIRQ();
-}
-
-void i2cRxEndIRQ(void)
-{
-  s_i2c->notifyRxEndIRQ();
-}
-
-void i2cRxErrorIRQ(void)
-{
-  s_i2c->notifyRxErrorIRQ();
-}
-
-void i2cTxEndIRQ(void)
-{
-  s_i2c->notifyTxEndIRQ();
-}
-
-void i2cTxErrorIRQ(void)
-{
-  s_i2c->notifyTxErrorIRQ();
-}
-
-void extiSwIRQ(void)
-{
-  msg::send(i2cTaskHandle, msg::ENCODER_GET_REQ);
-  notifyExtiSwIRQ();
-}
-
-void extiSw2IRQ(void)
-{
-  msg::send(i2cTaskHandle, msg::MODE_KEY_GET_REQ);
-  notifyExtiSw2IRQ();
-}
-
-void extiMpuIRQ(void)
-{
-  msg::send(i2cTaskHandle, msg::GYRO_GET_REQ);
-}
+  /// @brief I2Cイベント割り込み
+  void i2cEvIRQ(void) { s_i2c->notifyEvIRQ(); }
+  /// @brief I2Cエラー割り込み
+  void i2cErIRQ(void) { s_i2c->notifyErIRQ(); }
+  /// @brief I2C受信完了割り込み
+  void i2cRxEndIRQ(void) { s_i2c->notifyRxEndIRQ(); }
+  /// @brief I2C受信エラー割り込み
+  void i2cRxErrorIRQ(void) { s_i2c->notifyRxErrorIRQ(); }
+  /// @brief I2C送信完了割り込み
+  void i2cTxEndIRQ(void) { s_i2c->notifyTxEndIRQ(); }
+  /// @brief I2C送信エラー割り込み
+  void i2cTxErrorIRQ(void) { s_i2c->notifyTxErrorIRQ(); }
+  /// @brief GPIO_IN_INT_MPU_N 割り込み
+  void extiSwIRQ(void)
+  {
+    msg::send(i2cTaskHandle, msg::ENCODER_GET_REQ);
+    extern void notifyExtiSwIRQ(void);
+    notifyExtiSwIRQ();
+  }
+  /// @brief GPIO_IN_INT_SW_N 割り込み
+  void extiSw2IRQ(void)
+  {
+    msg::send(i2cTaskHandle, msg::MODE_KEY_GET_REQ);
+    extern void notifyExtiSw2IRQ(void);
+    notifyExtiSw2IRQ();
+  }
+  /// @brief GPIO_IN_INT_SW2_N 割り込み
+  void extiMpuIRQ(void) { msg::send(i2cTaskHandle, msg::GYRO_GET_REQ); }
+} // extern "C"

@@ -4,10 +4,8 @@
 ///
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
-#include "task/app_task.h"
 #include "common/alloc.hpp"
 #include "main.h"
-#include "sound_task.h"
 #include "state/effect_edit.h"
 #include "state/error.h"
 #include "state/factory_reset.h"
@@ -36,64 +34,54 @@ void initBackup()
 }
 } // namespace
 
-void appTaskProc(void const *argument)
+extern "C"
 {
-  s_spi = satoh::alloc<satoh::SpiMaster>(SRAM_SPI, DMA1, LL_DMA_STREAM_4, LL_DMA_STREAM_3, SRAM_SPI_NSS_GPIO_Port, SRAM_SPI_NSS_Pin);
-  if (msg::registerThread(4) != osOK)
+  /// @brief appTask内部処理
+  /// @param [in] argument タスク引数
+  void appTaskProc(void const *argument)
   {
-    return;
-  }
-  initBackup();
-  auto *patch = reinterpret_cast<state::PatchTable *>(BKPSRAM_BASE);
-  satoh::UniquePtr<state::Property> prop(satoh::alloc<state::Property>(patch, s_spi));
-  state::PatchEdit stPE(*prop);
-  state::EffectEdit stEE(*prop);
-  state::Playing stPL(*prop);
-  state::FactoryReset stFR(*prop);
-  state::Tuner stTN(*prop);
-  state::Error stER(*prop);
-  state::Base *states[] = {&stPL, &stPE, &stEE, &stFR, &stTN, &stER};
-  state::ID stID = state::PLAYING;
-  states[stID]->init();
-  for (;;)
-  {
-    auto res = msg::recv();
-    auto *msg = res.msg();
-    if (msg == 0)
+    s_spi = satoh::alloc<satoh::SpiMaster>(SRAM_SPI, DMA1, LL_DMA_STREAM_4, LL_DMA_STREAM_3, SRAM_SPI_NSS_GPIO_Port, SRAM_SPI_NSS_Pin);
+    if (msg::registerThread(4) != osOK)
     {
-      continue;
+      return;
     }
-    auto next = states[stID]->run(msg);
-    if (stID != next)
+    initBackup();
+    auto *patch = reinterpret_cast<state::PatchTable *>(BKPSRAM_BASE);
+    satoh::UniquePtr<state::Property> prop(satoh::alloc<state::Property>(patch, s_spi));
+    state::PatchEdit stPE(*prop);
+    state::EffectEdit stEE(*prop);
+    state::Playing stPL(*prop);
+    state::FactoryReset stFR(*prop);
+    state::Tuner stTN(*prop);
+    state::Error stER(*prop);
+    state::Base *states[] = {&stPL, &stPE, &stEE, &stFR, &stTN, &stER};
+    state::ID stID = state::PLAYING;
+    states[stID]->init();
+    for (;;)
     {
-      states[stID]->deinit();
-      stID = next;
-      states[stID]->init();
+      auto res = msg::recv();
+      auto *msg = res.msg();
+      if (msg == 0)
+      {
+        continue;
+      }
+      auto next = states[stID]->run(msg);
+      if (stID != next)
+      {
+        states[stID]->deinit();
+        stID = next;
+        states[stID]->init();
+      }
     }
   }
-}
-
-void appTimIRQ(void)
-{
-  msg::send(appTaskHandle, msg::APP_TIM_NOTIFY);
-}
-
-void spiSramTxEndIRQ(void)
-{
-  s_spi->notifyTxEndIRQ();
-}
-
-void spiSramTxErrorIRQ(void)
-{
-  s_spi->notifyTxErrorIRQ();
-}
-
-void spiSramRxEndIRQ(void)
-{
-  s_spi->notifyRxEndIRQ();
-}
-
-void spiSramRxErrorIRQ(void)
-{
-  s_spi->notifyRxErrorIRQ();
-}
+  /// @brief APP TIM割り込み
+  void appTimIRQ(void) { msg::send(appTaskHandle, msg::APP_TIM_NOTIFY); }
+  /// @brief SPI SRAM送信完了割り込み
+  void spiSramTxEndIRQ(void) { s_spi->notifyTxEndIRQ(); }
+  /// @brief SPI SRAM送信エラー割り込み
+  void spiSramTxErrorIRQ(void) { s_spi->notifyTxErrorIRQ(); }
+  /// @brief SPI SRAM受信完了割り込み
+  void spiSramRxEndIRQ(void) { s_spi->notifyRxEndIRQ(); }
+  /// @brief SPI SRAM受信エラー割り込み
+  void spiSramRxErrorIRQ(void) { s_spi->notifyRxErrorIRQ(); }
+} // extern "C"

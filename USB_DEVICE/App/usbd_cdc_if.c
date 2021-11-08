@@ -23,7 +23,7 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-#include "user.h"
+
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -265,6 +265,7 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
   /* USER CODE BEGIN 6 */
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+  extern void usbRxIRQ(uint8_t const *bytes, uint32_t size);
   usbRxIRQ(Buf, *Len);
   return (USBD_OK);
   /* USER CODE END 6 */
@@ -311,8 +312,8 @@ static int8_t CDC_TransmitCplt_FS(uint8_t *Buf, uint32_t *Len, uint8_t epnum)
 {
   uint8_t result = USBD_OK;
   /* USER CODE BEGIN 13 */
-  UNUSED(epnum);
-  usbTxEndIRQ(Buf, *Len);
+  extern void usbTxEndIRQ(uint8_t const *bytes, uint32_t size, uint8_t epnum);
+  usbTxEndIRQ(Buf, *Len, epnum);
   /* USER CODE END 13 */
   return result;
 }

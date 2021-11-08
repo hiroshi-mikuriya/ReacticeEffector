@@ -48,7 +48,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "cmsis_os.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -130,7 +130,13 @@ void Error_Handler(void);
 #define RPI_UART_RX_Pin LL_GPIO_PIN_7
 #define RPI_UART_RX_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
-
+extern osThreadId usbTxTaskHandle;
+extern osThreadId i2cTaskHandle;
+extern osThreadId neoPixelTaskHandle;
+extern osThreadId appTaskHandle;
+extern osThreadId soundTaskHandle;
+extern osThreadId adcTaskHandle;
+extern osThreadId i2cMonitorTaskHandle;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

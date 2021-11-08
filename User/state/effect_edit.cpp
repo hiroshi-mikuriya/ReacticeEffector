@@ -7,7 +7,6 @@
 #include "effect_edit.h"
 #include "common.h"
 #include "common/utils.h"
-#include "user.h"
 
 namespace msg = satoh::msg;
 namespace state = satoh::state;

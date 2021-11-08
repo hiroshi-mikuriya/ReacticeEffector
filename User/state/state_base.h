@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "main.h"
 #include "message/type.h"
 #include "property.h"
 

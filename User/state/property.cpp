@@ -21,8 +21,7 @@
 #include "effector/reverb.hpp"
 #include "effector/tremolo.hpp"
 #include "factory_reset.h"
-#include "stm32f7xx.h"
-#include "stm32f7xx_ll_crc.h"
+#include "main.h"
 
 namespace fx = satoh::fx;
 namespace state = satoh::state;

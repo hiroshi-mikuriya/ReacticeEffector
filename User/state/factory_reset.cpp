@@ -7,7 +7,6 @@
 #include "factory_reset.h"
 #include "common.h"
 #include "common/utils.h"
-#include "user.h"
 
 namespace msg = satoh::msg;
 
