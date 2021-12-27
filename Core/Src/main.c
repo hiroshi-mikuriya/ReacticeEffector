@@ -21,7 +21,6 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "usb_device.h"
-#include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -62,6 +61,7 @@ osThreadId i2cMonitorTaskHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void PeriphCommonClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_USART1_UART_Init(void);
@@ -119,6 +119,9 @@ int main(void)
 
   /* Configure the system clock */
   SystemClock_Config();
+
+/* Configure the peripherals common clocks */
+  PeriphCommonClock_Config();
 
   /* USER CODE BEGIN SysInit */
 
@@ -230,18 +233,10 @@ void SystemClock_Config(void)
   }
   LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSE, LL_RCC_PLLM_DIV_4, 216, LL_RCC_PLLP_DIV_2);
   LL_RCC_PLL_ConfigDomain_48M(LL_RCC_PLLSOURCE_HSE, LL_RCC_PLLM_DIV_4, 216, LL_RCC_PLLQ_DIV_9);
-  LL_RCC_PLLSAI_ConfigDomain_SAI(LL_RCC_PLLSOURCE_HSE, LL_RCC_PLLM_DIV_4, 182, LL_RCC_PLLSAIQ_DIV_2, LL_RCC_PLLSAIDIVQ_DIV_1);
   LL_RCC_PLL_Enable();
 
    /* Wait till PLL is ready */
   while(LL_RCC_PLL_IsReady() != 1)
-  {
-
-  }
-  LL_RCC_PLLSAI_Enable();
-
-   /* Wait till PLL is ready */
-  while(LL_RCC_PLLSAI_IsReady() != 1)
   {
 
   }
@@ -262,11 +257,22 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  LL_RCC_SetUSBClockSource(LL_RCC_USB_CLKSOURCE_PLL);
-  LL_RCC_SetUSARTClockSource(LL_RCC_USART1_CLKSOURCE_PCLK2);
-  LL_RCC_SetUSARTClockSource(LL_RCC_USART2_CLKSOURCE_PCLK1);
-  LL_RCC_SetSAIClockSource(LL_RCC_SAI1_CLKSOURCE_PLLSAI);
-  LL_RCC_SetI2CClockSource(LL_RCC_I2C1_CLKSOURCE_PCLK1);
+}
+
+/**
+  * @brief Peripherals Common Clock Configuration
+  * @retval None
+  */
+void PeriphCommonClock_Config(void)
+{
+  LL_RCC_PLLSAI_ConfigDomain_SAI(LL_RCC_PLLSOURCE_HSE, LL_RCC_PLLM_DIV_4, 182, LL_RCC_PLLSAIQ_DIV_2, LL_RCC_PLLSAIDIVQ_DIV_1);
+  LL_RCC_PLLSAI_Enable();
+
+   /* Wait till PLL is ready */
+  while(LL_RCC_PLLSAI_IsReady() != 1)
+  {
+
+  }
 }
 
 /**
@@ -403,6 +409,8 @@ static void MX_I2C1_Init(void)
   LL_I2C_InitTypeDef I2C_InitStruct = {0};
 
   LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  LL_RCC_SetI2CClockSource(LL_RCC_I2C1_CLKSOURCE_PCLK1);
 
   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
   /**I2C1 GPIO Configuration
@@ -944,6 +952,8 @@ static void MX_USART1_UART_Init(void)
 
   LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 
+  LL_RCC_SetUSARTClockSource(LL_RCC_USART1_CLKSOURCE_PCLK2);
+
   /* Peripheral clock enable */
   LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_USART1);
 
@@ -1028,6 +1038,8 @@ static void MX_USART2_UART_Init(void)
   LL_USART_InitTypeDef USART_InitStruct = {0};
 
   LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  LL_RCC_SetUSARTClockSource(LL_RCC_USART2_CLKSOURCE_PCLK1);
 
   /* Peripheral clock enable */
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_USART2);
@@ -1370,4 +1382,3 @@ void assert_failed(uint8_t *file, uint32_t line)
 }
 #endif /* USE_FULL_ASSERT */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

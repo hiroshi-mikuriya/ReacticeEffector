@@ -73,6 +73,7 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef* pcdHandle)
   /* USER CODE BEGIN USB_OTG_FS_MspInit 0 */
 
   /* USER CODE END USB_OTG_FS_MspInit 0 */
+    LL_RCC_SetUSBClockSource(LL_RCC_USB_CLKSOURCE_PLL);
 
     __HAL_RCC_GPIOA_CLK_ENABLE();
     /**USB_OTG_FS GPIO Configuration
@@ -689,4 +690,3 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
   return usb_status;
 }
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

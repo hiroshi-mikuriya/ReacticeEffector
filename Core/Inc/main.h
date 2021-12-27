@@ -144,5 +144,3 @@ extern osThreadId i2cMonitorTaskHandle;
 #endif
 
 #endif /* __MAIN_H */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -93,6 +93,8 @@ void HAL_SAI_MspInit(SAI_HandleTypeDef* hsai)
     if(hsai->Instance==SAI1_Block_A)
     {
     /* Peripheral clock enable */
+    LL_RCC_SetSAIClockSource(LL_RCC_SAI1_CLKSOURCE_PLLSAI);
+
     if (SAI1_client == 0)
     {
        __HAL_RCC_SAI1_CLK_ENABLE();
@@ -146,6 +148,8 @@ void HAL_SAI_MspInit(SAI_HandleTypeDef* hsai)
     if(hsai->Instance==SAI1_Block_B)
     {
       /* Peripheral clock enable */
+    LL_RCC_SetSAIClockSource(LL_RCC_SAI1_CLKSOURCE_PLLSAI);
+
       if (SAI1_client == 0)
       {
        __HAL_RCC_SAI1_CLK_ENABLE();
@@ -236,4 +240,3 @@ void HAL_SAI_MspDeInit(SAI_HandleTypeDef* hsai)
 
 /* USER CODE END 1 */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

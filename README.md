@@ -3,7 +3,7 @@ ReactiveEffector
 
 ## ビルド手順
 
-[STM32CubeIDE(1.7.0)](https://www.st.com/ja/development-tools/stm32cubeide.html)もしくは `MacOS + CMake + ARMコンパイラ` でビルドできます。
+[STM32CubeIDE(1.8.0)](https://www.st.com/ja/development-tools/stm32cubeide.html)もしくは `MacOS + CMake + ARMコンパイラ` でビルドできます。
 
 ## MacOS + CMake + ARMコンパイラ
 
