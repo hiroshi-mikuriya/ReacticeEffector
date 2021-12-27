@@ -1,4 +1,4 @@
-ReacticeEffector
+ReactiveEffector
 ===
 
 ## ビルド手順
@@ -46,7 +46,7 @@ $ bash build.sh
 書き込みコマンド
 
 ```sh
-$ st-flash --format ihex write build/ReacticeEffector.hex
+$ st-flash --format ihex write build/ReactiveEffector.hex
 ```
 
 ## ディレクトリ構成
@@ -63,7 +63,7 @@ $ st-flash --format ihex write build/ReacticeEffector.hex
 （ファイル）
 ├── README.md（このファイル）
 ├── Doxyfile（doxygen設定）
-├── ReacticeEffector.ioc（CubeMXファイル）
+├── ReactiveEffector.ioc（CubeMXファイル）
 ├── STM32F745VGTX_FLASH.ld（自動生成・FLASH設定）
 ├── build.sh（CMakeビルド実行スクリプト）
 ├── .clang-format（clang-format設定）

@@ -25,7 +25,7 @@ set(FLOAT_ABI -mfloat-abi=hard)
 ##########
 # project name
 ##########
-project(ReacticeEffector)
+project(ReactiveEffector)
 
 set(ELF_FILE ${PROJECT_NAME}.elf)
 set(HEX_FILE ${PROJECT_NAME}.hex)

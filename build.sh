@@ -5,5 +5,9 @@ if [ ! -d $BUILD ]; then
     mkdir $BUILD
 fi
 cd $BUILD
-cmake ../cmake
+CACHE=CMakeCache.txt
+if [ -e $CACHE ]; then
+    rm $CACHE
+fi
+cmake ..
 make -j
