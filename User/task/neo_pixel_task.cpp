@@ -32,9 +32,11 @@ extern "C"
     satoh::NeoPixel np(s_spi, LED_COUNT);
     msg::NEO_PIXEL_PATTERN ptn{};
     msg::NEO_PIXEL_SPEED speed = {100};
+    uint32_t lastFlashTime = 0; // 最後に点灯制御した時刻
     for (int i = 0;; i = (i + 1) % 6)
     {
-      auto res = msg::recv(speed.interval);
+      auto res = msg::recv(10);
+      uint32_t now = osKernelSysTick();
       if (res.status() == osOK && res.msg())
       {
         auto msg = res.msg();
@@ -46,8 +48,12 @@ extern "C"
         {
           ptn = *reinterpret_cast<msg::NEO_PIXEL_PATTERN const *>(msg->bytes);
         }
+      }
+      if (now - lastFlashTime < speed.interval)
+      {
         continue;
       }
+      lastFlashTime = now;
       np.clear();
       for (uint32_t n = 0; n < LED_COUNT; ++n)
       {
