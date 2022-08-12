@@ -9,6 +9,8 @@
 #include "message/type.h"
 #include <algorithm>
 
+namespace msg = satoh::msg;
+
 namespace
 {
 constexpr int32_t SIG_DMAEND = 1 << 0;
@@ -90,10 +92,12 @@ extern "C"
       }
       if (ev.value.signals & SIG_TIMER)
       {
-        satoh::msg::LED_LEVEL level{};
+        msg::LED_LEVEL level{};
         level.left = getLevel(left.getRange());
         level.right = getLevel(right.getRange());
-        satoh::msg::send(i2cTaskHandle, satoh::msg::LED_LEVEL_UPDATE_REQ, level);
+        msg::send(i2cTaskHandle, msg::LED_LEVEL_UPDATE_REQ, level);
+        msg::NEO_PIXEL_SPEED speed = {static_cast<uint32_t>(300 / (level.right + 1))};
+        msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_SPEED, speed);
         left.reset();
         right.reset();
       }

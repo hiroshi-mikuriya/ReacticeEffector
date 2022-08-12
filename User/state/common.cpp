@@ -102,8 +102,6 @@ void state::tapProc(Property &prop) noexcept
   {
     prop.getFx(i)->setTapInterval(interval);
   }
-  msg::NEO_PIXEL_SPEED speed = {interval};
-  msg::send(neoPixelTaskHandle, msg::NEO_PIXEL_SET_SPEED, speed);
 }
 
 void state::re1Proc(Property &prop) noexcept
