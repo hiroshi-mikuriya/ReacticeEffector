@@ -192,7 +192,6 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-  MX_USB_DEVICE_Init();
   LL_TIM_EnableCounter(TIM10);
   LL_TIM_EnableIT_UPDATE(TIM10);
   /* USER CODE END RTOS_THREADS */

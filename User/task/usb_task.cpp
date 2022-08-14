@@ -6,6 +6,7 @@
 
 #include "cmsis_os.h"
 #include "message/type.h"
+#include "usb_device.h"
 #include "usbd_cdc_if.h"
 
 namespace msg = satoh::msg;
@@ -21,6 +22,7 @@ extern "C"
   /// @param [in] argument タスク引数
   void usbTxTaskProc(void const *argument)
   {
+    MX_USB_DEVICE_Init();
     if (msg::registerThread(2) != osOK)
     {
       return;
