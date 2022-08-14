@@ -29,7 +29,7 @@ class satoh::SSD1306 : public satoh::I2CDeviceBase
   /// move演算子削除
   SSD1306 &operator=(SSD1306 &&) = delete;
   /// 表示用バッファ
-  UniquePtr<uint8_t> dispbuf_;
+  UniquePtr<uint8_t> buffer_;
   /// 通信用バッファ
   UniquePtr<uint8_t> txbuf_;
   /// 通信可否
@@ -47,6 +47,8 @@ class satoh::SSD1306 : public satoh::I2CDeviceBase
   bool sendBufferToDevice(uint8_t page) noexcept;
   /// @brief 全ページ分のバッファをOLEDに書き込む @retval true 通信成功 @retval false 通信失敗
   bool sendBufferToDevice() noexcept;
+  /// @brief 表示データの書き込み先のポインタを取得する @return 表示データの書き込み先のポインタ
+  uint8_t *getDispBuffer() { return buffer_.get() + 1; }
 
 public:
   /// @brief コンストラクタ

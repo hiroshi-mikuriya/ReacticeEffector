@@ -42,7 +42,7 @@ constexpr uint32_t BUF_SIZE = WIDTH * HEIGHT / 8;
 /// @param [in] x X位置
 /// @param [in] y Y位置
 /// @param [out] dst 書き込み先
-void drawPixel(uint8_t color, uint8_t x, uint8_t y, uint8_t *dst) noexcept
+inline void drawPixel(uint8_t color, uint8_t x, uint8_t y, uint8_t *dst) noexcept
 {
   if (x < WIDTH && y < HEIGHT)
   {
@@ -63,7 +63,7 @@ void drawPixel(uint8_t color, uint8_t x, uint8_t y, uint8_t *dst) noexcept
 /// @param [in] x X位置
 /// @param [in] y Y位置
 /// @param [out] dst 書き込み先
-void drawChar(char ch, satoh::FontDef const &font, bool invert, uint8_t x, uint8_t y, uint8_t *dst) noexcept
+inline void drawChar(char ch, satoh::FontDef const &font, bool invert, uint8_t x, uint8_t y, uint8_t *dst) noexcept
 {
   for (uint8_t dy = 0; dy < font.height; ++dy)
   {
@@ -86,7 +86,7 @@ void drawChar(char ch, satoh::FontDef const &font, bool invert, uint8_t x, uint8
 /// @param [in] x X位置
 /// @param [in] y Y位置
 /// @param [out] dst 書き込み先
-void drawString(char const *str, satoh::FontDef const &font, bool invert, uint8_t x, uint8_t y, uint8_t *dst) noexcept
+inline void drawString(char const *str, satoh::FontDef const &font, bool invert, uint8_t x, uint8_t y, uint8_t *dst) noexcept
 {
   for (char const *p = str; *p; ++p)
   {
@@ -164,7 +164,7 @@ bool satoh::SSD1306::sendBufferToDevice(uint8_t page) noexcept
   write(v, sizeof(v), false);
   uint8_t *tx = txbuf_.get();
   tx[0] = CTRL_01;
-  memcpy(&tx[1], dispbuf_.get() + page * WIDTH, WIDTH);
+  memcpy(&tx[1], getDispBuffer() + page * WIDTH, WIDTH);
   return write(tx, WIDTH + 1, true); // falseにすると表示が崩れる
 }
 
@@ -178,11 +178,11 @@ bool satoh::SSD1306::sendBufferToDevice() noexcept
   return true;
 }
 
-satoh::SSD1306::SSD1306(I2C *i2c) noexcept     //
-    : I2CDeviceBase(i2c, SLAVE_ADDR),          //
-      dispbuf_(allocArray<uint8_t>(BUF_SIZE)), //
-      txbuf_(allocArray<uint8_t>(WIDTH + 32)), //
-      ok_(init())                              //
+satoh::SSD1306::SSD1306(I2C *i2c) noexcept        //
+    : I2CDeviceBase(i2c, SLAVE_ADDR),             //
+      buffer_(allocArray<uint8_t>(BUF_SIZE + 1)), //
+      txbuf_(allocArray<uint8_t>(WIDTH + 32)),    //
+      ok_(init())                                 //
 {
   if (ok_)
   {
@@ -192,7 +192,7 @@ satoh::SSD1306::SSD1306(I2C *i2c) noexcept     //
 
 bool satoh::SSD1306::update(msg::OLED_DISP_EFFECTOR const &src) noexcept
 {
-  uint8_t *disp = dispbuf_.get();
+  uint8_t *disp = getDispBuffer();
   memset(disp, 0, BUF_SIZE);
   satoh::FontDef const &titleFont = satoh::Font_11x18;
   satoh::FontDef const &paramFont = satoh::Font_7x10;
@@ -231,7 +231,7 @@ bool satoh::SSD1306::update(msg::OLED_DISP_EFFECTOR const &src) noexcept
 }
 bool satoh::SSD1306::update(msg::OLED_DISP_BANK const &src) noexcept
 {
-  uint8_t *disp = dispbuf_.get();
+  uint8_t *disp = getDispBuffer();
   memset(disp, 0, BUF_SIZE);
   satoh::FontDef const &titleFont = satoh::Font_11x18;
   satoh::FontDef const &paramFont = satoh::Font_7x10;
@@ -258,7 +258,7 @@ bool satoh::SSD1306::update(msg::OLED_DISP_CONFIRM const &src) noexcept
 {
   const auto &font0 = Font_7x10;
   const auto &font1 = Font_11x18;
-  uint8_t *disp = dispbuf_.get();
+  uint8_t *disp = getDispBuffer();
   memset(disp, 0, BUF_SIZE);
   drawString(src.msg1, font0, false, 0, font0.height * 0, disp);
   drawString(src.msg2, font0, false, 0, font0.height * 1, disp);
@@ -269,7 +269,7 @@ bool satoh::SSD1306::update(msg::OLED_DISP_CONFIRM const &src) noexcept
 bool satoh::SSD1306::update(msg::OLED_DISP_TEXT const &src) noexcept
 {
   const auto &font = Font_7x10;
-  uint8_t *disp = dispbuf_.get();
+  uint8_t *disp = getDispBuffer();
   memset(disp, 0, BUF_SIZE);
   drawString(src.msg1, font, false, 0, font.height * 1, disp);
   drawString(src.msg2, font, false, 0, font.height * 2, disp);
@@ -279,7 +279,7 @@ bool satoh::SSD1306::update(msg::OLED_DISP_TEXT const &src) noexcept
 bool satoh::SSD1306::update(msg::OLED_DISP_TUNER const &src) noexcept
 {
   const auto &font = Font_7x10;
-  uint8_t *disp = dispbuf_.get();
+  uint8_t *disp = getDispBuffer();
   memset(disp, 0, BUF_SIZE);
   drawString("TUNER", font, false, 40, 0, disp);
   if (src.estimated)
