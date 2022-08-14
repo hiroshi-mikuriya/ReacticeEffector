@@ -57,7 +57,7 @@ void ledLevelUpdateProc(satoh::LevelMeter &level, msg::Message const *msg) noexc
 {
   if (level)
   {
-    auto *param = reinterpret_cast<msg::LED_LEVEL const *>(msg->bytes);
+    auto *param = msg->get<msg::LED_LEVEL>();
     level.setLeft(param->left);
     level.setRight(param->right);
     level.show();
@@ -70,7 +70,7 @@ void ledSimpleProc(satoh::LevelMeter &level, msg::Message const *msg) noexcept
 {
   if (level)
   {
-    auto *param = reinterpret_cast<msg::LED_SIMPLE const *>(msg->bytes);
+    auto *param = msg->get<msg::LED_SIMPLE>();
     if (param->led == 0)
     {
       level.setPowerLed(param->level);
@@ -89,7 +89,7 @@ void ledEffectProc(satoh::PCA9635 &led, msg::Message const *msg) noexcept
 {
   if (led)
   {
-    auto *param = reinterpret_cast<msg::LED_EFFECT const *>(msg->bytes);
+    auto *param = msg->get<msg::LED_EFFECT>();
     led.set(param->rgb, param->led);
   }
 }
@@ -100,7 +100,7 @@ void ledAllEffectProc(satoh::PCA9635 &led, msg::Message const *msg) noexcept
 {
   if (led)
   {
-    auto *param = reinterpret_cast<msg::LED_ALL_EFFECT const *>(msg->bytes);
+    auto *param = msg->get<msg::LED_ALL_EFFECT>();
     led.set(param->rgb);
   }
 }
@@ -151,8 +151,7 @@ void oledUpdate(satoh::SSD1306 &oled, msg::Message const *msg)
 {
   if (oled)
   {
-    auto *param = reinterpret_cast<T const *>(msg->bytes);
-    oled.update(*param);
+    oled.update(*msg->get<T>());
   }
 }
 } // namespace

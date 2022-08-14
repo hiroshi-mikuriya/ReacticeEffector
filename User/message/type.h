@@ -81,36 +81,36 @@ constexpr uint8_t BUTTON_DOWN = 1; ///< ボタン押下中
 } // namespace msg
 } // namespace satoh
 
-/// @brief ジャイロ - 加速度・ジャイロ値通知型
+/// @brief GYRO_NOTIFY 付随データ
 struct satoh::msg::ACC_GYRO
 {
   int16_t acc[3];
   int16_t gyro[3];
 };
-/// @brief LED - レベルメーター（左右）更新依頼型
+/// @brief LED_LEVEL_UPDATE_REQ 付随データ
 struct satoh::msg::LED_LEVEL
 {
   uint8_t left;  ///< レベルメーター左（0 - 7）
   uint8_t right; ///< レベルメーター右（0 - 7）
 };
-/// @brief Power/Tap LED点灯状態変更依頼型
+/// @brief LED_SIMPLE_REQ 付随データ
 struct satoh::msg::LED_SIMPLE
 {
   uint8_t led; ///< @arg 0 POWER @arg 1 TAP
   bool level;  ///< @arg true 点灯 @arg false 消灯
 };
-/// @brief LED - EFFECT LED点灯状態変更依頼型（LED指定）
+/// @brief LED_EFFECT_REQ 付随データ
 struct satoh::msg::LED_EFFECT
 {
   uint8_t led; ///< LED番号（0 - 3）
   RGB rgb;     ///< 色
 };
-/// @brief LED - EFFECT LED点灯状態変更依頼型（全LED）
+/// @brief LED_ALL_EFFECT_REQ 付随データ
 struct satoh::msg::LED_ALL_EFFECT
 {
   RGB rgb[EFFECT_LED_COUNT]; ///< 色
 };
-/// @brief ロータリーエンコーダ値通知
+/// @brief ROTARY_ENCODER_NOTIFY 付随データ
 struct satoh::msg::ROTARY_ENCODER
 {
   /// 回転量の変化
@@ -119,7 +119,7 @@ struct satoh::msg::ROTARY_ENCODER
   /// @arg 1 右方向回転
   int8_t angleDiff[4];
 };
-/// @brief エフェクトキー変化通知
+/// @brief EFFECT_KEY_CHANGED_NOTIFY 付随データ
 struct satoh::msg::EFFECT_KEY
 {
   /// キー状態
@@ -127,7 +127,7 @@ struct satoh::msg::EFFECT_KEY
   /// @arg BUTTON_DOWN ボタン押下中
   uint8_t button[EFFECT_BUTTON_COUNT];
 };
-/// @brief モードキー変化通知
+/// @brief MODE_KEY_NOTIFY 付随データ
 struct satoh::msg::MODE_KEY
 {
   /// TAPキー状態
@@ -155,7 +155,7 @@ struct satoh::msg::MODE_KEY
   /// @arg BUTTON_DOWN ボタン押下中
   uint8_t re1;
 };
-/// OLED - エフェクターパラメータ一一覧表示依頼型
+/// @brief OLED_DISP_EFFECTOR_REQ 付随データ
 struct satoh::msg::OLED_DISP_EFFECTOR
 {
   /// 表示するエフェクター
@@ -165,7 +165,7 @@ struct satoh::msg::OLED_DISP_EFFECTOR
   /// 選択中のパラメータ番号
   uint8_t selectedParam;
 };
-/// OLED - バンク画面表示依頼型
+/// @brief OLED_DISP_BANK_REQ 付随データ
 struct satoh::msg::OLED_DISP_BANK
 {
   /// バンク番号
@@ -179,21 +179,21 @@ struct satoh::msg::OLED_DISP_BANK
   /// 選択中のエフェクト番号（editMode = true のときのみ有効）
   uint8_t selectedFx;
 };
-/// OLED - コンファーム画面表示依頼型
+/// @brief OLED_DISP_CONFIRM_REQ 付随データ
 struct satoh::msg::OLED_DISP_CONFIRM
 {
   char msg1[19]; ///< テキスト１行目（末尾の0含む）
   char msg2[19]; ///< テキスト２行目（末尾の0含む）
   bool yes;      ///< @arg YES選択 @arg NO選択
 };
-/// OLED - テキスト表示依頼型
+/// @brief OLED_DISP_TEXT_REQ 付随データ
 struct satoh::msg::OLED_DISP_TEXT
 {
   char msg1[19]; ///< テキスト１行目（末尾の0含む）
   char msg2[19]; ///< テキスト２行目（末尾の0含む）
   char msg3[19]; ///< テキスト３行目（末尾の0含む）
 };
-/// OLED - チューナー表示依頼型
+/// @brief OLED_DISP_TUNER_REQ 付随データ
 struct satoh::msg::OLED_DISP_TUNER
 {
   bool estimated; ///< 周波数推定有無
@@ -201,25 +201,25 @@ struct satoh::msg::OLED_DISP_TUNER
   int diff;       ///< 期待値とのずれ（0ならば一致している）
   float freq;     ///< 周波数
 };
-/// NeoPixel - 点灯パターン指定型
+/// @brief NEO_PIXEL_SET_PATTERN 付随データ
 struct satoh::msg::NEO_PIXEL_PATTERN
 {
   /// 点灯パターン
   RGB rgb[6];
 };
-/// NeoPixel - 点灯スピード指定型
+/// @brief NEO_PIXEL_SET_SPEED 付随データ
 struct satoh::msg::NEO_PIXEL_SPEED
 {
   /// インターバル（ミリ秒）
   uint32_t interval;
 };
-/// Sound - エフェクター変更要求型
+/// @brief SOUND_CHANGE_EFFECTOR_REQ 付随データ
 struct satoh::msg::SOUND_EFFECTOR
 {
   /// エフェクタークラスのポインタ
   fx::EffectorBase *fx[MAX_EFFECTOR_COUNT];
 };
-/// Error - エラー通知
+/// @brief ERROR_NOTIFY 付随データ
 struct satoh::msg::ERROR
 {
   /// エラー原因

@@ -139,7 +139,7 @@ extern "C"
         soundProc(effector, pop, rxbuf.get() + BLOCK_SIZE_2, txbuf.get() + BLOCK_SIZE_2, left.get(), right.get(), satoh::BLOCK_SIZE);
         break;
       case msg::SOUND_CHANGE_EFFECTOR_REQ:
-        effector = *reinterpret_cast<msg::SOUND_EFFECTOR const *>(msg->bytes);
+        effector = *msg->get<msg::SOUND_EFFECTOR>();
         pop.init();
         break;
       }

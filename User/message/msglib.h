@@ -72,6 +72,23 @@ struct satoh::msg::Message
   ID type;                           ///< メッセージ種別
   uint16_t size;                     ///< 付随データサイズ
   uint8_t bytes[MAX_MAIL_DATA_SIZE]; ///< 付随データ
+
+  /// @brief 付随データを任意の型のポインタに変換して取得する
+  /// @tparam T  変換する型
+  /// @return ポインタ
+  template <typename T>
+  T *get()
+  {
+    return reinterpret_cast<T *>(bytes);
+  }
+  /// @brief 付随データを任意の型のポインタに変換して取得する
+  /// @tparam T  変換する型
+  /// @return ポインタ
+  template <typename T>
+  T const *get() const
+  {
+    return const_cast<Message *>(this)->get<T>();
+  }
 };
 
 /// @brief 受信結果型

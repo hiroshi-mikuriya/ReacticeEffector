@@ -61,15 +61,15 @@ public:
     switch (msg->type)
     {
     case msg::MODE_KEY_NOTIFY:
-      return run(reinterpret_cast<msg::MODE_KEY const *>(msg->bytes));
+      return run(msg->get<msg::MODE_KEY>());
     case msg::EFFECT_KEY_CHANGED_NOTIFY:
-      return run(reinterpret_cast<msg::EFFECT_KEY const *>(msg->bytes));
+      return run(msg->get<msg::EFFECT_KEY>());
     case msg::GYRO_NOTIFY:
-      return run(reinterpret_cast<msg::ACC_GYRO const *>(msg->bytes));
+      return run(msg->get<msg::ACC_GYRO>());
     case msg::ROTARY_ENCODER_NOTIFY:
-      return run(reinterpret_cast<msg::ROTARY_ENCODER const *>(msg->bytes));
+      return run(msg->get<msg::ROTARY_ENCODER>());
     case msg::ERROR_NOTIFY:
-      return run(reinterpret_cast<msg::ERROR const *>(msg->bytes));
+      return run(msg->get<msg::ERROR>());
     case msg::APP_TIM_NOTIFY:
       return timer();
     }

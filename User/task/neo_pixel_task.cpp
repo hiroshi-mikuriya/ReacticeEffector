@@ -42,11 +42,11 @@ extern "C"
         auto msg = res.msg();
         if (msg->type == msg::NEO_PIXEL_SET_SPEED)
         {
-          speed = *reinterpret_cast<msg::NEO_PIXEL_SPEED const *>(msg->bytes);
+          speed = *msg->get<msg::NEO_PIXEL_SPEED>();
         }
         if (msg->type == msg::NEO_PIXEL_SET_PATTERN)
         {
-          ptn = *reinterpret_cast<msg::NEO_PIXEL_PATTERN const *>(msg->bytes);
+          ptn = *msg->get<msg::NEO_PIXEL_PATTERN>();
         }
       }
       if (now - lastFlashTime < speed.interval)

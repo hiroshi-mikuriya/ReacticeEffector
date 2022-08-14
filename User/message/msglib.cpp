@@ -84,10 +84,11 @@ osStatus msg::send(osThreadId threadId, ID type, void const *bytes, uint16_t siz
   {
     return osEventTimeout;
   }
+  memset(m, 0, sizeof(Message));
   m->type = type;
-  m->size = size;
   if (0 < size && bytes)
   {
+    m->size = size;
     memcpy(m->bytes, bytes, size);
   }
   return osMailPut(info->mailId, m);
