@@ -7,6 +7,7 @@
 #include "factory_reset.h"
 #include "common.h"
 #include "common/utils.h"
+#include <cstdio> // to use `sprintf`
 
 namespace msg = satoh::msg;
 

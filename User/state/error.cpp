@@ -6,6 +6,7 @@
 
 #include "error.h"
 #include "common/utils.h"
+#include <cstdio> // to use `sprintf`
 
 namespace msg = satoh::msg;
 namespace state = satoh::state;
