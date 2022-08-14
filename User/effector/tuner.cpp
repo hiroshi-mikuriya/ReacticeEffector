@@ -183,7 +183,7 @@ satoh::fx::Tuner::Tuner()                                           //
       inDataCnt_(0),                                                //
       bitStream_({}),                                               //
       arraySel_(0),                                                 //
-      corrArray_(makeDmaMem<uint32_t>(CORR_ARRAY_SIZE)),            //
+      corrArray_(allocArray<uint32_t>(CORR_ARRAY_SIZE)),            //
       maxCorr_(0),                                                  //
       minCorr_(UINT32_MAX),                                         //
       estimatedIndex_(MIN_PERIOD),                                  //

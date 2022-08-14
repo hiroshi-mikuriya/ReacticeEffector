@@ -16,6 +16,9 @@ constexpr int32_t SIG_DMAEND = (1 << 2) & satoh::I2C_CLS_SIG_MASK;
 constexpr int32_t SIG_DMAERR = (1 << 3) & satoh::I2C_CLS_SIG_MASK;
 constexpr int32_t SIG_ERR = (1 << 7) & satoh::I2C_CLS_SIG_MASK;
 
+constexpr size_t RX_BUF_SIZE = 32;
+constexpr size_t TX_BUF_SIZE = 1025; // OLEDの送信バッファを想定したサイズ
+
 /// @brief I2C通信後の終了処理を行うクラス
 class Finalizer
 {
@@ -53,6 +56,22 @@ public:
     clearSignals();
   }
 };
+/// @brief I2Cビジーが解除されるまで待機する
+/// @param [in] i2cx I2Cペリフェラル
+/// @retval true レディ
+/// @retval false タイムアウト
+inline bool waitForReady(I2C_TypeDef *i2cx)
+{
+  for (int i = 0; i < 100; ++i)
+  {
+    if (!LL_I2C_IsActiveFlag_BUSY(i2cx))
+    {
+      return true;
+    }
+    osThreadYield();
+  }
+  return false;
+}
 } // namespace
 
 void satoh::I2C::start() const noexcept
@@ -118,17 +137,17 @@ satoh::I2C::I2C()   //
 {
 }
 
-satoh::I2C::I2C(I2C_TypeDef *const i2cx,    //
-                DMA_TypeDef *const dma,     //
-                uint32_t rxStream,          //
-                uint32_t txStream) noexcept //
-    : i2cx_(i2cx),                          //
-      threadId_(0),                         //
-      dma_(dma),                            //
-      rxStream_(rxStream),                  //
-      txStream_(txStream),                  //
-      rxbuf_(makeDmaMem<uint8_t>(32)),      //
-      txbuf_(makeDmaMem<uint8_t>(256))      //
+satoh::I2C::I2C(I2C_TypeDef *const i2cx,        //
+                DMA_TypeDef *const dma,         //
+                uint32_t rxStream,              //
+                uint32_t txStream) noexcept     //
+    : i2cx_(i2cx),                              //
+      threadId_(0),                             //
+      dma_(dma),                                //
+      rxStream_(rxStream),                      //
+      txStream_(txStream),                      //
+      rxbuf_(makeDmaMem<uint8_t>(RX_BUF_SIZE)), //
+      txbuf_(makeDmaMem<uint8_t>(TX_BUF_SIZE))  //
 {
   start();
 }
@@ -273,15 +292,15 @@ satoh::I2C::Result satoh::I2C::write(uint8_t slaveAddr, void const *bytes, uint3
   {
     return Result::ERROR;
   }
-  if (LL_I2C_IsActiveFlag_BUSY(i2cx_))
-  {
-    restart();
-    return Result::BUSY;
-  }
   threadId_ = osThreadGetId();
   if (threadId_ == 0)
   {
     return Result::ERROR;
+  }
+  if (!waitForReady(i2cx_))
+  {
+    restart();
+    return Result::BUSY;
   }
   Finalizer fin(i2cx_);
   LL_I2C_EnableIT_NACK(i2cx_);
@@ -307,15 +326,15 @@ satoh::I2C::Result satoh::I2C::read(uint8_t slaveAddr, void *buffer, uint32_t si
   {
     return Result::ERROR;
   }
-  if (LL_I2C_IsActiveFlag_BUSY(i2cx_))
-  {
-    restart();
-    return Result::BUSY;
-  }
   threadId_ = osThreadGetId();
   if (threadId_ == 0)
   {
     return Result::ERROR;
+  }
+  if (!waitForReady(i2cx_))
+  {
+    restart();
+    return Result::BUSY;
   }
   Finalizer fin(i2cx_);
   LL_I2C_EnableIT_STOP(i2cx_);
@@ -324,7 +343,7 @@ satoh::I2C::Result satoh::I2C::read(uint8_t slaveAddr, void *buffer, uint32_t si
   LL_DMA_SetDataLength(dma_, rxStream_, size);
   LL_DMA_EnableStream(dma_, rxStream_);
   LL_I2C_HandleTransfer(i2cx_, slaveAddr, LL_I2C_ADDRSLAVE_7BIT, size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_READ);
-  WAIT_SIGNAL(SIG_DMAEND | SIG_DMAERR | SIG_NACK | SIG_ERR, 10);
+  WAIT_SIGNAL(SIG_DMAEND | SIG_DMAERR | SIG_NACK | SIG_ERR, 100);
   WAIT_SIGNAL(SIG_STOP, 1);
   memcpy(buffer, rxbuf_.get(), size);
   if (withSleep)

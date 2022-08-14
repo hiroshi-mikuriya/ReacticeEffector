@@ -13,7 +13,7 @@
 namespace
 {
 /// メモリ全体のサイズ
-constexpr std::size_t TOTAL_SIZE = 24000;
+constexpr std::size_t TOTAL_SIZE = 24368;
 /// DTCM領域に確保したDMA専用メモリ（D-Cacheの影響を受けない）
 std::uint8_t s_dmaMem[TOTAL_SIZE] DTCM_MEM;
 /// 現在位置
