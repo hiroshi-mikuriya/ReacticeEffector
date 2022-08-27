@@ -1,0 +1,927 @@
+:lang: ja
+:doctype: book
+:toc: left
+:toclevels: 2
+:toc-title: 目次
+:sectnums:
+:sectnumlevels: 4
+:sectlinks:
+:icons: font
+:source-highlighter: highlightjs
+:example-caption: 例
+:table-caption: 表
+:figure-caption: 図
+:doctitle: RE-1 RTOSメッセージ定義
+:author: 佐藤ガジェット製作所
+:revnumber: 1.0
+:revdate: 2022/8/27
+:imagesdir: images
+:chapter-label:
+
+:adc_task: ADCタスク
+:app_task: アプリケーションタスク
+:i2c_monitor_task: I2C監視タスク
+:i2c_task: I2Cタスク
+:neo_pixel_task: NeoPixelタスク
+:sound_task: サウンドタスク
+:usb_task: USBタスク
+
+:extiSw2IRQ: EXTI タッチセンサ入力通知割り込み
+:extiSwIRQ: EXTI ロータリーエンコーダイベント通知割り込み
+:extiMpuIRQ: EXTI ジャイロセンサ更新通知割り込み
+:extiSpiNssIRQ: EXTI SPI4（RPI）NSS変化通知割り込み
+
+= {doctitle}
+
+== 本ドキュメントについて
+
+RE-1 の タスク・割り込み・RTOSメッセージについて解説します。
+
+image::re-1.jpg[RE-1,200,200,float="right",align="center"]
+
+== RTOSタスク
+
+[options="header, autowidth", options="header", stripes=even]
+.RTOSタスク一覧
+|===
+|タスク名|処理内容
+|{adc_task}|音量レベルの監視
+|{app_task}|状態遷移を行う
+|{i2c_monitor_task}|一定期間通信していないI2Cデバイスと通信を行うよう通知する
+|{i2c_task}|全I2Cデバイスとの通信
+|{neo_pixel_task}|NeoPixel制御
+|{sound_task}|エフェクト処理
+|{usb_task}|USBコマンド送信
+|===
+
+== 割り込み
+
+=== DMA割り込み
+
+[options="header, autowidth", options="header", stripes=even]
+.DMA割り込み一覧
+|===
+|DMA|チャネル|アサイン
+|1|0|I2C受信完了/エラー
+|1|1|-
+|1|2|-
+|1|3|SPI2（SRAM）受信完了/エラー
+|1|4|SPI2（SRAM）送信完了/エラー
+|1|5|SPI3（NeoPixel）送信完了/エラー
+|1|6|UART2（IR）送信完了/エラー
+|1|7|I2C送信完了/エラー
+|2|0|SPI4（RPI）受信完了/エラー
+|2|1|SPI4（RPI）送信完了/エラー
+|2|2|-
+|2|3|SAI1 A
+|2|4|ADC変換完了/エラー
+|2|5|SAI1 B
+|2|6|-
+|2|7|UART1（RPI）送信完了/エラー
+|===
+
+<<<
+=== タイマー割り込み
+
+[options="header, autowidth", options="header", stripes=even]
+.タイマー割り込み一覧
+|===
+|TIM|周期|アサイン
+|1|-|-
+|2|-|-
+|3|-|-
+|4|-|-
+|5|-|-
+|6|500ms|ACT LED点滅
+|7|1ms|HAL/FreeRTOS
+|8|-|-
+|9|-|-
+|10|100ms|ADC/APP
+|11|-|-
+|12|-|-
+|13|-|-
+|14|-|-
+|===
+
+=== EXTI割り込み
+
+[options="header, autowidth", options="header", stripes=even]
+.EXTI割り込み一覧
+|===
+|EXTI|ピン|アサイン
+|0|-|-
+|1|-|-
+|2|-|-
+|3|-|-
+|4|-|-
+|5|PA5|{extiSw2IRQ}
+|6|PA6|{extiMpuIRQ}
+|7|PA7|{extiSwIRQ}
+|8|-|-
+|9|-|-
+|10|-|-
+|11|PE11|{extiSpiNssIRQ}
+|12|-|-
+|13|-|-
+|14|-|-
+|15|-|-
+|===
+
+=== ペリフェラル割り込み
+
+[options="header, autowidth", options="header", stripes=even]
+.ペリフェラル割り込み一覧
+|===
+|ペリフェラル|割り込み
+|I2C1|イベント通知
+|I2C1|エラー通知
+|UART1（RPI）|受信、その他エラー通知など
+|UART2（IR）|受信、その他エラー通知など
+|USB FS|-
+|===
+
+
+== RTOSメッセージ
+
+[options="header, autowidth", options="header", stripes=even]
+.RTOSメッセージ一覧
+|===
+|定義|意味
+|GYRO_GET_REQ   |ジャイロ - 取得依頼
+|GYRO_NOTIFY    |ジャイロ - 加速度・ジャイロ値通知
+|LED_LEVEL_UPDATE_REQ   |LED - レベルメーター（左右）更新依頼
+|LED_SIMPLE_REQ |LED - Power/Tap LED点灯状態変更依頼
+|LED_EFFECT_REQ |LED - EFFECT LED点灯状態変更依頼（LED指定）
+|LED_ALL_EFFECT_REQ |LED - EFFECT LED点灯状態変更依頼（全LED）
+|ENCODER_GET_REQ    |ENCODER - エンコーダ値取得依頼
+|ROTARY_ENCODER_NOTIFY  |ENCODER - ロータリーエンコーダ値通知
+|EFFECT_KEY_CHANGED_NOTIFY  |ENCODER - エフェクトキー変化通知
+|MODE_KEY_GET_REQ   |キー入力 - 取得依頼
+|MODE_KEY_NOTIFY    |キー入力 - キー取得値通知
+|OLED_DISP_EFFECTOR_REQ |OLED - エフェクターパラメータ一一覧表示依頼
+|OLED_DISP_BANK_REQ |OLED - バンク画面表示依頼
+|OLED_DISP_CONFIRM_REQ  |OLED - コンファーム画面表示依頼
+|OLED_DISP_TEXT_REQ |OLED - テキスト表示依頼
+|OLED_DISP_TUNER_REQ    |OLED - チューナー表示依頼
+|USB_TX_REQ |USB - 送信依頼
+|USB_RX_NOTIFY  |USB - 受信通知
+|NEO_PIXEL_SET_PATTERN  |NeoPixel - 点灯パターン指定
+|NEO_PIXEL_SET_SPEED    |NeoPixel - 点灯スピード指定
+|SOUND_DMA_HALF_NOTIFY  |Sound - DMA半分受信完了通知
+|SOUND_DMA_CPLT_NOTIFY  |Sound - DMA全部受信完了通知
+|SOUND_CHANGE_EFFECTOR_REQ  |Sound - エフェクター変更要求
+|APP_TIM_NOTIFY |App - タイマー通知
+|ERROR_NOTIFY   |Error - エラー通知
+|===
+
+<<<
+=== ジャイロ - 取得依頼
+
+説明:::
+
+ジャイロセンサのレジスタ更新を通知するI/O信号を検出したら通知されます。
+
+定義名:::
+
+GYRO_GET_REQ   
+
+送信元:::
+
+{extiMpuIRQ}
+
+送信先:::
+
+{i2c_task}
+
+引数:::
+
+なし
+
+<<<
+=== ジャイロ - 加速度・ジャイロ値通知
+
+説明:::
+
+ジャイロセンサのレジスタ読み込み結果を通知します。
+
+定義名:::
+
+GYRO_NOTIFY    
+
+送信元:::
+
+{i2c_task}
+
+送信先:::
+
+{app_task}
+
+引数:::
+
+[source, c++]
+----
+struct satoh::msg::ACC_GYRO
+{
+  int16_t acc[3];
+  int16_t gyro[3];
+};
+----
+
+<<<
+=== LED - レベルメーター（左右）更新依頼
+
+説明:::
+
+レベルメータLEDの点灯状態を変更します。
+
+定義名:::
+
+LED_LEVEL_UPDATE_REQ   
+
+送信元:::
+
+{adc_task}
+
+送信先:::
+
+{i2c_task}
+
+引数:::
+
+[source, c++]
+----
+struct satoh::msg::LED_LEVEL
+{
+  uint8_t left;  ///< レベルメーター左（0 - 7）
+  uint8_t right; ///< レベルメーター右（0 - 7）
+};
+----
+
+<<<
+=== LED - Power/Tap LED点灯状態変更依頼
+
+説明:::
+
+POWER LED / TAP LED に点灯・消灯を指定します。
+
+定義名:::
+
+LED_SIMPLE_REQ 
+
+送信元:::
+
+{app_task}
+
+送信先:::
+
+{i2c_task}
+
+引数:::
+
+[source, c++]
+----
+struct satoh::msg::LED_SIMPLE
+{
+  uint8_t led; ///< @arg 0 POWER @arg 1 TAP
+  bool level;  ///< @arg true 点灯 @arg false 消灯
+};
+----
+
+<<<
+=== LED - EFFECT LED点灯状態変更依頼（LED指定）
+
+説明:::
+
+１つのエフェクトLEDの点灯色を指定します。
+
+定義名:::
+
+LED_EFFECT_REQ 
+
+送信元:::
+
+未使用
+
+送信先:::
+
+{i2c_task}
+
+引数:::
+
+[source, c++]
+----
+struct satoh::msg::LED_EFFECT
+{
+  uint8_t led; ///< LED番号（0 - 3）
+  RGB rgb;     ///< 色
+};
+----
+
+<<<
+=== LED - EFFECT LED点灯状態変更依頼（全LED）
+
+説明:::
+
+全てのエフェクトLEDの点灯色を指定します。
+
+定義名:::
+
+LED_ALL_EFFECT_REQ 
+
+送信元:::
+
+{app_task}
+
+送信先:::
+
+{i2c_task}
+
+引数:::
+
+[source, c++]
+----
+struct satoh::msg::LED_ALL_EFFECT
+{
+  RGB rgb[EFFECT_LED_COUNT]; ///< 色
+};
+----
+
+<<<
+=== ENCODER - エンコーダ値取得依頼
+
+説明:::
+
+エンコーダが更新されたI/O信号を検出すると通知されます。 +
+エンコーダの読み取りを一定期間行っていない場合にも通知されます。
+
+定義名:::
+
+ENCODER_GET_REQ    
+
+送信元:::
+
+{extiSwIRQ} +
+{i2c_monitor_task}
+
+送信先:::
+
+{i2c_task}
+
+引数:::
+
+なし
+
+<<<
+=== ENCODER - ロータリーエンコーダ値通知
+
+説明:::
+
+ロータリーエンコーダの回転変化を通知します。
+
+定義名:::
+
+ROTARY_ENCODER_NOTIFY  
+
+送信元:::
+
+{i2c_task}
+
+送信先:::
+
+{app_task}
+
+引数:::
+
+[source, c++]
+----
+struct satoh::msg::ROTARY_ENCODER
+{
+  /// 回転量の変化
+  /// @arg -1 左方向回転
+  /// @arg 0 変化なし
+  /// @arg 1 右方向回転
+  int8_t angleDiff[4];
+};
+----
+
+<<<
+=== ENCODER - エフェクトキー変化通知
+
+説明:::
+
+ロータリエンコーダのボタンが押されたら通知されます。
+
+定義名:::
+
+EFFECT_KEY_CHANGED_NOTIFY  
+
+送信元:::
+
+{i2c_task}
+
+送信先:::
+
+{app_task}
+
+引数:::
+
+[source, c++]
+----
+struct satoh::msg::EFFECT_KEY
+{
+  /// キー状態
+  /// @arg BUTTON_UP ボタン離し中
+  /// @arg BUTTON_DOWN ボタン押下中
+  uint8_t button[EFFECT_BUTTON_COUNT];
+};
+----
+
+<<<
+=== キー入力 - 取得依頼
+
+説明:::
+
+キー入力されたことを表すI/O信号を検出したら通知されます。 +
+キー状態の読み出しを一定期間信号行っていない場合にも通知されます。
+
+定義名:::
+
+MODE_KEY_GET_REQ   
+
+送信元:::
+
+{extiSw2IRQ} +
+{i2c_monitor_task}
+
+送信先:::
+
+{i2c_task}
+
+引数:::
+
+なし
+
+<<<
+=== キー入力 - キー取得値通知
+
+説明:::
+
+キー押下状態を読み込んだ結果を通知します。
+
+定義名:::
+
+MODE_KEY_NOTIFY    
+
+送信元:::
+
+{i2c_task}
+
+送信先:::
+
+{app_task}
+
+引数:::
+
+[source, c++]
+----
+struct satoh::msg::MODE_KEY
+{
+  /// TAPキー状態
+  /// @arg BUTTON_UP ボタン離し中
+  /// @arg BUTTON_DOWN ボタン押下中
+  uint8_t tap;
+  /// UPキー状態
+  /// @arg BUTTON_UP ボタン離し中
+  /// @arg BUTTON_DOWN ボタン押下中
+  uint8_t up;
+  /// DOWNキー状態
+  /// @arg BUTTON_UP ボタン離し中
+  /// @arg BUTTON_DOWN ボタン押下中
+  uint8_t down;
+  /// OKキー状態
+  /// @arg BUTTON_UP ボタン離し中
+  /// @arg BUTTON_DOWN ボタン押下中
+  uint8_t ok;
+  /// リターンキー状態
+  /// @arg BUTTON_UP ボタン離し中
+  /// @arg BUTTON_DOWN ボタン押下中
+  uint8_t rtn;
+  /// RE1キー状態
+  /// @arg BUTTON_UP ボタン離し中
+  /// @arg BUTTON_DOWN ボタン押下中
+  uint8_t re1;
+};
+----
+
+<<<
+=== OLED - エフェクターパラメータ一一覧表示依頼
+
+説明:::
+
+OLEDにエフェクターパラメータ一覧を表示します。
+
+定義名:::
+
+OLED_DISP_EFFECTOR_REQ 
+
+送信元:::
+
+{app_task}
+
+送信先:::
+
+{i2c_task}
+
+引数:::
+
+[source, c++]
+----
+struct satoh::msg::OLED_DISP_EFFECTOR
+{
+  /// 表示するエフェクター
+  fx::EffectorBase *fx;
+  /// パッチ番号
+  uint8_t patch;
+  /// 選択中のパラメータ番号
+  uint8_t selectedParam;
+};
+----
+
+<<<
+=== OLED - バンク画面表示依頼
+
+説明:::
+
+OLEDにバンク画面を表示します。
+
+定義名:::
+
+OLED_DISP_BANK_REQ 
+
+送信元:::
+
+{app_task}
+
+送信先:::
+
+{i2c_task}
+
+引数:::
+
+[source, c++]
+----
+struct satoh::msg::OLED_DISP_BANK
+{
+  /// バンク番号
+  uint8_t bank;
+  /// パッチ番号
+  uint8_t patch;
+  /// 表示するエフェクター
+  fx::EffectorBase *fx[MAX_EFFECTOR_COUNT];
+  /// エディットモードフラグ
+  bool editMode;
+  /// 選択中のエフェクト番号（editMode = true のときのみ有効）
+  uint8_t selectedFx;
+};
+----
+
+<<<
+=== OLED - コンファーム画面表示依頼
+
+説明:::
+
+OLEDにコンファーム画面を表示します。
+
+定義名:::
+
+OLED_DISP_CONFIRM_REQ  
+
+送信元:::
+
+{app_task}
+
+送信先:::
+
+{i2c_task}
+
+引数:::
+
+[source, c++]
+----
+struct satoh::msg::OLED_DISP_CONFIRM
+{
+  char msg1[19]; ///< テキスト１行目（末尾の0含む）
+  char msg2[19]; ///< テキスト２行目（末尾の0含む）
+  bool yes;      ///< @arg YES選択 @arg NO選択
+};
+----
+
+<<<
+=== OLED - テキスト表示依頼
+
+説明:::
+
+OLEDに任意のテキストを表示します。
+
+定義名:::
+
+OLED_DISP_TEXT_REQ 
+
+送信元:::
+
+{app_task}
+
+送信先:::
+
+{i2c_task}
+
+引数:::
+
+[source, c++]
+----
+struct satoh::msg::OLED_DISP_TEXT
+{
+  char msg1[19]; ///< テキスト１行目（末尾の0含む）
+  char msg2[19]; ///< テキスト２行目（末尾の0含む）
+  char msg3[19]; ///< テキスト３行目（末尾の0含む）
+};
+----
+
+<<<
+=== OLED - チューナー表示依頼
+
+説明:::
+
+OLEDにチューナー画面を表示します。
+
+定義名:::
+
+OLED_DISP_TUNER_REQ    
+
+送信元:::
+
+{app_task}
+
+送信先:::
+
+{i2c_task}
+
+引数:::
+
+[source, c++]
+----
+struct satoh::msg::OLED_DISP_TUNER
+{
+  bool estimated; ///< 周波数推定有無
+  char name[3];   ///< 音名(C, C#, D, D#, E, F, F#, G, G#, A, A#, B)
+  int diff;       ///< 期待値とのずれ（0ならば一致している）
+  float freq;     ///< 周波数
+};
+----
+
+<<<
+=== USB - 送信依頼
+
+説明:::
+
+USB送信データを指定します。
+
+定義名:::
+
+USB_TX_REQ 
+
+送信元:::
+
+{app_task}
+
+送信先:::
+
+{usb_task}
+
+引数:::
+
+任意のバイト列
+
+<<<
+=== USB - 受信通知
+
+説明:::
+
+USBからデータを受信したら通知されます。
+
+定義名:::
+
+USB_RX_NOTIFY  
+
+送信元:::
+
+USB FS割り込み
+
+送信先:::
+
+{usb_task}
+
+引数:::
+
+任意のバイト列
+
+<<<
+=== NeoPixel - 点灯パターン指定
+
+説明:::
+
+NeoPixelの点灯パターンを指定します。
+
+定義名:::
+
+NEO_PIXEL_SET_PATTERN  
+
+送信元:::
+
+{app_task}
+
+送信先:::
+
+{neo_pixel_task}
+
+引数:::
+
+[source, c++]
+----
+struct satoh::msg::NEO_PIXEL_PATTERN
+{
+  /// 点灯パターン
+  RGB rgb[6];
+};
+----
+
+<<<
+=== NeoPixel - 点灯スピード指定
+
+説明:::
+
+NeoPixelの点灯スピードを指定します。
+
+定義名:::
+
+NEO_PIXEL_SET_SPEED    
+
+送信元:::
+
+{adc_task}
+
+送信先:::
+
+{neo_pixel_task}
+
+引数:::
+
+[source, c++]
+----
+struct satoh::msg::NEO_PIXEL_SPEED
+{
+  /// インターバル（ミリ秒）
+  uint32_t interval;
+};
+----
+
+<<<
+=== Sound - DMA半分受信完了通知
+
+説明:::
+
+音声入力データを格納するバッファの前半部分が埋まったら通知されます。
+
+定義名:::
+
+SOUND_DMA_HALF_NOTIFY  
+
+送信元:::
+
+SAI DMA前半部受信割り込み
+
+送信先:::
+
+{sound_task}
+
+引数:::
+
+なし
+
+<<<
+=== Sound - DMA全部受信完了通知
+
+説明:::
+
+音声入力データを格納するバッファの後半部分が埋まったら通知されます。
+
+定義名:::
+
+SOUND_DMA_CPLT_NOTIFY  
+
+送信元:::
+
+SAI DMA後半部受信割り込み
+
+送信先:::
+
+{sound_task}
+
+引数:::
+
+なし
+
+<<<
+=== Sound - エフェクター変更要求
+
+説明:::
+
+入力音声を変換するエフェクターを切り替えます。
+
+定義名:::
+
+SOUND_CHANGE_EFFECTOR_REQ  
+
+送信元:::
+
+{app_task}
+
+送信先:::
+
+{sound_task}
+
+引数:::
+
+[source, c++]
+----
+struct satoh::msg::SOUND_EFFECTOR
+{
+  /// エフェクタークラスのポインタ
+  fx::EffectorBase *fx[MAX_EFFECTOR_COUNT];
+};
+----
+
+<<<
+=== App - タイマー通知
+
+説明:::
+
+{app_task} に定期的に通知します。 +
+TAP時間の計測などに使用されます。
+
+定義名:::
+
+APP_TIM_NOTIFY 
+
+送信元:::
+
+ADC/APP TIM割り込み
+
+送信先:::
+
+{app_task}
+
+引数:::
+
+なし
+
+<<<
+=== Error - エラー通知 
+
+説明:::
+
+エラー発生を通知します。
+
+定義名:::
+
+ERROR_NOTIFY   
+
+送信元:::
+
+{i2c_task} +
+{sound_task}
+
+送信先:::
+
+{app_task}
+
+引数:::
+
+[source, c++]
+----
+struct satoh::msg::ERROR
+{
+  /// エラー原因
+  error::ID cause;
+};
+----
+
+== 改訂履歴
+
+[cols="1,2,14", options="header"]
+.改訂履歴
+|===
+|版|日付|内容
+|1.0|2022/8/27|初版
+
+|===

@@ -1,0 +1,44 @@
+# frozen_string_literal: true
+
+require 'asciidoctor'
+require 'rake/clean'
+
+NAME = 'RE-1 RTOSメッセージ定義'
+ASCIIDOC = '../asciidoc'
+SRC = 'main.adoc'
+
+CLEAN.include('./.asciidoctor')
+CLEAN.include('./images/*.svg')
+CLEAN.include('./*.pdf')
+CLEAN.include('./*.html')
+
+desc 'generate pdf'
+task :pdf do
+  cmd = %W[
+    asciidoctor
+    --trace
+    --backend=pdf
+    -a pdf-style=#{ASCIIDOC}/theme.yml
+    -r asciidoctor-pdf-cjk-kai_gen_gothic
+    -r #{ASCIIDOC}/config.rb
+    -r asciidoctor-diagram
+    #{SRC} -o "#{NAME}.pdf"
+  ].join(' ')
+  sh cmd
+end
+
+desc 'generate html'
+task :html do
+  cmd = %W[
+    asciidoctor
+    --trace
+    --backend=html5
+    -r #{ASCIIDOC}/config.rb
+    -r asciidoctor-diagram
+    #{SRC} -o index.html
+  ].join(' ')
+  sh cmd
+end
+
+desc 'do all tasks'
+task all: %i[pdf html]
