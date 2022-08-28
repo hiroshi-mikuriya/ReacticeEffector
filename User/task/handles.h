@@ -14,4 +14,3 @@ extern osThreadId neoPixelTaskHandle;
 extern osThreadId appTaskHandle;
 extern osThreadId soundTaskHandle;
 extern osThreadId adcTaskHandle;
-extern osThreadId i2cMonitorTaskHandle;

@@ -202,6 +202,10 @@ extern "C"
     {
       sendError(msg::error::OLED);
     }
+
+    uint32_t lastEncoderGetTime = 0;
+    uint32_t lastKeyGetTime = 0;
+    constexpr uint32_t timeout = 50;
     for (;;)
     {
       auto res = msg::recv();
@@ -214,6 +218,18 @@ extern "C"
       {
         continue;
       }
+
+      // エンコーダ、タッチキーはしばらく読み出さないとEXTI割り込みを検出できなくなることがあるため
+      uint32_t now = osKernelSysTick();
+      if (msg->type != msg::MODE_KEY_GET_REQ && timeout < now - lastKeyGetTime)
+      {
+        msg::send(i2cTaskHandle, msg::MODE_KEY_GET_REQ);
+      }
+      if (msg->type != msg::ENCODER_GET_REQ && timeout < now - lastEncoderGetTime)
+      {
+        msg::send(i2cTaskHandle, msg::ENCODER_GET_REQ);
+      }
+
       switch (msg->type)
       {
       case msg::LED_LEVEL_UPDATE_REQ:
@@ -235,10 +251,12 @@ extern "C"
       case msg::MODE_KEY_GET_REQ:
         res.reset();
         keyUpdateProc(modeKey);
+        lastKeyGetTime = now;
         break;
       case msg::ENCODER_GET_REQ:
         res.reset();
         encoderGetProc(encoder);
+        lastEncoderGetTime = now;
         break;
       case msg::OLED_DISP_EFFECTOR_REQ:
         oledUpdate<msg::OLED_DISP_EFFECTOR>(oled, msg);
@@ -270,20 +288,10 @@ extern "C"
   void i2cTxEndIRQ(void) { s_i2c->notifyTxEndIRQ(); }
   /// @brief I2C送信エラー割り込み
   void i2cTxErrorIRQ(void) { s_i2c->notifyTxErrorIRQ(); }
-  /// @brief GPIO_IN_INT_MPU_N 割り込み
-  void extiSwIRQ(void)
-  {
-    msg::send(i2cTaskHandle, msg::ENCODER_GET_REQ);
-    extern void notifyExtiSwIRQ(void);
-    notifyExtiSwIRQ();
-  }
   /// @brief GPIO_IN_INT_SW_N 割り込み
-  void extiSw2IRQ(void)
-  {
-    msg::send(i2cTaskHandle, msg::MODE_KEY_GET_REQ);
-    extern void notifyExtiSw2IRQ(void);
-    notifyExtiSw2IRQ();
-  }
+  void extiSwIRQ(void) { msg::send(i2cTaskHandle, msg::ENCODER_GET_REQ); }
   /// @brief GPIO_IN_INT_SW2_N 割り込み
+  void extiSw2IRQ(void) { msg::send(i2cTaskHandle, msg::MODE_KEY_GET_REQ); }
+  /// @brief GPIO_IN_INT_MPU_N 割り込み
   void extiMpuIRQ(void) { msg::send(i2cTaskHandle, msg::GYRO_GET_REQ); }
 } // extern "C"

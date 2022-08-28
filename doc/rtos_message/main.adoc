@@ -13,14 +13,13 @@
 :figure-caption: 図
 :doctitle: RE-1 RTOSメッセージ定義
 :author: 佐藤ガジェット製作所
-:revnumber: 1.0
-:revdate: 2022/8/27
+:revnumber: 1.1
+:revdate: 2022/8/28
 :imagesdir: images
 :chapter-label:
 
 :adc_task: ADCタスク
 :app_task: アプリケーションタスク
-:i2c_monitor_task: I2C監視タスク
 :i2c_task: I2Cタスク
 :neo_pixel_task: NeoPixelタスク
 :sound_task: サウンドタスク
@@ -47,7 +46,6 @@ image::re-1.jpg[RE-1,200,200,float="right",align="center"]
 |タスク名|処理内容
 |{adc_task}|音量レベルの監視
 |{app_task}|状態遷移を行う
-|{i2c_monitor_task}|一定期間通信していないI2Cデバイスと通信を行うよう通知する
 |{i2c_task}|全I2Cデバイスとの通信
 |{neo_pixel_task}|NeoPixel制御
 |{sound_task}|エフェクト処理
@@ -361,7 +359,7 @@ ENCODER_GET_REQ
 送信元:::
 
 {extiSwIRQ} +
-{i2c_monitor_task}
+{i2c_task}
 
 送信先:::
 
@@ -451,7 +449,7 @@ MODE_KEY_GET_REQ
 送信元:::
 
 {extiSw2IRQ} +
-{i2c_monitor_task}
+{i2c_task}
 
 送信先:::
 
@@ -924,4 +922,5 @@ struct satoh::msg::ERROR
 |版|日付|内容
 |1.0|2022/8/27|初版
 
+|1.1|2022/8/28|I2C監視タスクを削除
 |===
