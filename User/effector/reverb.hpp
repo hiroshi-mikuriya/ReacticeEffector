@@ -112,14 +112,14 @@ public:
   /// @brief コンストラクタ
   Reverb()                                                           //
       : EffectorBase(REVERB, "Reverb", "RV", RGB{0x20, 0x20, 0x20}), //
-        ui_({
+        ui_{
             EffectParameterF(0, 100, 1, "LEVEL"),  //
             EffectParameterF(0, 100, 1, "MIX"),    //
             EffectParameterF(0, 99, 1, "F.BACK"),  //
             EffectParameterF(0, 100, 1, "HiCUT"),  //
             EffectParameterF(0, 100, 1, "LoCUT"),  //
             EffectParameterF(0, 100, 1, "HiDUMP"), //
-        }),                                        //
+        },                                         //
         level_(0),                                 //
         mix_(0),                                   //
         fback_(0)                                  //

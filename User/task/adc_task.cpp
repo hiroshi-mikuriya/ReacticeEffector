@@ -30,7 +30,7 @@ public:
   /// @brief 幅を初期化
   void reset() noexcept
   {
-    min_ = 0xFFFF;
+    min_ = UINT16_MAX;
     max_ = 0;
   }
   /// @brief 上限・下限を更新

@@ -110,14 +110,14 @@ public:
   /// @brief コンストラクタ
   Compressor()
       : EffectorBase(COMPRESSOR, "Compressor", "CS", RGB{0x00, 0x00, 0x20}), // エフェクター名、短縮エフェクター名、LED色
-        ui_({
+        ui_{
             EffectParameterF(0, 100, 1, "LEVEL"), //
             EffectParameterF(-90, 0, 1, "THRE"),  //
             EffectParameterF(2, 11, 1, "RATIO"),  //
             EffectParameterF(4, 100, 1, "ATK"),   //
             EffectParameterF(5, 400, 1, "REL"),   //
             EffectParameterF(0, 20, 1, "KNEE"),   //
-        })                                        //
+        }                                         //
   {
     lpfEnv.set(500.0f); // エンベロープ用ローパスフィルタ設定
     lpfAtkRel.set(100.0f);

@@ -179,9 +179,9 @@ void bitStreamSet(uint16_t cnt, float x, float *inData, uint32_t *bitData)
 satoh::fx::Tuner::Tuner()                                           //
     : EffectorBase(TEMPLATE, "Tuner", "TN", RGB{0x00, 0x00, 0x00}), //
       lpf_(MAX_FREQ),                                               //
-      inData_({}),                                                  //
+      inData_{},                                                    //
       inDataCnt_(0),                                                //
-      bitStream_({}),                                               //
+      bitStream_{},                                                 //
       arraySel_(0),                                                 //
       corrArray_(allocArray<uint32_t>(CORR_ARRAY_SIZE)),            //
       maxCorr_(0),                                                  //

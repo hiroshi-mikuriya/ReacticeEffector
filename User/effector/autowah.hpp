@@ -98,13 +98,13 @@ public:
   /// @brief コンストラクタ
   AutoWah()
       : EffectorBase(AUTO_WAH, "Auto Wah", "AW", RGB{0x20, 0x20, 0x20}), // エフェクター名、短縮エフェクター名、LED色
-        ui_({
+        ui_{
             EffectParameterF(0, 100, 1, "LEVEL"),     //
             EffectParameterF(0, 100, 1, "SENS"),      //
             EffectParameterF(10, 90, 1, "Q"),         //
             EffectParameterF(1000, 9000, 100, "HiF"), //
             EffectParameterF(100, 900, 10, "LowF"),   //
-        }),                                           //
+        },                                            //
         level_(0),                                    //
         sens_(0),                                     //
         q_(0),                                        //

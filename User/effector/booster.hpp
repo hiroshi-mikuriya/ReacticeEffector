@@ -80,11 +80,11 @@ public:
   /// @brief コンストラクタ
   Booster()
       : EffectorBase(BOOSTER, "Booster", "BT", RGB{0x20, 0x00, 0x00}), //
-        ui_({
+        ui_{
             EffectParameterF(0, 10, 1, "LEVEL"), //
             EffectParameterF(0, 10, 1, "HIGH"),  //
             EffectParameterF(0, 10, 1, "LOW"),   //
-        }),                                      //
+        },                                       //
         gain_(0)                                 //
   {
     init(ui_, COUNT);

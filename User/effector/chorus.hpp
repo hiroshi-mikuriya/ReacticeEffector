@@ -104,14 +104,14 @@ public:
   /// @brief コンストラクタ
   Chorus()
       : EffectorBase(CHORUS, "Chorus", "CH", RGB{0x00, 0x10, 0x20}), //
-        ui_({
+        ui_{
             EffectParameterF(1, 100, 1, "LEVEL"), //
             EffectParameterF(1, 100, 1, "MIX"),   //
             EffectParameterF(1, 99, 1, "F.BACK"), //
             EffectParameterF(1, 100, 1, "RATE"),  //
             EffectParameterF(1, 100, 1, "DEPTH"), //
             EffectParameterF(1, 100, 1, "TONE"),  //
-        }),                                       //
+        },                                        //
         del1_(16),                                //
         level_(0),                                //
         mix_(0),                                  //

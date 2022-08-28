@@ -187,9 +187,9 @@ void state::Property::loadPatch() noexcept
 state::Property::Property(PatchTable *patch, SpiMaster *spi) //
     : bankNum_(0),                                           //
       patchNum_(0),                                          //
-      effectors_({Effectors(0, spi),                         //
-                  Effectors(1, spi),                         //
-                  Effectors(2, spi)}),                       //
+      effectors_{Effectors(0, spi),                          //
+                 Effectors(1, spi),                          //
+                 Effectors(2, spi)},                         //
       patches_(patch),                                       //
       editSelectedFxNum_(0),                                 //
       error_(msg::error::NONE)                               //

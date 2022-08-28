@@ -85,11 +85,11 @@ public:
   /// @brief コンストラクタ
   Oscillator()                                                               //
       : EffectorBase(OSCILLATOR, "Oscillator", "OS", RGB{0x00, 0x08, 0x20}), //
-        ui_({
+        ui_{
             EffectParameterF(0, 100, 1, "LEVEL"), //
             EffectParameterF(2, 200, 2, "FREQ"),  //
             EffectParameterF(0, 2, 1, "TYPE"),    //
-        }),                                       //
+        },                                        //
         level_(0),                                //
         type_(0)                                  //
   {

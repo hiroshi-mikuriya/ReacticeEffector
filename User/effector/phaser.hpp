@@ -78,11 +78,11 @@ public:
   /// @brief コンストラクタ
   Phaser()                                                          //
       : EffectorBase(PHASER, "Phaser", "PH", RGB{0x8, 0x20, 0x00}), //
-        ui_({
+        ui_{
             EffectParameterF(0, 100, 1, "LEVEL"), //
             EffectParameterF(0, 100, 1, "RATE"),  //
             EffectParameterF(1, 6, 1, "STAGE"),   //
-        })                                        //
+        }                                         //
   {
     init(ui_, COUNT);
   }

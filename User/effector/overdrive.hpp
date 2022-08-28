@@ -88,12 +88,12 @@ public:
   /// @brief コンストラクタ
   OverDrive()                                                              //
       : EffectorBase(OVERDRIVE, "Overdrive", "OD", RGB{0x20, 0x20, 0x00}), //
-        ui_({
+        ui_{
             EffectParameterF(1, 100, 1, "LEVEL"),  //
             EffectParameterF(1, 100, 1, "GAIN"),   //
             EffectParameterF(1, 100, 1, "TREBLE"), //
             EffectParameterF(1, 100, 1, "BASS"),   //
-        }),                                        //
+        },                                         //
         level_(0),                                 //
         gain_(0)                                   //
   {

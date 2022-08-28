@@ -80,11 +80,11 @@ public:
   /// @brief コンストラクタ
   Distortion()                                                               //
       : EffectorBase(DISTORTION, "Distortion", "DS", RGB{0x20, 0x00, 0x00}), //
-        ui_({
+        ui_{
             EffectParameterF(1, 100, 1, "LEVEL"), //
             EffectParameterF(1, 100, 1, "GAIN"),  //
             EffectParameterF(1, 100, 1, "TONE"),  //
-        }),                                       //
+        },                                        //
         level_(0),                                //
         gain_(0)                                  //
   {

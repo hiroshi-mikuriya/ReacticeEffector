@@ -109,13 +109,13 @@ public:
   /// @brief コンストラクタ
   BqFilter()                                                               //
       : EffectorBase(BQ_FILTER, "BQ Filter", "BQ", RGB{0x00, 0x20, 0x20}), //
-        ui_({
+        ui_{
             EffectParameterF(-20, 20, 1, "LV"), //
             EffectParameterF(0, 8, 1, "TYPE"),  //
             EffectParameterF(2, 999, 10, "Fc"), //
             EffectParameterF(1, 99, 1, "Q"),    //
             EffectParameterF(-15, 15, 1, "dB"), //
-        }),                                     //
+        },                                      //
         level_(0),                              //
         type_(0),                               //
         freq_(0),                               //

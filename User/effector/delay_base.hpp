@@ -89,12 +89,12 @@ public:
   /// @param [in] ledColor アクティブ時のLED色
   DelayBase(ID id, const char *name, const char *shortName, RGB const &ledColor) //
       : EffectorBase(id, name, shortName, ledColor),                             //
-        ui_({
+        ui_{
             EffectParameterF(10, 900, 100, 5, "TIME"), //
             EffectParameterF(0, 100, 1, "E.LV"),       //
             EffectParameterF(0, 99, 1, "F.BACK"),      //
             EffectParameterF(0, 100, 1, "TONE"),       //
-        }),
+        },
         fback_(0), //
         elevel_(0) //
   {

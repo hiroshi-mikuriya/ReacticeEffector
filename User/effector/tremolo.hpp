@@ -83,12 +83,12 @@ public:
   /// @brief コンストラクタ
   Tremolo()                                                            //
       : EffectorBase(TREMOLO, "Tremolo", "TR", RGB{0x00, 0x20, 0x00}), //
-        ui_({
+        ui_{
             EffectParameterF(1, 100, 1, "LEVEL"), //
             EffectParameterF(1, 100, 1, "RATE"),  //
             EffectParameterF(1, 100, 1, "DEPTH"), //
             EffectParameterF(1, 100, 1, "WAVE"),  //
-        }),                                       //
+        },                                        //
         level_(0),                                //
         wave_(0),                                 //
         depth_(0)                                 //
