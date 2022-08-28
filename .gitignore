@@ -17,3 +17,10 @@
 !CMakeLists.txt
 CMakeFiles
 
+# 自動生成したソースコードは管理対象に含めない
+Core
+Drivers
+Middlewares
+USB_DEVICE
+!Core/Startup/*.s
+!USB_DEVICE/App/usbd_cdc_if.c

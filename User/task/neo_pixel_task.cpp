@@ -7,6 +7,7 @@
 #include "cmsis_os.h"
 #include "common/alloc.hpp"
 #include "device/neo_pixel.h"
+#include "handles.h"
 #include "main.h"
 #include "message/type.h"
 
@@ -20,9 +21,10 @@ satoh::SpiMaster *s_spi = 0;
 extern "C"
 {
   /// @brief neoPixelTask内部処理
-  /// @param [in] argument タスク引数
+  /// @param [in] argument 未使用
   void neoPixelTaskProc(void const *argument)
   {
+    UNUSED(argument);
     if (msg::registerThread(2) != osOK)
     {
       return;

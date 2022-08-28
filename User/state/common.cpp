@@ -106,7 +106,7 @@ void state::tapProc(Property &prop) noexcept
 
 void state::re1Proc(Property &prop) noexcept
 {
-  static_cast<void>(prop); // unused
+  UNUSED(prop);
   changeNeoPixelPattern();
 }
 

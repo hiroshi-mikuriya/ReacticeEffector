@@ -11,6 +11,7 @@
 #include "device/pca9635.h"
 #include "device/rotary_encoder.h"
 #include "device/ssd1306.h"
+#include "handles.h"
 #include "main.h"
 #include "message/msglib.h"
 
@@ -159,9 +160,10 @@ void oledUpdate(satoh::SSD1306 &oled, msg::Message const *msg)
 extern "C"
 {
   /// @brief i2cTask内部処理
-  /// @param [in] argument タスク引数
+  /// @param [in] argument 未使用
   void i2cTaskProc(void const *argument)
   {
+    UNUSED(argument);
     if (msg::registerThread(12) != osOK)
     {
       return;

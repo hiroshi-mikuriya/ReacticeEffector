@@ -5,6 +5,7 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "common/alloc.hpp"
+#include "handles.h"
 #include "main.h"
 #include "state/effect_edit.h"
 #include "state/error.h"
@@ -37,9 +38,10 @@ void initBackup()
 extern "C"
 {
   /// @brief appTask内部処理
-  /// @param [in] argument タスク引数
+  /// @param [in] argument 未使用
   void appTaskProc(void const *argument)
   {
+    UNUSED(argument);
     s_spi = satoh::alloc<satoh::SpiMaster>(SRAM_SPI, DMA1, LL_DMA_STREAM_4, LL_DMA_STREAM_3, SRAM_SPI_NSS_GPIO_Port, SRAM_SPI_NSS_Pin);
     if (msg::registerThread(4) != osOK)
     {
@@ -57,6 +59,9 @@ extern "C"
     state::Base *states[] = {&stPL, &stPE, &stEE, &stFR, &stTN, &stER};
     state::ID stID = state::PLAYING;
     states[stID]->init();
+
+    LL_TIM_EnableCounter(TIM10);
+    LL_TIM_EnableIT_UPDATE(TIM10);
     for (;;)
     {
       auto res = msg::recv();

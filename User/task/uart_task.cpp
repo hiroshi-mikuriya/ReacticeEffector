@@ -4,6 +4,7 @@
 ///
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
+#include "handles.h"
 #include "main.h"
 
 extern "C"

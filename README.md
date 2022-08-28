@@ -1,9 +1,14 @@
 ReactiveEffector
 ===
 
+## ソースコードについて
+
+このリポジトリには一部のソースコードしかコミットしていない。  
+不足しているコードは `CubeMX(6.6.1)` や `STM32CubeIDE(1.10.1)` などの自動生成機能で生成すること。
+
 ## ビルド手順
 
-[STM32CubeIDE(1.8.0)](https://www.st.com/ja/development-tools/stm32cubeide.html)もしくは `MacOS + CMake + ARMコンパイラ` でビルドできます。
+[STM32CubeIDE(1.10.1)](https://www.st.com/ja/development-tools/stm32cubeide.html)もしくは `MacOS + CMake + ARMコンパイラ` でビルドできます。
 
 ## MacOS + CMake + ARMコンパイラ
 
@@ -71,6 +76,4 @@ $ st-flash --format ihex write build/ReactiveEffector.hex
 ```
 
 CubeMXで自動生成したファイルのうち、以下は一部手動で編集した。
-* Core/Src/main.c
-* Core/Src/stm32f7xx_it.c
 * USB_DEVICE/App/usbd_cdc_if.c

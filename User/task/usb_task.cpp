@@ -5,6 +5,7 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "cmsis_os.h"
+#include "handles.h"
 #include "message/type.h"
 #include "usb_device.h"
 #include "usbd_cdc_if.h"
@@ -19,9 +20,10 @@ constexpr int32_t SIG_USBTXEND = 1 << 0;
 extern "C"
 {
   /// @brief USB送信Task内部処理
-  /// @param [in] argument タスク引数
+  /// @param [in] argument 未使用
   void usbTxTaskProc(void const *argument)
   {
+    UNUSED(argument);
     MX_USB_DEVICE_Init();
     if (msg::registerThread(2) != osOK)
     {
@@ -54,11 +56,7 @@ extern "C"
   /// @brief USB受信割り込み
   /// @param [in] bytes 受信データの先頭ポインタ
   /// @param [in] size 受信データサイズ
-  void usbRxIRQ(uint8_t const *bytes, uint32_t size)
-  {
-    UNUSED(bytes);
-    UNUSED(size);
-  }
+  void usbRxIRQ(uint8_t const *bytes, uint32_t size) { msg::send(usbTxTaskHandle, msg::USB_RX_NOTIFY, bytes, size); }
   /// @brief USB送信完了割り込み
   /// @param [in] bytes 受信データの先頭ポインタ
   /// @param [in] size 受信データサイズ

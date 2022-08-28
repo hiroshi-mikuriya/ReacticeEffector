@@ -5,6 +5,7 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "common/dma_mem.h"
+#include "handles.h"
 #include "main.h"
 #include "message/type.h"
 #include <algorithm>
@@ -63,9 +64,11 @@ uint8_t getLevel(uint16_t v)
 extern "C"
 {
   /// @brief adcTask内部処理
-  /// @param [in] argument タスク引数
+  /// @param [in] argument 未使用
   void adcTaskProc(void const *argument)
   {
+    UNUSED(argument);
+
     ADC_TypeDef *const adc = ADC1;
     DMA_TypeDef *const dma = DMA2;
     const uint32_t stream = LL_DMA_STREAM_4;

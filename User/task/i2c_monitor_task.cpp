@@ -4,6 +4,7 @@
 ///
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
+#include "handles.h"
 #include "main.h"
 #include "message/type.h"
 
@@ -16,9 +17,11 @@ constexpr int32_t SIG_ENCODER = 1 << 17;
 extern "C"
 {
   /// @brief i2cMonitorTask内部処理
-  /// @param [in] argument タスク引数
+  /// @param [in] argument 未使用
   void i2cMonitorTaskProc(void const *argument)
   {
+    UNUSED(argument);
+
     for (;;)
     {
       osEvent ev = osSignalWait(SIG_MODE_KEY | SIG_ENCODER, 50);

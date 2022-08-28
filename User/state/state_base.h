@@ -9,6 +9,7 @@
 #include "main.h"
 #include "message/type.h"
 #include "property.h"
+#include "task/handles.h"
 
 namespace satoh
 {

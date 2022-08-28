@@ -7,6 +7,7 @@
 #include "common/alloc.hpp"
 #include "common/dma_mem.h"
 #include "effector/pop_noise_reductor.hpp"
+#include "handles.h"
 #include "main.h"
 #include "message/type.h"
 #include "peripheral/i2c.h"
@@ -90,9 +91,10 @@ extern "C"
     }
   }
   /// @brief soundTask内部処理
-  /// @param [in] argument タスク引数
+  /// @param [in] argument 未使用
   void soundTaskProc(void const *argument)
   {
+    UNUSED(argument);
     osEvent ev = osSignalWait(SIG_INITADC, 500);
     if (ev.status == osEventTimeout)
     {
