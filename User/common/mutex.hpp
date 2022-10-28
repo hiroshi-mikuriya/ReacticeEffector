@@ -11,7 +11,10 @@
 namespace satoh
 {
 class Mutex;
-}
+
+template <class MutexType>
+class LockGuard;
+} // namespace satoh
 
 /// @brief FreeRTOSのミューテックスを扱うクラス
 /// @note std::lock_guard から使えるように、関数の分け方を std::mutex に合わせている。
@@ -86,4 +89,25 @@ public:
     m_ = 0;
     return res;
   }
+};
+
+/// @brief FreeRTOSのミューテックスを扱うクラス
+/// @note std::lock_guard から使えるように、関数の分け方を std::mutex に合わせている。
+template <class MutexType>
+class satoh::LockGuard
+{
+  LockGuard() = delete;                             ///< デフォルトコンストラクタ削除
+  LockGuard(LockGuard const &) = delete;            ///< コピーコンストラクタ削除
+  LockGuard &operator=(LockGuard const &) = delete; ///< 代入演算子削除
+  LockGuard(LockGuard &&) = delete;                 ///< moveコンストラクタ削除
+  LockGuard &operator=(LockGuard &&) = delete;      ///< move演算子削除
+
+  MutexType &mutex_; ///<ミューテクス
+
+public:
+  /// @brief コンストラクタ（ロックする）
+  /// @param mutex ロック対象のミューテクス
+  explicit LockGuard(MutexType &mutex) : mutex_(mutex) { mutex_.lock(); }
+  /// @brief デストラクタ（アンロックする）
+  virtual ~LockGuard() { mutex_.unlock(); }
 };

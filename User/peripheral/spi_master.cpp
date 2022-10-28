@@ -5,8 +5,8 @@
 /// DO NOT USE THIS SOFTWARE WITHOUT THE SOFTWARE LICENSE AGREEMENT.
 
 #include "spi_master.h"
-#include <mutex>
 #include <string.h> // memset
+#include <utility>  // std::move
 
 namespace
 {
@@ -203,7 +203,7 @@ satoh::SpiMaster::~SpiMaster()
 
 satoh::SpiMaster::Result satoh::SpiMaster::send(void const *bytes, uint32_t size, uint32_t millisec) const noexcept
 {
-  std::lock_guard<Mutex> lock(mutex_);
+  LockGuard<Mutex> lock(mutex_);
   if (!spi_)
   {
     return ERROR;
@@ -231,7 +231,7 @@ satoh::SpiMaster::Result satoh::SpiMaster::send(void const *bytes, uint32_t size
 
 satoh::SpiMaster::Result satoh::SpiMaster::sendRecv(void const *tbytes, void *rbytes, uint32_t size, uint32_t millisec) const noexcept
 {
-  std::lock_guard<Mutex> lock(mutex_);
+  LockGuard<Mutex> lock(mutex_);
   if (!spi_ || sendOnly_)
   {
     return ERROR;

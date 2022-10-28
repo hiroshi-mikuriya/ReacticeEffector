@@ -6,7 +6,6 @@
 
 #include "i2c.h"
 #include <cstring> // memcpy
-#include <mutex>
 
 namespace
 {
@@ -287,7 +286,7 @@ void satoh::I2C::notifyTxErrorIRQ() noexcept
 
 satoh::I2C::Result satoh::I2C::write(uint8_t slaveAddr, void const *bytes, uint32_t size, bool withSleep) const noexcept
 {
-  std::lock_guard<Mutex> lock(mutex_);
+  LockGuard<Mutex> lock(mutex_);
   if (!i2cx_)
   {
     return Result::ERROR;
@@ -310,7 +309,7 @@ satoh::I2C::Result satoh::I2C::write(uint8_t slaveAddr, void const *bytes, uint3
   LL_DMA_SetDataLength(dma_, txStream_, size);
   LL_DMA_EnableStream(dma_, txStream_);
   LL_I2C_HandleTransfer(i2cx_, slaveAddr, LL_I2C_ADDRSLAVE_7BIT, size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_WRITE);
-  WAIT_SIGNAL(SIG_DMAEND | SIG_DMAERR | SIG_NACK | SIG_ERR, 10);
+  WAIT_SIGNAL(SIG_DMAEND | SIG_DMAERR | SIG_NACK | SIG_ERR, 100);
   WAIT_SIGNAL(SIG_STOP, 1);
   if (withSleep)
   {
@@ -321,7 +320,7 @@ satoh::I2C::Result satoh::I2C::write(uint8_t slaveAddr, void const *bytes, uint3
 
 satoh::I2C::Result satoh::I2C::read(uint8_t slaveAddr, void *buffer, uint32_t size, bool withSleep) const noexcept
 {
-  std::lock_guard<Mutex> lock(mutex_);
+  LockGuard<Mutex> lock(mutex_);
   if (!i2cx_)
   {
     return Result::ERROR;
