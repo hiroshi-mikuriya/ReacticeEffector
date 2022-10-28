@@ -16,3 +16,7 @@
 !*.yml
 !rakefile
 !Gemfile
+
+# xlsx
+!*.xlsx
+~*.xlsx
