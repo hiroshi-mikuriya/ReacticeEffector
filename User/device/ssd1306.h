@@ -38,13 +38,6 @@ class satoh::SSD1306 : public satoh::I2CDeviceBase
   uint8_t selectedParam_;
   /// @brief LCD初期化 @retval true 通信成功 @retval false 通信失敗
   bool init() const noexcept;
-  /// @brief リセット処理 @retval true 通信成功 @retval false 通信失敗
-  bool reset() const noexcept;
-  /// @brief ページ分のバッファをOLEDに書き込む
-  /// @param [in] page ページ番号（0〜7）
-  /// @retval true 通信成功
-  /// @retval false 通信失敗
-  bool sendBufferToDevice(uint8_t page) noexcept;
   /// @brief 全ページ分のバッファをOLEDに書き込む @retval true 通信成功 @retval false 通信失敗
   bool sendBufferToDevice() noexcept;
   /// @brief 表示データの書き込み先のポインタを取得する @return 表示データの書き込み先のポインタ

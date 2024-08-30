@@ -15,28 +15,42 @@ namespace
 constexpr char const *BYPASS_NAME = "---";
 
 constexpr uint8_t SLAVE_ADDR = 0x3C;
-constexpr uint8_t SET_ADDRESSING_MODE = 0x20;
-constexpr uint8_t PAGE_ADDRESSING_MODE = 0x10;
-constexpr uint8_t SET_COLUMN_ADDR = 0x21;
-constexpr uint8_t SET_PAGE_ADDR = 0x22;
-constexpr uint8_t SET_CONTRAST_CTRL = 0x81;
-constexpr uint8_t DISABLE_DISPLAY_ON = 0xA4;
-constexpr uint8_t SET_NORMAL_DISPLAY = 0xA6;
-constexpr uint8_t SET_INVERSE_DISPLAY = 0xA7;
-constexpr uint8_t SET_MULTI_RATIO = 0xA8;
-constexpr uint8_t DISPLAY_OFF = 0xAE;
-constexpr uint8_t DISPLAY_ON = 0xAF;
-constexpr uint8_t SET_PAGE_START_ADDR = 0xB0;
-constexpr uint8_t SET_DISPLAY_OFFSET = 0xD3;
-constexpr uint8_t SET_DISPLAY_CLOCK_DIV = 0xD5;
 
-constexpr uint8_t CTRL_00 = 0b00000000; // control byte, Co bit = 0, D/C# = 0 (command)
-constexpr uint8_t CTRL_01 = 0b01000000; //control byte, Co bit = 0 (continue), D/C# = 1 (data)
-constexpr uint8_t CTRL_10 = 0b10000000; // control byte, Co bit = 1, D/C# = 0 (command)
-constexpr uint8_t WIDTH = 128;
-constexpr uint8_t HEIGHT = 64;
-constexpr uint8_t PAGE = 8;
-constexpr uint32_t BUF_SIZE = WIDTH * HEIGHT / 8;
+constexpr uint8_t WIDTH = 128;                  ///< 横ピクセル数
+constexpr uint8_t NUM_PAGE = 8;                 ///< ページ数
+constexpr uint8_t HEIGHT = NUM_PAGE * 8;        ///< 縦ピクセル数
+constexpr uint32_t BUF_SIZE = WIDTH * NUM_PAGE; ///< 画面の全ピクセルデータをバッファするのに必要なサイズ
+
+constexpr uint8_t SSD1306_CONFIG_MUX_RATIO_CMD = 0xA8;
+constexpr uint8_t SSD1306_CONFIG_MUX_RATIO_A = 0x3F;
+constexpr uint8_t SSD1306_CONFIG_DISPLAY_OFFSET_CMD = 0xD3;
+constexpr uint8_t SSD1306_CONFIG_DISPLAY_OFFSET_A = 0x0;
+constexpr uint8_t SSD1306_CONFIG_DISPLAY_START_LINE = 0x40;
+constexpr uint8_t SSD1306_CONFIG_SEGMENT_REMAP = 0xA1;
+constexpr uint8_t SSD1306_CONFIG_COM_OUT_DIRECTION = 0xC8;
+constexpr uint8_t SSD1306_CONFIG_COM_PIN_CONFIG_CMD = 0xDA;
+constexpr uint8_t SSD1306_CONFIG_COM_PIN_CONFIG_A = 0x12;
+constexpr uint8_t SSD1306_CONFIG_CONTRAST_CMD = 0x81;
+constexpr uint8_t SSD1306_CONFIG_CONTRAST_A = 0x7F;
+constexpr uint8_t SSD1306_CONFIG_ENTIRE_DISPLAY_ON = 0xA4;
+constexpr uint8_t SSD1306_CONFIG_DISPLAY_PIX_MODE = 0xA6;
+constexpr uint8_t SSD1306_CONFIG_DISPLAY_FREQ_CMD = 0xD5;
+constexpr uint8_t SSD1306_CONFIG_DISPLAY_FREQ_A = 0xF0;
+constexpr uint8_t SSD1306_CONFIG_ADDRESSING_MODE_CMD = 0x20;
+constexpr uint8_t SSD1306_CONFIG_ADDRESSING_MODE_A = 0x0;
+constexpr uint8_t SSD1306_CONFIG_CHARGE_PUMP_CMD = 0x8D;
+constexpr uint8_t SSD1306_CONFIG_CHARGE_PUMP_A = 0x14;
+constexpr uint8_t SSD1306_CONFIG_DISPLAY_ON_OFF = 0xAF;
+
+///< 1つのコマンドセットのみ
+constexpr uint8_t SSD1306_CTRL_BYTE_CMD_SINGLE = 0b00000000;
+///< コマンドの後ろに続けて複数のコントロールバイト＆コマンドor描画データを場合
+constexpr uint8_t SSD1306_CTRL_BYTE_CMD_STREAM = 0b10000000;
+///< 描画データのWriteのみ
+constexpr uint8_t SSD1306_CTRL_BYTE_DATA_SINGLE = 0b01000000;
+///< 描画データの後ろに続けて複数のコントロールバイト＆コマンドor描画データを場合
+constexpr uint8_t SSD1306_CTRL_BYTE_DATA_STREAM = 0b11000000;
+
 /// @brief １ピクセル書き込む
 /// @param [in] color 色
 /// @param [in] x X位置
@@ -98,82 +112,90 @@ inline void drawString(char const *str, satoh::FontDef const &font, bool invert,
 
 bool satoh::SSD1306::init() const noexcept
 {
-  constexpr uint8_t off[] = {CTRL_10, DISPLAY_OFF};
-  constexpr uint8_t on[] = {CTRL_10, DISPLAY_ON};
-  return write(off, sizeof(off)) && reset() && write(on, sizeof(on));
-}
+  // see. https://monoedge.net/raspi-ssd1306/
+  // 1	Set MUX Ratio	使用する行数。
+  // default値0x3F=64行	0xA8, 0x3F
+  // 2	Set Display Offset	画面垂直方向のオフセット(ずらし)
+  // オフセットは設けないので0に設定	0xD3, 0x00
+  // 3	Set Display Start Line	画面スタートライン
+  // 全領域使用するので0x40を指定(0x40~0x7F)	0x40
+  // 4	Set Segment Re-map	水平方向の反転
+  // デフォルトは右下スタートだが、今回は左上スタートにするので反転有効=0xA1	0xA1
+  // 5	Set COM Output Scan Direction	垂直方向の反転
+  // デフォルトは右下スタートだが、今回は左上スタートにするので反転有効=0xC8	0xC8
+  // 6	Set COM Pins Hardware Configuration	COM signals pinの設定のようだが値を変えても挙動に変化無し。デフォルト値0x12でOK	0xDA, 0x12
+  // 7	Set Contrast Control	256階調のコントラスト(明るさ)設定
+  // デフォルトは0x7F。最大は0xFF。お好みでOK	0x81, 0xFF
+  // 8	Disable Entire Display On	0xA4で画面メモリの内容を画面表示
+  // 0xA5でテスト用(と思われる)の全画面表示機能なので使用しない	0xA4
+  // 9	Set Normal Display	白黒反転設定
+  // 通常は1が発光だが、その逆の設定も可能
+  // 今回は通常設定	0xA6
+  // 10	Set Osc Frequency	ディスプレイのクロック設定
+  // デフォルト値0x80でOK	0xD5, 0x80
+  // 11	Set Addressing Mode	アドレスモードの設定
+  // 0x00：水平方向アドレッシング←今回はこれ
+  // 0x01：垂直方向アドレッシング
+  // 0x10：ページアドレッシング(default)	0x20, 0x00
+  // 12	Enable Charge Pump Regulator	ディスプレイをONにするにはチャージポンプレギュレータをONにしておく必要があるので設定します	0x8D, 0x14
+  // 13	Display On	0xAEは画面OFF
+  // 0xAFで画面ONです	0xAF
 
-bool satoh::SSD1306::reset() const noexcept
-{
-  uint8_t v[] = {
-      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
-      SET_MULTI_RATIO,       // Set Multiplex Ratio  0xA8, 0x3F
-      HEIGHT - 1,            // 64MUX
-      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
-      SET_DISPLAY_OFFSET,    // Set Display Offset 0xD3, 0x00
-      0x00,                  //
-      CTRL_10,               // control byte, Co bit = 1, D/C# = 0 (command)
-      0x40,                  // Set Display Start Line 0x40
-      CTRL_10,               // control byte, Co bit = 1, D/C# = 0 (command)
-      0xA0,                  // Set Segment re-map 0xA0/0xA1
-      CTRL_10,               // control byte, Co bit = 1, D/C# = 0 (command)
-      0xA1,                  // 始点を左上にする
-      0xC8,                  //
-      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
-      0xDA,                  // Set COM Pins hardware configuration 0xDA, 0x02
-      0x12,                  //
-      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
-      SET_CONTRAST_CTRL,     // Set Contrast Control 0x81, default=0x7F
-      255,                   // 0-255
-      CTRL_10,               // control byte, Co bit = 1, D/C# = 0 (command)
-      DISABLE_DISPLAY_ON,    // Disable Entire Display On
-      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
-      SET_NORMAL_DISPLAY,    // Set Normal Display 0xA6, Inverse display 0xA7
-      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
-      SET_DISPLAY_CLOCK_DIV, // Set Display Clock Divide Ratio/Oscillator Frequency 0xD5, 0x80
-      0x80,                  //
-      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
-      SET_ADDRESSING_MODE,   // Set Memory Addressing Mode
-      PAGE_ADDRESSING_MODE,  // Page addressing mode
-      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
-      SET_PAGE_ADDR,         // Set Page Address
-      0,                     // Start page set
-      PAGE - 1,              // End page set
-      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
-      SET_COLUMN_ADDR,       // set Column Address
-      0,                     // Column Start Address
-      WIDTH - 1,             // Column Stop Address
-      CTRL_00,               // control byte, Co bit = 0, D/C# = 0 (command)
-      0x8D,                  // Set Enable charge pump regulator 0x8D, 0x14
-      0x14,                  //
+  constexpr uint8_t v[] = {
+      SSD1306_CTRL_BYTE_CMD_SINGLE,       //
+      SSD1306_CONFIG_MUX_RATIO_CMD,       //
+      SSD1306_CONFIG_MUX_RATIO_A,         //
+      SSD1306_CONFIG_DISPLAY_OFFSET_CMD,  //
+      SSD1306_CONFIG_DISPLAY_OFFSET_A,    //
+      SSD1306_CONFIG_DISPLAY_START_LINE,  //
+      SSD1306_CONFIG_SEGMENT_REMAP,       //
+      SSD1306_CONFIG_COM_OUT_DIRECTION,   //
+      SSD1306_CONFIG_COM_PIN_CONFIG_CMD,  //
+      SSD1306_CONFIG_COM_PIN_CONFIG_A,    //
+      SSD1306_CONFIG_CONTRAST_CMD,        //
+      SSD1306_CONFIG_CONTRAST_A,          //
+      SSD1306_CONFIG_ENTIRE_DISPLAY_ON,   //
+      SSD1306_CONFIG_DISPLAY_PIX_MODE,    //
+      SSD1306_CONFIG_DISPLAY_FREQ_CMD,    //
+      SSD1306_CONFIG_DISPLAY_FREQ_A,      //
+      SSD1306_CONFIG_ADDRESSING_MODE_CMD, //
+      SSD1306_CONFIG_ADDRESSING_MODE_A,   //
+      SSD1306_CONFIG_CHARGE_PUMP_CMD,     //
+      SSD1306_CONFIG_CHARGE_PUMP_A,       //
+      SSD1306_CONFIG_DISPLAY_ON_OFF,      //
   };
-  return write(v, sizeof(v));
-}
-
-bool satoh::SSD1306::sendBufferToDevice(uint8_t page) noexcept
-{
-  uint8_t addr = static_cast<uint8_t>(SET_PAGE_START_ADDR + page);
-  uint8_t v[] = {
-      CTRL_10,         // control byte, Co bit = 1, D/C# = 0 (command)
-      addr,            // set page start address(B0～B7)
-      CTRL_00,         // control byte, Co bit = 0, D/C# = 0 (command)
-      SET_COLUMN_ADDR, //
-      0,               // Column Start Address(0-127)
-      WIDTH - 1,       // Column Stop Address(0-127)
-  };
-  write(v, sizeof(v), false);
-  uint8_t *tx = txbuf_.get();
-  tx[0] = CTRL_01;
-  memcpy(&tx[1], getDispBuffer() + page * WIDTH, WIDTH);
-  return write(tx, WIDTH + 1, true); // falseにすると表示が崩れる
+  // 失敗すると画面が消えてしまうが次回成功で復帰するので、適当に通信をリトライしておく。
+  for (int i = 0; i < 10; ++i)
+  {
+    if (write(v, sizeof(v)))
+    {
+      return true;
+    }
+    osDelay(1);
+  }
+  return false;
 }
 
 bool satoh::SSD1306::sendBufferToDevice() noexcept
 {
-  reset();
-  for (uint8_t page = 0; page < PAGE; ++page)
+  init();
+
+  for (uint8_t page = 0; page < NUM_PAGE; ++page)
   {
-    sendBufferToDevice(page);
+    uint8_t v0[] = {
+        SSD1306_CTRL_BYTE_CMD_STREAM, //
+        (uint8_t)(0xB0 + page),       // set page start address
+        SSD1306_CTRL_BYTE_CMD_SINGLE, //
+        0x21,                         // set column address
+        0,                            // column start address(0-127)
+        WIDTH - 1,                    // column stop address(0-127)
+    };
+    write(v0, sizeof(v0));
+
+    uint8_t *tx = txbuf_.get();
+    tx[0] = SSD1306_CTRL_BYTE_DATA_SINGLE;
+    memcpy(&tx[1], getDispBuffer() + page * WIDTH, WIDTH);
+    write(tx, WIDTH + 1);
   }
   return true;
 }
